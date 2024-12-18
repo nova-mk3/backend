@@ -21,7 +21,7 @@ services:
       - 'SPRING_DATASOURCE_USERNAME=${MYSQL_USER}'
       - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
     ports:
-      - '${SPRING_APP_PORT}:8080'
+      - '${SPRING_APP_PORT}:4001'
     volumes:
       - ./.env:/app/.env
     depends_on:
