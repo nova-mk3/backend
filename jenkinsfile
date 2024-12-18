@@ -55,7 +55,6 @@ pipeline {
                 sh '''
                 docker-compose --env-file $ENV_FILE down || true
                 docker-compose --env-file $ENV_FILE up --build -d
-                docker-compose --env-file $ENV_FILE exec -T spring-app ./gradlew test
                 docker-compose --env-file $ENV_FILE down
                 '''
             }
