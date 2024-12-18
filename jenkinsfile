@@ -83,7 +83,6 @@ pipeline {
     post {
         always {
             echo "Cleaning up resources"
-            sh 'docker-compose --env-file $ENV_FILE down || true'
         }
         success {
             echo "Pipeline completed successfully."
