@@ -22,9 +22,9 @@ services:
       - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
     ports:
       - '${SPRING_APP_PORT}:4001'
-#    volumes:
-#      - type: bind
-#        source: ./.env
-#        target: /app/.env
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /app/.env
     depends_on:
       - mysql

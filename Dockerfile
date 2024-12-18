@@ -6,7 +6,6 @@ WORKDIR /app
 
 # 빌드된 JAR 파일 복사
 COPY build/libs/backend-0.0.1-SNAPSHOT.jar backend.jar
-COPY .env /apps/.env
 
 # 애플리케이션 실행 포트
 EXPOSE 8080
