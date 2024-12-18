@@ -7,9 +7,9 @@ pipeline {
         stage('Set Environment Variables') {
             steps {
                 script {
-                     if (env.BRANCH_NAME == 'main') {
-                          echo "Setting environment for main branch..."
-                          writeFile file: ENV_FILE_PATH, text: """
+                    if (env.BRANCH_NAME == 'main') {
+                        echo "Setting environment for main branch..."
+                        writeFile file: ENV_FILE, text: """
                             MYSQL_DATABASE=${env.MYSQL_DATABASE_PROD}
                             MYSQL_USER=${env.MYSQL_USER_PROD}
                             MYSQL_PASSWORD=${env.MYSQL_PASSWORD_PROD}
@@ -20,10 +20,10 @@ pipeline {
 
                             SPRING_PROFILE_ACTIVE=${env.SPRING_PROFILE_ACTIVE_PROD}
                             SPRING_APP_PORT=${env.SPRING_APP_PORT_PROD}
-                            """
-                     } else if (env.BRANCH_NAME == 'dev') {
-                          echo "Setting environment for dev branch..."
-                          writeFile file: ENV_FILE_PATH, text: """
+                        """
+                    } else if (env.BRANCH_NAME == 'dev') {
+                        echo "Setting environment for dev branch..."
+                        writeFile file: ENV_FILE, text: """
                             MYSQL_DATABASE=${env.MYSQL_DATABASE_DEV}
                             MYSQL_USER=${env.MYSQL_USER_DEV}
                             MYSQL_PASSWORD=${env.MYSQL_PASSWORD_DEV}
@@ -34,10 +34,11 @@ pipeline {
 
                             SPRING_PROFILE_ACTIVE=${env.SPRING_PROFILE_ACTIVE_DEV}
                             SPRING_APP_PORT=${env.SPRING_APP_PORT_DEV}
-                            """
-                        }
+                        """
+                    }
                 }
             }
+        }
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -74,7 +75,7 @@ pipeline {
                 echo "Main branch detected. Deployment to AWS will be implemented later."
             }
         }
-        }
+    }
     post {
         always {
             echo "Cleaning up resources"
@@ -86,6 +87,5 @@ pipeline {
         failure {
             echo "Pipeline failed. Check the logs."
         }
-    }
     }
 }
