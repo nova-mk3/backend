@@ -39,12 +39,6 @@ pipeline {
                 }
             }
         }
-        stage('Check Env File') {
-            steps {
-                sh 'ls -l .env'
-                sh 'cat .env'
-            }
-        }
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -63,6 +57,12 @@ pipeline {
                 docker-compose --env-file $ENV_FILE up --build -d
                 docker-compose --env-file $ENV_FILE down
                 '''
+            }
+        }
+        stage('Check Env File') {
+            steps {
+                sh 'ls -l .env'
+                sh 'cat .env'
             }
         }
         stage('Deploy (Dev)') {
