@@ -35,7 +35,7 @@ pipeline {
                             SPRING_PROFILE_ACTIVE=${env.SPRING_PROFILE_ACTIVE_DEV}
                             SPRING_APP_PORT=${env.SPRING_APP_PORT_DEV}
                             """
-                     }
+                        }
                 }
             }
         stage('Checkout Code') {
