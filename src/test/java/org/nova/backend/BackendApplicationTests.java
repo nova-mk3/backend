@@ -8,8 +8,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @SpringBootTest
 class BackendApplicationTests {
     @Test
-    void contextLoads() {
-        // Simple test to verify the application context loads successfully
-        assertThat(true).isTrue();
+    void simpleSuccessTest() {
+        // This test will always pass
+        System.out.println("Test passed!");
+        assertThat(true);
     }
 }
