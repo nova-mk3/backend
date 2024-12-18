@@ -44,6 +44,11 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Build JAR') {
+            steps {
+                sh "./gradlew clean build"
+            }
+        }
         stage('Build and Test') {
             steps {
                 echo "Building and testing for branch: ${env.BRANCH_NAME}"
