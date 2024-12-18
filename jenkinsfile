@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+    environment {
+        ENV_FILE = '' // 브랜치별 환경 파일 경로
+    }
+    stages {
+        stage('Set Environment Variables') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'main') {
+                        echo "Using production environment file"
+                        withCredentials([file(credentialsId: 'prod-env-file', variable: 'ENV_FILE_PATH')]) {
+                            env.ENV_FILE = ENV_FILE_PATH
+                        }
+                    } else if (env.BRANCH_NAME == 'dev') {
+                        echo "Using development environment file"
+                        withCredentials([file(credentialsId: 'dev-env-file', variable: 'ENV_FILE_PATH')]) {
+                            env.ENV_FILE = ENV_FILE_PATH
+                        }
+                    } else {
+                        error("Unsupported branch: ${env.BRANCH_NAME}")
+                    }
+                }
+            }
+        }
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build and Test') {
+            steps {
+                echo "Building and testing for branch: ${env.BRANCH_NAME}"
+                sh '''
+                docker-compose --env-file $ENV_FILE down || true
+                docker-compose --env-file $ENV_FILE up --build -d
+                docker-compose --env-file $ENV_FILE exec spring-app ./gradlew test
+                docker-compose --env-file $ENV_FILE down
+                '''
+            }
+        }
+        stage('Deploy (Dev)') {
+            when {
+                branch 'dev'
+            }
+            steps {
+                echo "Deploying development environment on host PC..."
+                sh '''
+                docker-compose --env-file $ENV_FILE down || true
+                docker-compose --env-file $ENV_FILE up --build -d
+                '''
+            }
+        }
+        stage('Deploy (Main)') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "Main branch detected. Deployment to AWS will be implemented later."
+            }
+        }
+    }
+    post {
+        always {
+            echo "Cleaning up resources"
+            sh 'docker-compose --env-file $ENV_FILE down || true'
+        }
+        success {
+            echo "Pipeline completed successfully."
+        }
+        failure {
+            echo "Pipeline failed. Check the logs."
+        }
+    }
+}

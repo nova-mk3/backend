@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+  server:
+    port: 8080
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
