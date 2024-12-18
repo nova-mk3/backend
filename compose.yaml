@@ -23,6 +23,8 @@ services:
     ports:
       - '${SPRING_APP_PORT}:4001'
     volumes:
-      - ./.env:/app/.env
+      - type: bind
+        source: ./.env
+        target: /app/.env
     depends_on:
       - mysql
