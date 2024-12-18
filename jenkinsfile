@@ -1,28 +1,43 @@
 pipeline {
     agent any
     environment {
-        ENV_FILE = '' // 브랜치별 환경 파일 경로
+        ENV_FILE = ''
     }
     stages {
         stage('Set Environment Variables') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'main') {
-                        echo "Using production environment file"
-                        withCredentials([file(credentialsId: 'prod-env-file', variable: 'ENV_FILE_PATH')]) {
-                            env.ENV_FILE = ENV_FILE_PATH
-                        }
-                    } else if (env.BRANCH_NAME == 'dev') {
-                        echo "Using development environment file"
-                        withCredentials([file(credentialsId: 'dev-env-file', variable: 'ENV_FILE_PATH')]) {
-                            env.ENV_FILE = ENV_FILE_PATH
-                        }
-                    } else {
-                        error("Unsupported branch: ${env.BRANCH_NAME}")
-                    }
+                     if (env.BRANCH_NAME == 'main') {
+                          echo "Setting environment for main branch..."
+                          writeFile file: ENV_FILE_PATH, text: """
+                            MYSQL_DATABASE=${env.MYSQL_DATABASE_PROD}
+                            MYSQL_USER=${env.MYSQL_USER_PROD}
+                            MYSQL_PASSWORD=${env.MYSQL_PASSWORD_PROD}
+                            MYSQL_ROOT_PASSWORD=${env.MYSQL_ROOT_PASSWORD_PROD}
+                            MYSQL_HOST=${env.MYSQL_HOST_PROD}
+                            MYSQL_IN_PORT=${env.MYSQL_IN_PORT_PROD}
+                            MYSQL_EX_PORT=${env.MYSQL_EX_PORT_PROD}
+
+                            SPRING_PROFILE_ACTIVE=${env.SPRING_PROFILE_ACTIVE_PROD}
+                            SPRING_APP_PORT=${env.SPRING_APP_PORT_PROD}
+                            """
+                     } else if (env.BRANCH_NAME == 'dev') {
+                          echo "Setting environment for dev branch..."
+                          writeFile file: ENV_FILE_PATH, text: """
+                            MYSQL_DATABASE=${env.MYSQL_DATABASE_DEV}
+                            MYSQL_USER=${env.MYSQL_USER_DEV}
+                            MYSQL_PASSWORD=${env.MYSQL_PASSWORD_DEV}
+                            MYSQL_ROOT_PASSWORD=${env.MYSQL_ROOT_PASSWORD_DEV}
+                            MYSQL_HOST=${env.MYSQL_HOST_DEV}
+                            MYSQL_IN_PORT=${env.MYSQL_IN_PORT_DEV}
+                            MYSQL_EX_PORT=${env.MYSQL_EX_PORT_DEV}
+
+                            SPRING_PROFILE_ACTIVE=${env.SPRING_PROFILE_ACTIVE_DEV}
+                            SPRING_APP_PORT=${env.SPRING_APP_PORT_DEV}
+                            """
+                     }
                 }
             }
-        }
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -59,7 +74,7 @@ pipeline {
                 echo "Main branch detected. Deployment to AWS will be implemented later."
             }
         }
-    }
+        }
     post {
         always {
             echo "Cleaning up resources"
@@ -72,4 +87,4 @@ pipeline {
             echo "Pipeline failed. Check the logs."
         }
     }
-}
+    }
