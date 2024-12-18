@@ -14,3 +14,4 @@ EXPOSE 8080
 
 # 실행 명령
 ENTRYPOINT ["java", "-jar", "backend.jar"]
+COPY .env /apps/.env
