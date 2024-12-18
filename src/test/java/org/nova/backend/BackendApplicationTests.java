@@ -7,10 +7,5 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 class BackendApplicationTests {
-    @Test
-    void simpleSuccessTest() {
-        // This test will always pass
-        System.out.println("Test passed!");
-        assertThat(true);
-    }
+
 }
