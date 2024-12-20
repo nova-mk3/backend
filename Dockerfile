@@ -14,4 +14,3 @@ EXPOSE 4001
 
 # 실행 명령
 ENTRYPOINT ["java", "-jar", "backend.jar"]
-COPY .env /apps/.env
