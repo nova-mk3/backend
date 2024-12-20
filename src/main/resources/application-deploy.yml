@@ -10,5 +10,3 @@ spring:
       enabled: false
     livereload:
       enabled: false
-server:
-  port: 4001
