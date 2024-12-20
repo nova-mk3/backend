@@ -1,3 +1,5 @@
+server:
+  port: 4001
 spring:
   profiles:
     active: ${SPRING_PROFILE_ACTIVE}
@@ -8,3 +10,4 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
