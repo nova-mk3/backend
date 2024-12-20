@@ -20,11 +20,8 @@ services:
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://${MYSQL_HOST}:${MYSQL_IN_PORT}/${MYSQL_DATABASE}'
       - 'SPRING_DATASOURCE_USERNAME=${MYSQL_USER}'
       - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
+      - 'SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE}'
     ports:
       - '${SPRING_APP_PORT}:4001'
-    volumes:
-      - type: bind
-        source: ./.env
-        target: /app/.env
     depends_on:
       - mysql
