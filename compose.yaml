@@ -24,4 +24,5 @@ services:
     ports:
       - '${SPRING_APP_PORT}:8080'
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
