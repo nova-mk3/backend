@@ -9,11 +9,12 @@ import org.nova.backend.board.application.dto.request.CreatePostRequest;
 import org.nova.backend.board.application.dto.response.PostResponse;
 import org.nova.backend.board.application.mapper.PostMapper;
 import org.nova.backend.board.application.port.in.PostUseCase;
+import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,14 +41,17 @@ public class CreatePostController {
     })
     @PostMapping(consumes = {"multipart/form-data"})
     public ApiResponse<PostResponse> createPost(
-            @RequestBody CreatePostRequest request,
-            @RequestParam("files") List<MultipartFile> files
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam("dtype") String dtype,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
 
+        var request = new CreatePostRequest(title, content, PostType.valueOf(dtype));
         var post = postMapper.toEntity(request);
-        var savedPost = postUseCase.createPost(post);
+        var savedPost = postUseCase.createPost(post, files);
         var response = postMapper.toResponse(savedPost);
 
-        return ApiResponse.success(response);
+        return ApiResponse.created(response);
     }
 }
