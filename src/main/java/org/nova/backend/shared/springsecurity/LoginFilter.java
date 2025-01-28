@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nova.backend.auth.application.dto.dto.AuthLoginDTO;
+import org.nova.backend.auth.application.dto.dto.CustomUserDetails;
+import org.nova.backend.shared.jwt.JWTUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +24,7 @@ import org.springframework.util.StreamUtils;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final JWTUtil jwtUtil;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -55,6 +58,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authentication) {
         log.info("로그인 성공");
+
+        String token = createAuthorizationToken(authentication);
+
+        response.addHeader("Authorization", "Bearer " + token);
+    }
+
+    /*
+    로그인 인증 토큰 생성 : 학번, 이름, role 저장
+     */
+    private String createAuthorizationToken(Authentication authentication) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        //토큰, 세션에 학번, 이름, role 저장
+        String studentNumber = customUserDetails.getStudentNumber();
+        String name = customUserDetails.getUsername();
+        String role = SecurityUtils.getRole(authentication);
+
+        return jwtUtil.createJwt(studentNumber, name, role, 60 * 60 * 60 * 10L);
     }
 
     @Override

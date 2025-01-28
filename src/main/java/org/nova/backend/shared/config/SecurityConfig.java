@@ -2,6 +2,7 @@ package org.nova.backend.shared.config;
 
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.domain.model.valueobject.Role;
+import org.nova.backend.shared.jwt.JWTUtil;
 import org.nova.backend.shared.springsecurity.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JWTUtil jwtUtil;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -46,15 +48,15 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/service/**").permitAll()
-                        .requestMatchers("/api/v1/members", "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/v1/admin").hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
-                        .anyRequest().authenticated()
+                                .requestMatchers("/", "/service/**").permitAll()
+                                .requestMatchers("/api/v1/members", "/api/v1/auth/login").permitAll()
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                                .requestMatchers("/api/v1/admin").hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+                                .anyRequest().authenticated()
                 );
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)),
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
