@@ -1,11 +1,12 @@
 package org.nova.backend.board.domain.model.entity;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embedded;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -14,40 +15,49 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.nova.backend.board.domain.model.valueobject.Content;
 import org.nova.backend.board.domain.model.valueobject.PostType;
-import org.nova.backend.board.domain.model.valueobject.Title;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "post")
+@Table(name = "post", indexes = {
+        //@Index(name = "idx_member_id", columnList = "member_id"),
+        @Index(name = "idx_post_id", columnList = "post_id")
+})
 public class Post {
     @Id
-    private UUID post_id;
+    @Column
+    private UUID postId;
 
-    private UUID member_id;
+    @Column
+    private UUID memberId;
 
     @Enumerated(EnumType.STRING)
-    private PostType dtype;
+    @Column
+    private PostType postType;
 
-    @Embedded
-    private Title title;
+    @Column
+    private String title;
 
-    @Embedded
-    private Content content;
+    @Column
+    private String  content;
 
-    private int view_count;
+    @Column
+    private int viewCount;
 
-    private int like_count;
+    @Column
+    private int likeCount;
 
-    private int comment_count;
+    @Column
+    private int commentCount;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<File> files;
 
-    private LocalDateTime created_time;
+    @Column
+    private LocalDateTime createdTime;
 
-    private LocalDateTime modified_time;
+    @Column
+    private LocalDateTime modifiedTime;
 }
