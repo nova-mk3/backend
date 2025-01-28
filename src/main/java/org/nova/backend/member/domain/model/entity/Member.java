@@ -57,4 +57,10 @@ public class Member {
     @JoinColumn(name = "graduation_id")
     private Graduation graduation;
 
+
+    // 로그인 세션 생성 용 임시 객체
+    public Member(String studentNumber, Role role) {
+        this.name = studentNumber;
+        this.role = role;
+    }
 }

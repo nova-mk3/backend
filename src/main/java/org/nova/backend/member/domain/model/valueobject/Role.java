@@ -12,4 +12,17 @@ public enum Role {
     Role(String type) {
         this.type = type;
     }
+
+    public static Role fromROLE_String(String roleName) {
+        String splitRole= roleName.split("_")[1];
+
+        for (Role role : Role.values()) {
+            if (role.name().equalsIgnoreCase(splitRole)) {
+                return role;
+            }
+        }
+
+        return Role.GENERAL;
+    }
+
 }
