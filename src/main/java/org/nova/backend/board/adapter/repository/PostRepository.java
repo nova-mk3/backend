@@ -1,4 +1,4 @@
-package org.nova.backend.board.adapter.persistence;
+package org.nova.backend.board.adapter.repository;
 
 import java.util.UUID;
 import org.nova.backend.board.domain.model.entity.Post;

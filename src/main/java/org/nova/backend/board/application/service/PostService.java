@@ -1,5 +1,6 @@
 package org.nova.backend.board.application.service;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.application.port.in.PostUseCase;
@@ -9,15 +10,21 @@ import org.nova.backend.board.domain.model.entity.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class PostService implements PostUseCase {
-    private static final Logger logger = LoggerFactory.getLogger(PostService.class); // Logger 추가
+    private static final Logger logger = LoggerFactory.getLogger(PostService.class);
 
     private final PostPersistencePort postPersistencePort;
+    private final FileService fileService;
 
-    public PostService(PostPersistencePort postPersistencePort) {
+    public PostService(
+            PostPersistencePort postPersistencePort,
+            FileService fileService
+    ) {
         this.postPersistencePort = postPersistencePort;
+        this.fileService = fileService;
     }
 
     /**
@@ -34,16 +41,28 @@ public class PostService implements PostUseCase {
     }
 
     /**
-     * 새로운 게시글 생성
+     * 새로운 게시글과 첨부파일 저장
      *
-     * @param post 생성할 게시글 객체
+     * @param post  생성할 게시글 객체
+     * @param files 첨부파일 리스트
      * @return 저장된 게시글 객체
      */
     @Override
-    public Post createPost(Post post) {
-        logger.info("게시글 생성 요청을 처리 중입니다. 제목: {}", post.getTitle().getTitle());
+    @Transactional
+    public Post createPost(Post post, List<MultipartFile> files) {
+        logger.info("게시글 생성 요청:");
+        logger.info(" - 제목: {}", post.getTitle());
+        logger.info(" - 내용: {}", post.getContent());
+        logger.info(" - 게시글 유형: {}", post.getPostType());
+        logger.info(" - 첨부파일 수: {}", files != null ? files.size() : 0);
+
         Post savedPost = postPersistencePort.save(post);
-        logger.info("게시글이 성공적으로 생성되었습니다. ID: {}", savedPost.getPost_id());
+
+        if (files != null && !files.isEmpty()) {
+            fileService.saveFiles(savedPost, files);
+        }
+
+        logger.info("게시글과 파일이 성공적으로 저장되었습니다. 게시글 ID: {}", savedPost.getPostId());
         return savedPost;
     }
 

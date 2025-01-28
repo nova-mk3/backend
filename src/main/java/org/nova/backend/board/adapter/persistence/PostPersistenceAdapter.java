@@ -3,6 +3,7 @@ package org.nova.backend.board.adapter.persistence;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.nova.backend.board.adapter.repository.PostRepository;
 import org.nova.backend.board.application.port.out.PostPersistencePort;
 import org.nova.backend.board.domain.model.entity.Post;
 import org.springframework.stereotype.Component;
