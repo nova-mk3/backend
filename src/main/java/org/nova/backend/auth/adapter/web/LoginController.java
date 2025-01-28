@@ -7,13 +7,12 @@ import org.nova.backend.auth.application.dto.request.LoginRequest;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Login API", description = "로그인 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth")
+//@RequestMapping("/api/v1/auth")
 public class LoginController {
 
     @PostMapping("/login")
@@ -21,4 +20,5 @@ public class LoginController {
 
         return ApiResponse.success("로그인");
     }
+
 }
