@@ -28,11 +28,19 @@ public class SignUpService {
     @Transactional
     public Member createMember(final SignUpRequest signUpRequest) {
 
+        isAlreadyExist(signUpRequest.getStudentNumber());
+
         String encryptedPassword = bCryptPasswordEncoder.encode(signUpRequest.getPassword());
         Member signUpMember = memberMapper.toEntity(signUpRequest, encryptedPassword);
         memberRepository.save(signUpMember);
 
         return getSavedMember(signUpRequest.getStudentNumber());
+    }
+
+    private void isAlreadyExist(String studentNumber) {
+        if (memberRepository.existsByStudentNumber(studentNumber)) {
+            throw new MemberDomainException("Member already exists " + studentNumber);
+        }
     }
 
     private Member getSavedMember(String studentNumber) {

@@ -9,4 +9,6 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
 
     Optional<Member> findByStudentNumber(String studentNumber);
 
+    boolean existsByStudentNumber(String studentNumber);
+
 }
