@@ -43,11 +43,11 @@ public class CreatePostController {
     public ApiResponse<PostResponse> createPost(
             @RequestParam("title") String title,
             @RequestParam("content") String content,
-            @RequestParam("dtype") String dtype,
+            @RequestParam("postType") String postType,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
 
-        var request = new CreatePostRequest(title, content, PostType.valueOf(dtype));
+        var request = new CreatePostRequest(title, content, PostType.valueOf(postType));
         var post = postMapper.toEntity(request);
         var savedPost = postUseCase.createPost(post, files);
         var response = postMapper.toResponse(savedPost);
