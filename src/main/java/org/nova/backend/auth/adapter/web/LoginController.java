@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoginController {
 
     @PostMapping("/login")
+    @AuthApiDocument.LoginApiDoc
     public ApiResponse<String> login(@Valid @RequestBody LoginRequest loginRequest) {
 
         return ApiResponse.success("로그인");

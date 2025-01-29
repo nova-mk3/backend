@@ -22,7 +22,7 @@ public class MemberMapper {
                 request.isAbsence(),
                 request.getProfilePhoto(),
                 request.getPhone(),
-                request.getIntroduction(),
+                "안녕하세요^-^",
                 request.getBirth(),
                 request.getRole(),
                 null
