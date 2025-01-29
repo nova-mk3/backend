@@ -16,5 +16,6 @@ spring:
       max-lifetime: 1800000
       validation-timeout: 5000
       pool-name: Nova-Backend-Pool
-
-
+      
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
