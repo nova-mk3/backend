@@ -62,7 +62,7 @@ public class PostService implements PostUseCase {
             fileService.saveFiles(savedPost, files);
         }
 
-        logger.info("게시글과 파일이 성공적으로 저장되었습니다. 게시글 ID: {}", savedPost.getPostId());
+        logger.info("게시글과 파일이 성공적으로 저장되었습니다. 게시글 ID: {}", savedPost.getId());
         return savedPost;
     }
 

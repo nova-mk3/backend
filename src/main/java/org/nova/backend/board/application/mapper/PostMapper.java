@@ -29,7 +29,7 @@ public class PostMapper {
 
     public PostResponse toResponse(Post post) {
         return new PostResponse(
-                post.getPostId(),
+                post.getId(),
                 post.getTitle(),
                 post.getContent(),
                 post.getViewCount(),

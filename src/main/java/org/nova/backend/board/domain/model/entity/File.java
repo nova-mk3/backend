@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 public class File {
     @Id
     @Column
-    private UUID fileId;
+    private UUID id;
 
     @Column
     private String filePath;
@@ -38,12 +38,12 @@ public class File {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         File file = (File) o;
-        return Objects.equals(fileId, file.fileId);
+        return Objects.equals(id, file.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileId);
+        return Objects.hash(id);
     }
 }
 

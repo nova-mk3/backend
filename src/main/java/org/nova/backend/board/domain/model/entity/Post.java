@@ -5,8 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -16,22 +19,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.nova.backend.board.domain.model.valueobject.PostType;
+import org.nova.backend.member.domain.model.entity.Member;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "post", indexes = {
-        //@Index(name = "idx_member_id", columnList = "member_id"),
+        @Index(name = "idx_member_id", columnList = "member_id"),
         @Index(name = "idx_post_id", columnList = "post_id")
 })
 public class Post {
     @Id
     @Column
-    private UUID postId;
+    private UUID id;
 
-    @Column
-    private UUID memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Enumerated(EnumType.STRING)
     @Column
