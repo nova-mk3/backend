@@ -1,5 +1,6 @@
 package org.nova.backend.board.domain.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +14,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -21,17 +23,25 @@ import lombok.NoArgsConstructor;
 @Table(name = "file", indexes = {
         @Index(name = "idx_post_id", columnList = "post_id")
 })
-public class File {
+public class File { //파일 다운로드 횟수 추가해야함
     @Id
     @Column
     private UUID id;
 
     @Column
+    private String originalFilename;
+
+    @Column
     private String filePath;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "postId", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false)
+    @JsonIgnore
     private Post post;
+
+    @Column
+    private int downloadCount;
 
     @Override
     public boolean equals(Object o) {
