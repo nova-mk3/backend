@@ -51,7 +51,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/api/v1", "/service/**").permitAll()
-                        .requestMatchers("/api/v1/members", "/api/v1/auth/login").permitAll()                   // 회원가입, 로그인
+                        .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll()                   // 회원가입, 로그인
                         .requestMatchers("/api/v1/email-auth/**").permitAll()                                        // 회원가입 시 이메일 인증
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/admin")
