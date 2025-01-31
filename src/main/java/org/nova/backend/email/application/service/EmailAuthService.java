@@ -4,6 +4,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.email.adapter.persistence.repository.EmailAuthRepository;
 import org.nova.backend.email.application.mapper.EmailAuthMapper;
+import org.nova.backend.email.domain.exception.EmailAuthException;
 import org.nova.backend.email.domain.model.EmailAuth;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailAuthService {
 
     private final EmailAuthMapper emailAuthMapper;
     private final EmailAuthRepository emailAuthRepository;
@@ -37,4 +38,18 @@ public class EmailService {
     private String createAuthCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     }
+
+    /**
+     * 인증 코드 확인
+     *
+     * @param email
+     */
+    @Transactional
+    public void checkAuthCode(String email, String authCode) {
+        EmailAuth emailAuth= emailAuthRepository.findByEmailAndCode(email, authCode)
+                .orElseThrow(()-> new EmailAuthException("email verification failed"));
+
+        emailAuthRepository.delete(emailAuth);
+    }
+
 }
