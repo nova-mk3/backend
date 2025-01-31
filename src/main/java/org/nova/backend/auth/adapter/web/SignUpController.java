@@ -22,6 +22,11 @@ public class SignUpController {
     private final SignUpService signUpService;
     private final MemberMapper memberMapper;
 
+    /**
+     * 회원가입
+     * @param signUpRequest 회원가입 요청
+     * @return 생성된 Member
+     */
     @PostMapping()
     @AuthApiDocument.SignUpApiDoc
     public ApiResponse<MemberResponse> signUp(@RequestBody SignUpRequest signUpRequest) {

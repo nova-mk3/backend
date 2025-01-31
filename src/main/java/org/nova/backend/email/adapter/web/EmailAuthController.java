@@ -23,6 +23,7 @@ public class EmailAuthController {
      * 회원가입 시 이메일 인증코드 전송
      */
     @PostMapping("")
+    @EmailAuthApiDocument.EmailAuthApiDoc
     public ApiResponse<String> sendAuthCodeEmail(@RequestBody AuthCodeEmailRequest request) {
         emailAuthService.sendAuthCodeEmail(request.getEmail());
 
@@ -33,6 +34,7 @@ public class EmailAuthController {
      * 회원가입 시 이메일 인증코드 확인
      */
     @PostMapping("/check")
+    @EmailAuthApiDocument.CheckAuthCodeApiDoc
     public ApiResponse<String> checkAuthCode(@RequestBody CheckAuthCodelRequest request) {
         emailAuthService.checkAuthCode(request.getEmail(), request.getAuthCode());
 

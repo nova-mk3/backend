@@ -46,7 +46,7 @@ public class EmailSendService {
             javaMailSender.send(mimeMessage);
 
         } catch (MessagingException e) {
-            throw new EmailException("email send failed.");
+            throw new EmailException("email send failed." + emailAuth.getEmail());
         }
     }
 
