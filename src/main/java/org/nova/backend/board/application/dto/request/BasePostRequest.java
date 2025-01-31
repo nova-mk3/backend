@@ -10,7 +10,7 @@ import org.nova.backend.board.domain.model.valueobject.PostType;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatePostRequest {
+public class BasePostRequest {
     @NotBlank(message = "제목은 비어 있을 수 없습니다.")
     @Size(max = 255, message = "제목은 255자를 초과할 수 없습니다.")
     private String title;
@@ -19,5 +19,5 @@ public class CreatePostRequest {
     @Size(max = 5000, message = "내용은 5000자를 초과할 수 없습니다.")
     private String content;
 
-    private PostType dtype;
+    private PostType postType;
 }
