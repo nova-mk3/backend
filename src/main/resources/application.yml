@@ -16,6 +16,16 @@ spring:
       max-lifetime: 1800000
       validation-timeout: 5000
       pool-name: Nova-Backend-Pool
-      
+
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: nova_cbnu@naver.com
+    password: rnjswk123@
+    properties:
+      mail.smtp.auth: true        # SMTP 서버와의 인증
+      mail.smtp.ssl.enable: true  # SSL 보안 연결(필수)
+      mail.smtp.ssl.trust: smtp.naver.com
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
