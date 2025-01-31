@@ -1,7 +1,6 @@
 package org.nova.backend.auth.adapter.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.application.dto.request.LoginRequest;
 import org.nova.backend.shared.model.ApiResponse;
@@ -17,7 +16,7 @@ public class LoginController {
 
     @PostMapping("/login")
     @AuthApiDocument.LoginApiDoc
-    public ApiResponse<String> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ApiResponse<String> login(@RequestBody LoginRequest loginRequest) {
 
         return ApiResponse.success("로그인");
     }
