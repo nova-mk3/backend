@@ -42,4 +42,8 @@ public class CustomUserDetails implements UserDetails {
     public String getStudentNumber(){
         return member.getStudentNumber();
     }
+  
+    public Member getMember() {
+        return member;
+    }
 }
