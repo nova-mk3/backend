@@ -1,9 +1,10 @@
 package org.nova.backend.board.domain.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -22,6 +23,7 @@ import org.nova.backend.member.domain.model.entity.Member;
 @Table(name = "comment")
 public class Comment {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column
     private UUID id;
 
