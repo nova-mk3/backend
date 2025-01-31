@@ -24,9 +24,10 @@ public class SignUpController {
     private final MemberMapper memberMapper;
 
     @PostMapping()
+    @AuthApiDocument.SignUpApiDoc
     public ApiResponse<MemberResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
 
-        Member savedMember = signUpService.createMember(signUpRequest);
+        Member savedMember = signUpService.signUp(signUpRequest);
         MemberResponse response = memberMapper.toResponse(savedMember);
 
         return ApiResponse.success(response);
