@@ -53,6 +53,8 @@ public class SecurityConfig {
                                 .requestMatchers("/", "/service/**").permitAll()
                                 .requestMatchers("/api/v1/members", "/api/v1/auth/login").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                                .requestMatchers("/api/v1/integrated/**").permitAll()
+                                .requestMatchers("/api/v1/comments/**").permitAll()
                                 .requestMatchers("/api/v1/admin")
                                 .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
                                 .anyRequest().authenticated()
