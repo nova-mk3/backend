@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -23,9 +25,10 @@ import lombok.Setter;
 @Table(name = "file", indexes = {
         @Index(name = "idx_post_id", columnList = "post_id")
 })
-public class File { //파일 다운로드 횟수 추가해야함
+public class File {
     @Id
     @Column
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column
@@ -48,12 +51,14 @@ public class File { //파일 다운로드 횟수 추가해야함
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         File file = (File) o;
-        return Objects.equals(id, file.id);
+        return Objects.equals(id, file.id) &&
+                Objects.equals(originalFilename, file.originalFilename) &&
+                Objects.equals(filePath, file.filePath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, originalFilename, filePath);
     }
 }
 

@@ -60,9 +60,7 @@ public class PostService implements PostUseCase {
         Post post = postMapper.toEntity(request, member, board);
 
         Post savedPost = postPersistencePort.save(post);
-
-        List<File> savedFiles = fileUseCase.saveFiles(files);
-        savedFiles.forEach(file -> file.setPost(savedPost));
+        List<File> savedFiles = fileUseCase.saveFiles(files, savedPost);
         savedPost.addFiles(savedFiles);
 
         return postMapper.toResponse(savedPost);

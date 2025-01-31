@@ -30,7 +30,7 @@ public class BasePostMapper {
                 0,
                 0,
                 0,
-//                new ArrayList<>(), //댓글리스트
+                new ArrayList<>(), //댓글리스트
                 new ArrayList<>(), //첨부파일 리스트
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -40,6 +40,7 @@ public class BasePostMapper {
     public PostResponse toResponse(Post post) {
         List<FileResponse> fileResponses = post.getFiles().stream()
                 .map(file -> new FileResponse(file.getId(), file.getOriginalFilename(), file.getFilePath()))
+                .distinct()
                 .toList();
         return new PostResponse(
                 post.getId(),
