@@ -14,9 +14,12 @@ import org.nova.backend.board.domain.exception.BoardDomainException;
 import org.nova.backend.board.domain.model.entity.Board;
 import org.nova.backend.board.domain.model.entity.File;
 import org.nova.backend.board.domain.model.entity.Post;
+import org.nova.backend.board.domain.model.valueobject.BoardCategory;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,20 +70,23 @@ public class PostService implements PostUseCase {
     }
 
     /**
-     * ID를 기반으로 특정 게시글 조회
-     *
-     * @param postId 게시글 ID
-     * @return 게시글 객체
-     * @throws BoardDomainException 게시글이 존재하지 않을 경우 예외 발생
+     * 특정 카테고리의 모든 게시글 조회 (페이징)
      */
     @Override
-    public Post getPostById(UUID postId) {
-        logger.info("ID {}에 대한 게시글 조회 요청을 처리 중입니다.", postId);
-        return postPersistencePort.findById(postId)
-                .orElseThrow(() -> {
-                    logger.error("ID {}에 해당하는 게시글이 존재하지 않습니다.", postId);
-                    return new BoardDomainException("Post not found for ID: " + postId);
-                });
+    public Page<PostResponse> getPostsByCategory(BoardCategory category, Pageable pageable) {
+        return postPersistencePort.findAllByCategory(category, pageable)
+                .map(postMapper::toResponse);
+    }
+
+    /**
+     * 특정 게시글 조회
+     */
+    @Override
+    public PostResponse getPostById(UUID postId) {
+        postPersistencePort.increaseViewCount(postId);
+        Post post = postPersistencePort.findById(postId)
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
+        return postMapper.toResponse(post);
     }
 
     /**

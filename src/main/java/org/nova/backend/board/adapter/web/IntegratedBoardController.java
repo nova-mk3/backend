@@ -5,16 +5,22 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.response.PostResponse;
 import org.nova.backend.board.application.port.in.PostUseCase;
+import org.nova.backend.board.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,6 +61,29 @@ public class IntegratedBoardController {
         var request = new BasePostRequest(title, content, postType);
         var savedPost = postUseCase.createPost(request, member, files);
         return ApiResponse.created(savedPost);
+    }
+
+    /**
+     * 특정 카테고리의 모든 게시글 조회 (페이징)
+     */
+    @Operation(summary = "카테고리별 게시글 조회", description = "특정 게시판 카테고리에 속한 게시글 목록을 가져옵니다.")
+    @GetMapping
+    public ApiResponse<Page<PostResponse>> getPostsByCategory(
+            @RequestParam BoardCategory category,
+            Pageable pageable
+    ) {
+        var posts = postUseCase.getPostsByCategory(category, pageable);
+        return ApiResponse.success(posts);
+    }
+
+    /**
+     * 특정 게시글 상세 조회
+     */
+    @Operation(summary = "게시글 조회", description = "특정 게시글을 ID를 기반으로 조회합니다.")
+    @GetMapping("/{postId}")
+    public ApiResponse<PostResponse> getPostById(@PathVariable UUID postId) {
+        var post = postUseCase.getPostById(postId);
+        return ApiResponse.success(post);
     }
 
     /**
