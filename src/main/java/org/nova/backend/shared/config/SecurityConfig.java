@@ -52,7 +52,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/api/v1", "/service/**").permitAll()
                         .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll()                   // 회원가입, 로그인
-                        .requestMatchers("/api/v1/email-auth/**").permitAll()                                        // 회원가입 시 이메일 인증
+                        .requestMatchers("/api/v1/email-auth/**").permitAll()// 회원가입 시 이메일 인증
+                        .requestMatchers("/api/v1/integrated/**").permitAll()
+                        .requestMatchers("/api/v1/comments/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/admin")
                         .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
