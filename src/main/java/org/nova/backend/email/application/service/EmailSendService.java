@@ -4,7 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.nova.backend.email.domain.exception.EmailDomainException;
+import org.nova.backend.email.domain.exception.EmailException;
 import org.nova.backend.email.domain.model.EmailAuth;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -46,7 +46,7 @@ public class EmailSendService {
             javaMailSender.send(mimeMessage);
 
         } catch (MessagingException e) {
-            throw new EmailDomainException("email send failed.");
+            throw new EmailException("email send failed.");
         }
     }
 
