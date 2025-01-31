@@ -1,6 +1,7 @@
 package org.nova.backend.auth.adapter.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.application.dto.request.LoginRequest;
 import org.nova.backend.shared.model.ApiResponse;
@@ -15,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoginController {
 
     @PostMapping("/login")
-    public ApiResponse<String> login(@RequestBody LoginRequest loginRequest) {
+    @AuthApiDocument.LoginApiDoc
+    public ApiResponse<String> login(@Valid @RequestBody LoginRequest loginRequest) {
 
         return ApiResponse.success("로그인");
     }

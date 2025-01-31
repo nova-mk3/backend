@@ -1,15 +1,16 @@
 package org.nova.backend.member.application.mapper;
 
 import java.util.UUID;
-import org.nova.backend.auth.application.dto.request.SignUpRequest;
+import org.nova.backend.auth.application.dto.request.MemberSignUpRequest;
 import org.nova.backend.auth.application.dto.response.MemberResponse;
+import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MemberMapper {
 
-    public Member toEntity(SignUpRequest request, String encryptedPassword) {
+    public Member toEntity(MemberSignUpRequest request, String encryptedPassword, Graduation graduation) {
         return new Member(
                 UUID.randomUUID(),
                 request.getStudentNumber(),
@@ -22,10 +23,10 @@ public class MemberMapper {
                 request.isAbsence(),
                 request.getProfilePhoto(),
                 request.getPhone(),
-                request.getIntroduction(),
+                "안녕하세요^-^",
                 request.getBirth(),
                 request.getRole(),
-                null
+                graduation
         );
     }
 

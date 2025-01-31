@@ -1,6 +1,7 @@
 package org.nova.backend.auth.adapter.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.application.dto.request.SignUpRequest;
 import org.nova.backend.auth.application.dto.response.MemberResponse;
@@ -23,9 +24,10 @@ public class SignUpController {
     private final MemberMapper memberMapper;
 
     @PostMapping()
-    public ApiResponse<MemberResponse> signUp(@RequestBody SignUpRequest signUpRequest) {
+    @AuthApiDocument.SignUpApiDoc
+    public ApiResponse<MemberResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
 
-        Member savedMember = signUpService.createMember(signUpRequest);
+        Member savedMember = signUpService.signUp(signUpRequest);
         MemberResponse response = memberMapper.toResponse(savedMember);
 
         return ApiResponse.success(response);
