@@ -35,6 +35,7 @@ public class PendingMemberController {
      * @return 회원가입 요청 리스트
      */
     @GetMapping("")
+    @PendingMemberApiDocument.GetPendingMemberListApiDoc
     public ApiResponse<PendingMemberListResponse> getPendingMemberList() {
         long totalPendingMemberCount = pendingMemberService.getPendingMemberCount();
         List<PendingMemberResponse> pendingMemberResponseList = pendingMemberService.getPendingMemberList();
@@ -49,6 +50,7 @@ public class PendingMemberController {
      * 특정 PendingMember의 상세 정보 확인
      */
     @GetMapping("/{pendingMemberId}")
+    @PendingMemberApiDocument.GetPendingMemberDetailApiDoc
     public ApiResponse<PendingMemberDetailResponse> getPendingMemberDetail(
             @PathVariable("pendingMemberId") UUID pendingMemberId) {
         PendingMemberDetailResponse response = pendingMemberService.getPendingMemberDetail(pendingMemberId);
@@ -64,6 +66,7 @@ public class PendingMemberController {
      * @return 생성된 Member 객체
      */
     @PostMapping("")
+    @PendingMemberApiDocument.AcceptPendingMemberApiDoc
     public ApiResponse<MemberResponse> acceptPendingMember(@RequestBody PendingMemberManageRequest request) {
         Member savedMember = pendingMemberService.acceptPendingMember(request.getPendingMemberId());
         MemberResponse response = memberMapper.toResponse(savedMember);

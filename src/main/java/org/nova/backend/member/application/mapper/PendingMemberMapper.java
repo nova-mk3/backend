@@ -46,7 +46,8 @@ public class PendingMemberMapper {
                 pendingMember.getPhone(),
                 pendingMember.getIntroduction(),
                 pendingMember.getBirth(),
-                pendingMember.getRole()
+                pendingMember.getRole(),
+                pendingMember.isRejected()
         );
     }
 
