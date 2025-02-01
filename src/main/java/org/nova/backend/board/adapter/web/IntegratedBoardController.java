@@ -12,6 +12,7 @@ import org.nova.backend.board.application.port.in.PostUseCase;
 import org.nova.backend.board.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
+import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
@@ -63,10 +64,11 @@ public class IntegratedBoardController {
         return ApiResponse.created(savedPost);
     }
 
-    /**
-     * 특정 카테고리의 모든 게시글 조회 (페이징)
-     */
     @Operation(summary = "카테고리별 게시글 조회", description = "특정 게시판 카테고리에 속한 게시글 목록을 가져옵니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json"))
+    })
     @GetMapping
     public ApiResponse<Page<PostResponse>> getPostsByCategory(
             @RequestParam BoardCategory category,
@@ -76,10 +78,11 @@ public class IntegratedBoardController {
         return ApiResponse.success(posts);
     }
 
-    /**
-     * 특정 게시글 상세 조회
-     */
     @Operation(summary = "게시글 조회", description = "특정 게시글을 ID를 기반으로 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 조회 성공", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json"))
+    })
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> getPostById(@PathVariable UUID postId) {
         var post = postUseCase.getPostById(postId);
@@ -94,6 +97,6 @@ public class IntegratedBoardController {
 
         String studentNumber = authentication.getName();
         return memberRepository.findByStudentNumber(studentNumber)
-                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다."));
     }
 }
