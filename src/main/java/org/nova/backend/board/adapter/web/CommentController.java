@@ -1,6 +1,7 @@
 package org.nova.backend.board.adapter.web;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.application.dto.request.CommentRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Comment API", description = "모든 게시글 댓글 API")
 @RestController
 @RequestMapping("/api/v1/comments")
 public class CommentController {
