@@ -89,6 +89,18 @@ public class PostService implements PostUseCase {
         return postMapper.toResponse(post);
     }
 
+    @Override
+    @Transactional
+    public int likePost(UUID postId, Member member) {
+        return postPersistencePort.likePost(postId, member);
+    }
+
+    @Override
+    @Transactional
+    public int unlikePost(UUID postId, Member member) {
+        return postPersistencePort.unlikePost(postId, member);
+    }
+
     /**
      * 게시글 삭제 (작성자 본인만 가능)
      *
