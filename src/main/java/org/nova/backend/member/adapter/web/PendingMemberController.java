@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.member.application.dto.request.PendingMemberManageRequest;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberDetailResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberListResponse;
@@ -16,7 +15,6 @@ import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,6 +46,9 @@ public class PendingMemberController {
 
     /**
      * 특정 PendingMember의 상세 정보 확인
+     *
+     * @param pendingMemberId pk
+     * @return PendingMemberDetailResponse
      */
     @GetMapping("/{pendingMemberId}")
     @PendingMemberApiDocument.GetPendingMemberDetailApiDoc
@@ -62,16 +63,30 @@ public class PendingMemberController {
     /**
      * 회원가입 요청 단건 수락
      *
-     * @param request PendingMember PK
+     * @param pendingMemberId pk
      * @return 생성된 Member 객체
      */
-    @PostMapping("")
+    @PostMapping("/{pendingMemberId}")
     @PendingMemberApiDocument.AcceptPendingMemberApiDoc
-    public ApiResponse<MemberResponse> acceptPendingMember(@RequestBody PendingMemberManageRequest request) {
-        Member savedMember = pendingMemberService.acceptPendingMember(request.getPendingMemberId());
+    public ApiResponse<MemberResponse> acceptPendingMember(@PathVariable("pendingMemberId") UUID pendingMemberId) {
+        Member savedMember = pendingMemberService.acceptPendingMember(pendingMemberId);
         MemberResponse response = memberMapper.toResponse(savedMember);
 
         return ApiResponse.success(response);
+    }
+
+    /**
+     * 회원가입 요청 단건 거절
+     *
+     * @param pendingMemberId pk
+     * @return 거절 완료
+     */
+    @PostMapping("/{pendingMemberId}/rejected")
+    @PendingMemberApiDocument.RejectPendingMemberApiDoc
+    public ApiResponse<String> rejectPendingMember(@PathVariable("pendingMemberId") UUID pendingMemberId) {
+        pendingMemberService.rejectPendingMember(pendingMemberId);
+
+        return ApiResponse.success("거절 완료");
     }
 
 }

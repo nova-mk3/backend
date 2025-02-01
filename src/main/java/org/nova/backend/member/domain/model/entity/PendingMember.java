@@ -60,4 +60,12 @@ public class PendingMember {
 
     private boolean isRejected;
 
+    //== 비즈니스 로직 ==//
+
+    /**
+     * 회원가입 요청 거절
+     */
+    public void rejectPendingMember() {
+        this.isRejected = true;
+    }
 }

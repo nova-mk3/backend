@@ -63,4 +63,23 @@ public @interface PendingMemberApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface AcceptPendingMemberApiDoc {
     }
+
+    @Operation(summary = "회원가입 요청 단건 거절", description = "요청의 PendingMember의 isReject를 true로 변경합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원가입 요청 거절 완료",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", content = @Content(mediaType = "application/json",
+                    examples = {@ExampleObject(name = "PendingMember 조회 실패",
+                            value = "{\"code\": 404, \"message\": \"pending member not found. 20202020\"}"),
+                    }
+            )),
+            @ApiResponse(responseCode = "500", description = "서버 오류",
+                    content = @Content(mediaType = "application/json"))
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface RejectPendingMemberApiDoc {
+    }
 }

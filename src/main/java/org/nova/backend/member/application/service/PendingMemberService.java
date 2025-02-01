@@ -110,4 +110,15 @@ public class PendingMemberService {
                 .orElseThrow(() -> new PendingMemberDomainException("pending member not found " + pendingMemberId,
                         HttpStatus.NOT_FOUND));
     }
+
+    /**
+     * 회원가입 요청 단건 거절
+     *
+     * @param pendingMemberId pk
+     */
+    @Transactional
+    public void rejectPendingMember(final UUID pendingMemberId) {
+        PendingMember pendingMember = findPendingMember(pendingMemberId);
+        pendingMember.rejectPendingMember();
+    }
 }
