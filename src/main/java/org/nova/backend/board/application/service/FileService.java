@@ -65,6 +65,26 @@ public class FileService implements FileUseCase {
         return fileEntities;
     }
 
+
+    /**
+     * 로컬에서 파일 삭제 + DB에서도 삭제
+     */
+    @Override
+    public void deleteFiles(List<UUID> fileIds) {
+        List<File> filesToDelete = filePersistencePort.findFilesByIds(fileIds);
+
+        for (File file : filesToDelete) {
+            Path filePath = Paths.get(file.getFilePath());
+            try {
+                Files.deleteIfExists(filePath);
+                logger.info("파일 삭제 성공: {}", file.getFilePath());
+            } catch (IOException e) {
+                logger.error("파일 삭제 실패: {}", file.getFilePath(), e);
+            }
+        }
+        filePersistencePort.deleteFilesByIds(fileIds);
+    }
+
     /**
      * 게시판 카테고리 및 포스트 타입별 폴더 경로 반환
      */
