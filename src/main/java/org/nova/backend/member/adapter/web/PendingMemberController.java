@@ -2,9 +2,11 @@ package org.nova.backend.member.adapter.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.application.dto.request.PendingMemberManageRequest;
 import org.nova.backend.member.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.PendingMemberDetailResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberListResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberResponse;
 import org.nova.backend.member.application.mapper.MemberMapper;
@@ -12,6 +14,7 @@ import org.nova.backend.member.application.service.PendingMemberService;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +44,18 @@ public class PendingMemberController {
 
         return ApiResponse.success(response);
     }
+
+    /**
+     * 특정 PendingMember의 상세 정보 확인
+     */
+    @GetMapping("/{pendingMemberId}")
+    public ApiResponse<PendingMemberDetailResponse> getPendingMemberDetail(
+            @PathVariable("pendingMemberId") UUID pendingMemberId) {
+        PendingMemberDetailResponse response = pendingMemberService.getPendingMemberDetail(pendingMemberId);
+
+        return ApiResponse.success(response);
+    }
+
 
     /**
      * 회원가입 요청 단건 수락

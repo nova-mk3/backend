@@ -6,9 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.adapter.repository.GraduationRepository;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.adapter.repository.PendingMemberRepository;
+import org.nova.backend.member.application.dto.response.PendingGraduationResponse;
+import org.nova.backend.member.application.dto.response.PendingMemberDetailResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberResponse;
 import org.nova.backend.member.application.mapper.GraduationMapper;
 import org.nova.backend.member.application.mapper.MemberMapper;
+import org.nova.backend.member.application.mapper.PendingGraduationMapper;
 import org.nova.backend.member.application.mapper.PendingMemberMapper;
 import org.nova.backend.member.domain.exception.PendingMemberDomainException;
 import org.nova.backend.member.domain.model.entity.Graduation;
@@ -32,6 +35,7 @@ public class PendingMemberService {
     private final MemberMapper memberMapper;
     private final GraduationMapper graduationMapper;
     private final PendingMemberMapper pendingMemberMapper;
+    private final PendingGraduationMapper pendingGraduationMapper;
 
     /**
      * 모든 회원가입 요청 개수
@@ -54,6 +58,22 @@ public class PendingMemberService {
                 .map(pendingMemberMapper::toResponse)
                 .toList();
 
+    }
+
+    /**
+     * 늑정 PendingMember 상세 정보 확인
+     *
+     * @return PendingMemberDetailResponse
+     */
+    public PendingMemberDetailResponse getPendingMemberDetail(final UUID pendingMemberId) {
+
+        PendingMember pendingMember = findPendingMember(pendingMemberId);
+
+        PendingMemberResponse pendingMemberResponse = pendingMemberMapper.toResponse(pendingMember);
+        PendingGraduationResponse pendingGraduationResponse = pendingGraduationMapper.toResponse(
+                pendingMember.getPendingGraduation());
+
+        return new PendingMemberDetailResponse(pendingMemberResponse, pendingGraduationResponse);
     }
 
     /**
