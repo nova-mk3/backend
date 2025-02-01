@@ -1,12 +1,11 @@
 package org.nova.backend.member.domain.exception;
 
-public class PendingMemberDomainException extends RuntimeException {
+import org.nova.backend.shared.exception.CustomException;
+import org.springframework.http.HttpStatus;
 
-    public PendingMemberDomainException(String message) {
-        super(message);
-    }
+public class PendingMemberDomainException extends CustomException {
 
-    public PendingMemberDomainException(String message, Throwable cause) {
-        super(message, cause);
+    public PendingMemberDomainException(String message, HttpStatus status) {
+        super(message, status);
     }
 }

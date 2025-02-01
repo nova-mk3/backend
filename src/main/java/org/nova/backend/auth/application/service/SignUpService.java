@@ -14,6 +14,7 @@ import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.exception.PendingMemberDomainException;
 import org.nova.backend.member.domain.model.entity.PendingGraduation;
 import org.nova.backend.member.domain.model.entity.PendingMember;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,14 +71,16 @@ public class SignUpService {
     private void isMemberAlreadyExist(final String studentNumber, final String email) {
         if (memberRepository.existsByStudentNumberOrEmail(studentNumber, email)) {
             throw new MemberDomainException(
-                    "Member already exists. check student number or email " + studentNumber + " " + email);
+                    "Member already exists. check student number or email " + studentNumber + " " + email,
+                    HttpStatus.CONFLICT);
         }
     }
 
     private void isPendingMemberAlreadyExist(final String studentNumber, final String email) {
         if (pendingMemberRepository.existsByStudentNumberOrEmail(studentNumber, email)) {
             throw new PendingMemberDomainException(
-                    "Pending Member already exists. check student number or email " + studentNumber + " " + email);
+                    "Pending Member already exists. check student number or email " + studentNumber + " " + email,
+                    HttpStatus.CONFLICT);
         }
     }
 
