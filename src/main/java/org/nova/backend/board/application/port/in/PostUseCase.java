@@ -10,10 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-//여기 반환갑 객체 그대로 주면 안됨. 유연하게 처리
 public interface PostUseCase {
     PostResponse createPost(BasePostRequest request, Member member, List<MultipartFile> files);
     Page<PostResponse> getPostsByCategory(BoardCategory category, Pageable pageable);
     PostResponse getPostById(UUID postId);
+
+    int likePost(UUID postId, Member member);
+    int unlikePost(UUID postId, Member member);
     void deletePost(UUID postId, UUID memberId);
 }
