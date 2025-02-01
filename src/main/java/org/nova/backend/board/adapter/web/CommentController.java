@@ -1,6 +1,8 @@
 package org.nova.backend.board.adapter.web;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
@@ -34,14 +36,24 @@ public class CommentController {
         this.memberRepository = memberRepository;
     }
 
-    @Operation(summary = "댓글 작성")
+    @Operation(summary = "댓글 작성", description = "게시글에 댓글을 작성합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "댓글 작성 성공", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
+    })
     @PostMapping
     public ApiResponse<CommentResponse> createComment(@RequestBody CommentRequest request) {
         Member member = getCurrentMember();
         return ApiResponse.success(commentUseCase.addComment(request, member));
     }
 
-    @Operation(summary = "게시글의 모든 댓글 조회")
+    @Operation(summary = "게시글의 모든 댓글 조회", description = "특정 게시글에 달린 모든 댓글을 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "댓글 조회 성공", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글이 존재하지 않음", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
+    })
     @GetMapping("/{postId}")
     public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable UUID postId) {
         return ApiResponse.success(commentUseCase.getCommentsByPostId(postId));
