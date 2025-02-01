@@ -12,6 +12,7 @@ import org.nova.backend.board.application.port.out.FilePersistencePort;
 import org.nova.backend.board.domain.exception.FileDomainException;
 import org.nova.backend.board.domain.model.entity.File;
 import org.nova.backend.board.domain.model.entity.Post;
+import org.nova.backend.board.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileService implements FileUseCase {
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
-    private static final long MAX_FILE_SIZE = 500 * 1024 * 1024;
 
     private final FilePersistencePort filePersistencePort;
 
@@ -49,7 +49,12 @@ public class FileService implements FileUseCase {
         }
 
         List<File> fileEntities = files.stream()
-                .map(file -> new File(null, file.getOriginalFilename(), saveFileToLocal(file), post, 0))
+                .map(file -> {
+                    FileUtil.validateFileSize(file);
+                    FileUtil.validateFileExtension(file);
+
+                    return new File(null, file.getOriginalFilename(), saveFileToLocal(file), post, 0);
+                })
                 .toList();
 
         fileEntities.forEach(filePersistencePort::save);
