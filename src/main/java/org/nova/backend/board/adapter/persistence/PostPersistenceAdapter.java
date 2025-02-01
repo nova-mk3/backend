@@ -7,6 +7,7 @@ import org.nova.backend.board.adapter.persistence.repository.PostRepository;
 import org.nova.backend.board.application.port.out.PostPersistencePort;
 import org.nova.backend.board.domain.model.entity.Post;
 import org.nova.backend.board.domain.model.valueobject.BoardCategory;
+import org.nova.backend.member.domain.model.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,20 @@ public class PostPersistenceAdapter implements PostPersistencePort {
     @Transactional
     public void increaseViewCount(UUID postId) {
         postRepository.increaseViewCount(postId);
+    }
+
+    @Override
+    @Transactional
+    public int likePost(UUID postId, Member member) {
+        postRepository.increaseLikeCount(postId);
+        return postRepository.getLikeCount(postId);
+    }
+
+    @Override
+    @Transactional
+    public int unlikePost(UUID postId, Member member) {
+        postRepository.decreaseLikeCount(postId);
+        return postRepository.getLikeCount(postId);
     }
 
     @Override
