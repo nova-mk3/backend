@@ -1,5 +1,6 @@
 package org.nova.backend.member.domain.model.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,7 +22,7 @@ import org.nova.backend.member.domain.model.valueobject.Role;
 public class PendingMember {
 
     @Id
-    @Column(name = "member_request_id")
+    @Column(name = "pending_member_id")
     private UUID id;
 
     @Column(unique = true)
@@ -53,8 +54,8 @@ public class PendingMember {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "graduation_request_id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "pending_graduation_id")
     private PendingGraduation pendingGraduation;
 
     private boolean isRejected;

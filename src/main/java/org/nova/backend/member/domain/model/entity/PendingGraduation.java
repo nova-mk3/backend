@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class PendingGraduation {
 
     @Id
-    @Column(name = "graduation_request_id")
+    @Column(name = "pending_graduation_id")
     private UUID id;
 
     private int year;
