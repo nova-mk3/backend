@@ -57,6 +57,7 @@ public class Member {
     @JoinColumn(name = "graduation_id")
     private Graduation graduation;
 
+    private boolean isDeleted;
 
     // 로그인 세션 생성 용 임시 객체
     public Member(String studentNumber, Role role) {

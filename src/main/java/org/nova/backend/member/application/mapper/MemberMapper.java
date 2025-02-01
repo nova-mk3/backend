@@ -26,7 +26,8 @@ public class MemberMapper {
                 "안녕하세요^-^",
                 request.getBirth(),
                 request.getRole(),
-                graduation
+                graduation,
+                false
         );
     }
 
