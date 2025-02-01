@@ -2,7 +2,7 @@ package org.nova.backend.member.application.mapper;
 
 import java.util.UUID;
 import org.nova.backend.auth.application.dto.request.MemberSignUpRequest;
-import org.nova.backend.auth.application.dto.response.PendingMemberResponse;
+import org.nova.backend.member.application.dto.response.PendingMemberResponse;
 import org.nova.backend.member.domain.model.entity.PendingGraduation;
 import org.nova.backend.member.domain.model.entity.PendingMember;
 import org.springframework.stereotype.Component;

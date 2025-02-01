@@ -1,12 +1,15 @@
 package org.nova.backend.member.application.service;
 
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.adapter.repository.GraduationRepository;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.adapter.repository.PendingMemberRepository;
+import org.nova.backend.member.application.dto.response.PendingMemberResponse;
 import org.nova.backend.member.application.mapper.GraduationMapper;
 import org.nova.backend.member.application.mapper.MemberMapper;
+import org.nova.backend.member.application.mapper.PendingMemberMapper;
 import org.nova.backend.member.domain.exception.PendingMemberDomainException;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -28,15 +31,39 @@ public class PendingMemberService {
 
     private final MemberMapper memberMapper;
     private final GraduationMapper graduationMapper;
+    private final PendingMemberMapper pendingMemberMapper;
 
     /**
-     * 회원가입 요청 단건 승인
+     * 모든 회원가입 요청 개수
+     *
+     * @return PendingMemberListResponse
+     */
+    public long getPendingMemberCount() {
+        return pendingMemberRepository.count();
+    }
+
+    /**
+     * 모든 회원가입 요청 리스트
+     *
+     * @return PendingMemberListResponse
+     */
+    public List<PendingMemberResponse> getPendingMemberList() {
+        List<PendingMember> pendingMemberList = pendingMemberRepository.findAll();
+
+        return pendingMemberList.stream()
+                .map(pendingMemberMapper::toResponse)
+                .toList();
+
+    }
+
+    /**
+     * 회원가입 요청 단건 수락
      *
      * @param pendingMemberId 회원가입 요청 대상
      * @return Member 생성된 Member 객체
      */
     @Transactional
-    public Member approveMemberService(final UUID pendingMemberId) {
+    public Member acceptPendingMember(final UUID pendingMemberId) {
         PendingMember pendingMember = findPendingMember(pendingMemberId);
 
         Graduation graduation = null;

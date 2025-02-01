@@ -1,7 +1,7 @@
 package org.nova.backend.member.application.mapper;
 
 import java.util.UUID;
-import org.nova.backend.auth.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.PendingMember;

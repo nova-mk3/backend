@@ -1,13 +1,17 @@
 package org.nova.backend.member.adapter.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.auth.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.request.PendingMemberManageRequest;
+import org.nova.backend.member.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.PendingMemberListResponse;
+import org.nova.backend.member.application.dto.response.PendingMemberResponse;
 import org.nova.backend.member.application.mapper.MemberMapper;
 import org.nova.backend.member.application.service.PendingMemberService;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,13 +27,30 @@ public class PendingMemberController {
     private final MemberMapper memberMapper;
 
     /**
-     * 회원가입 요청 단건 승인
+     * 모든 회원가입 요청 리스트
+     *
+     * @return 회원가입 요청 리스트
+     */
+    @GetMapping("")
+    public ApiResponse<PendingMemberListResponse> getPendingMemberList() {
+        long totalPendingMemberCount = pendingMemberService.getPendingMemberCount();
+        List<PendingMemberResponse> pendingMemberResponseList = pendingMemberService.getPendingMemberList();
+
+        PendingMemberListResponse response = new PendingMemberListResponse(totalPendingMemberCount,
+                pendingMemberResponseList);
+
+        return ApiResponse.success(response);
+    }
+
+    /**
+     * 회원가입 요청 단건 수락
+     *
      * @param request PendingMember PK
      * @return 생성된 Member 객체
      */
     @PostMapping("")
-    public ApiResponse<MemberResponse> approvePendingMember(@RequestBody PendingMemberManageRequest request) {
-        Member savedMember = pendingMemberService.approveMemberService(request.getPendingMemberId());
+    public ApiResponse<MemberResponse> acceptPendingMember(@RequestBody PendingMemberManageRequest request) {
+        Member savedMember = pendingMemberService.acceptPendingMember(request.getPendingMemberId());
         MemberResponse response = memberMapper.toResponse(savedMember);
 
         return ApiResponse.success(response);

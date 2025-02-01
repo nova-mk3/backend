@@ -1,4 +1,4 @@
-package org.nova.backend.auth.application.dto.response;
+package org.nova.backend.member.application.dto.response;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,7 @@ import org.nova.backend.member.domain.model.valueobject.Role;
 
 @Getter
 @AllArgsConstructor
-public class MemberResponse {
+public class PendingMemberResponse {
 
     private UUID memberId;
     private String studentNumber;
