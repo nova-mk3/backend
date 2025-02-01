@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
+import org.nova.backend.board.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.application.dto.response.PostResponse;
 import org.nova.backend.board.application.port.in.PostUseCase;
 import org.nova.backend.board.domain.model.valueobject.BoardCategory;
@@ -23,13 +24,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
+@Tag(name = "Integrated Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
 @RestController
 @RequestMapping("/api/v1/integrated")
 public class IntegratedBoardController {
@@ -62,6 +64,20 @@ public class IntegratedBoardController {
         var request = new BasePostRequest(title, content, postType);
         var savedPost = postUseCase.createPost(request, member, files);
         return ApiResponse.created(savedPost);
+    }
+
+    @PutMapping("/{postId}")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<PostResponse> updatePost(
+            @PathVariable UUID postId,
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "deleteFileIds", required = false) List<UUID> deleteFileIds,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        Member member = getCurrentMember();
+        var request = new UpdatePostRequest(title, content, deleteFileIds);
+        return ApiResponse.success(postUseCase.updatePost(postId, request, member, files));
     }
 
     @Operation(summary = "카테고리별 게시글 조회", description = "특정 게시판 카테고리에 속한 게시글 목록을 가져옵니다.")
