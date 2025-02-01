@@ -73,6 +73,7 @@ public class PostService implements PostUseCase {
      * 특정 카테고리의 모든 게시글 조회 (페이징)
      */
     @Override
+    @Transactional
     public Page<PostResponse> getPostsByCategory(BoardCategory category, Pageable pageable) {
         return postPersistencePort.findAllByCategory(category, pageable)
                 .map(postMapper::toResponse);
@@ -82,6 +83,7 @@ public class PostService implements PostUseCase {
      * 특정 게시글 조회
      */
     @Override
+    @Transactional
     public PostResponse getPostById(UUID postId) {
         postPersistencePort.increaseViewCount(postId);
         Post post = postPersistencePort.findById(postId)
