@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
+import org.nova.backend.board.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.application.dto.response.PostResponse;
 import org.nova.backend.board.application.mapper.BasePostMapper;
 import org.nova.backend.board.application.port.in.BoardUseCase;
@@ -101,6 +102,38 @@ public class PostService implements PostUseCase {
     @Transactional
     public int unlikePost(UUID postId, Member member) {
         return postPersistencePort.unlikePost(postId, member);
+    }
+
+    /**
+     * 게시글 수정
+     *
+     * @param postId 수정할 게시글 ID
+     * @param request 업데이트할 게시글 요청 데이터
+     * @param member 게시글 작성자
+     * @param files 새로 업로드할 파일 리스트
+     * @return 수정된 게시글 응답
+     */
+    @Override
+    @Transactional
+    public PostResponse updatePost(UUID postId, UpdatePostRequest request, Member member, List<MultipartFile> files) {
+        Post post = postPersistencePort.findById(postId)
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
+
+        if (!post.getMember().getId().equals(member.getId())) {
+            throw new BoardDomainException("게시글 수정 권한이 없습니다.");
+        }
+
+        // 삭제할 파일이 있다면 로컬과 DB에서 삭제
+        if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
+            fileUseCase.deleteFiles(request.getDeleteFileIds());
+        }
+
+        List<File> newFiles = fileUseCase.saveFiles(files, post);
+        post.addFiles(newFiles);
+
+        post.updatePost(request.getTitle(), request.getContent());
+
+        return postMapper.toResponse(post);
     }
 
     /**
