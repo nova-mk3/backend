@@ -12,6 +12,8 @@ import org.nova.backend.board.application.port.out.FilePersistencePort;
 import org.nova.backend.board.domain.exception.FileDomainException;
 import org.nova.backend.board.domain.model.entity.File;
 import org.nova.backend.board.domain.model.entity.Post;
+import org.nova.backend.board.domain.model.valueobject.BoardCategory;
+import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.board.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +27,15 @@ public class FileService implements FileUseCase {
 
     private final FilePersistencePort filePersistencePort;
 
-    //임시경로
-    @Value("${file.storage.path:/Users/jiny/Desktop/Project/tmpServer}")
-    private String fileStoragePath;
+    @Value("${file.storage.path}")
+    private String baseFileStoragePath;
 
     public FileService(FilePersistencePort filePersistencePort) {
         this.filePersistencePort = filePersistencePort;
     }
 
     /**
-     * 파일 저장
-     * @param files 첨부파일 리스트
+     * 파일 저장 (게시판 카테고리 및 포스트 타입별 폴더 자동 생성)
      */
     @Override
     public List<File> saveFiles(List<MultipartFile> files, Post post) {
@@ -48,12 +48,16 @@ public class FileService implements FileUseCase {
             throw new FileDomainException("첨부파일은 최대 10개까지 가능합니다.");
         }
 
+        BoardCategory category = post.getBoard().getCategory();
+        PostType postType = post.getPostType();
+
         List<File> fileEntities = files.stream()
                 .map(file -> {
                     FileUtil.validateFileSize(file);
                     FileUtil.validateFileExtension(file);
 
-                    return new File(null, file.getOriginalFilename(), saveFileToLocal(file), post, 0);
+                    String storagePath = getStoragePath(category, postType);
+                    return new File(null, file.getOriginalFilename(), saveFileToLocal(file, storagePath), post, 0);
                 })
                 .toList();
 
@@ -61,9 +65,19 @@ public class FileService implements FileUseCase {
         return fileEntities;
     }
 
-    private String saveFileToLocal(MultipartFile file) {
+    /**
+     * 게시판 카테고리 및 포스트 타입별 폴더 경로 반환
+     */
+    private String getStoragePath(BoardCategory category, PostType postType) {
+        return Paths.get(baseFileStoragePath, "post", category.name(), postType.name()).toString();
+    }
+
+    /**
+     * 로컬에 파일 저장
+     */
+    private String saveFileToLocal(MultipartFile file, String storagePath) {
         try {
-            Path fileDir = Paths.get(fileStoragePath);
+            Path fileDir = Paths.get(storagePath);
             if (!Files.exists(fileDir)) {
                 Files.createDirectories(fileDir);
                 logger.info("파일 저장 디렉토리가 생성되었습니다: {}", fileDir.toAbsolutePath());
