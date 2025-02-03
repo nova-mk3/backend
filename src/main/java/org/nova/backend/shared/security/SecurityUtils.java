@@ -1,4 +1,4 @@
-package org.nova.backend.shared.springsecurity;
+package org.nova.backend.shared.security;
 
 import java.util.Collection;
 import java.util.Iterator;
