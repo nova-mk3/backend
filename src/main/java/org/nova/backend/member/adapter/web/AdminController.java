@@ -1,7 +1,7 @@
 package org.nova.backend.member.adapter.web;
 
 import org.nova.backend.shared.model.ApiResponse;
-import org.nova.backend.shared.springsecurity.SecurityUtils;
+import org.nova.backend.shared.security.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
