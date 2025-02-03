@@ -56,11 +56,12 @@ public class PostService implements PostUseCase {
     @Override
     @Transactional
     public PostResponse createPost(
+            UUID boardId,
             BasePostRequest request,
             Member member,
             List<MultipartFile> files
     ) {
-        Board board = boardUseCase.getBoardByCategory(request.getPostType().getCategory());
+        Board board = boardUseCase.getBoardById(boardId);
         Post post = postMapper.toEntity(request, member, board);
 
         Post savedPost = postPersistencePort.save(post);
@@ -115,9 +116,19 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public PostResponse updatePost(UUID postId, UpdatePostRequest request, Member member, List<MultipartFile> files) {
+    public PostResponse updatePost(
+            UUID boardId,
+            UUID postId,
+            UpdatePostRequest request,
+            Member member,
+            List<MultipartFile> files
+    ) {
         Post post = postPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
+
+        if (!post.getBoard().getId().equals(boardId)) {
+            throw new BoardDomainException("잘못된 게시판 ID입니다.");
+        }
 
         if (!post.getMember().getId().equals(member.getId())) {
             throw new BoardDomainException("게시글 수정 권한이 없습니다.");

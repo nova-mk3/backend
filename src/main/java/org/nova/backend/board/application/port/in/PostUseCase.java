@@ -12,10 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface PostUseCase {
-    PostResponse createPost(BasePostRequest request, Member member, List<MultipartFile> files);
+    PostResponse createPost(UUID boardId, BasePostRequest request, Member member, List<MultipartFile> files);
     Page<PostResponse> getPostsByCategory(BoardCategory category, Pageable pageable);
     PostResponse getPostById(UUID postId);
-    PostResponse updatePost(UUID postId, UpdatePostRequest request, Member member, List<MultipartFile> files);
+    PostResponse updatePost(UUID boardId, UUID postId, UpdatePostRequest request, Member member, List<MultipartFile> files);
 
     int likePost(UUID postId, Member member);
     int unlikePost(UUID postId, Member member);
