@@ -76,17 +76,17 @@ public class PendingMemberController {
     }
 
     /**
-     * 회원가입 요청 단건 거절
+     * 회원가입 요청 단건 반려
      *
      * @param pendingMemberId pk
-     * @return 거절 완료
+     * @return 반려 완료
      */
     @PostMapping("/{pendingMemberId}/rejected")
     @PendingMemberApiDocument.RejectPendingMemberApiDoc
     public ApiResponse<String> rejectPendingMember(@PathVariable("pendingMemberId") UUID pendingMemberId) {
         pendingMemberService.rejectPendingMember(pendingMemberId);
 
-        return ApiResponse.success("거절 완료");
+        return ApiResponse.success("반려 완료");
     }
 
 }
