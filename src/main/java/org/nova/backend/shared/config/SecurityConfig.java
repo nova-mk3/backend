@@ -53,18 +53,16 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> {
-                        //게시판 관련 권한
-                        configureBoardPermissions(auth);
+                    //게시판 관련 권한
+                    configureBoardPermissions(auth);
+                    //로그인 회원가입 관련 권한
+                    configureAuthPermissions(auth);
+                    //관리자 관련 권한
+                    configureAdministratorPermissions(auth);
 
-                        auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                    auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                             .requestMatchers("/", "/api/v1", "/service/**").permitAll()
-                            .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll() // 회원가입, 로그인
-                            .requestMatchers("/api/v1/email-auth/**").permitAll() // 회원가입 시 이메일 인증
                             .requestMatchers("/api/v1/comments/**").permitAll()
-                            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                            .requestMatchers("/api/v1/admin")
-                            .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
-                            .requestMatchers("/api/v1/pendingMembers/**").permitAll()
                             .anyRequest().authenticated();
                 });
 
@@ -100,5 +98,23 @@ public class SecurityConfig {
                 // 공지사항 게시판의 게시글 작성 & 수정 (관리자 & 회장만)
                 .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/posts")
                 .hasAnyRole(Role.ADMINISTRATOR.toString(), Role.CHAIRMAN.toString());
+    }
+
+    private void configureAdministratorPermissions(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+        auth.requestMatchers("/api/v1/admin")
+                .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+                .requestMatchers("/api/v1/pendingMembers/**").permitAll(); //추후 관리자한테만 권한 줄 예정..
+    }
+
+    private void configureAuthPermissions(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+        auth
+                // 회원가입, 로그인
+                .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll()
+                // 회원가입 시 이메일 인증
+                .requestMatchers("/api/v1/email-auth/**").permitAll();
     }
 }
