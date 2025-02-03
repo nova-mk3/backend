@@ -10,7 +10,7 @@ import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.application.dto.response.PostResponse;
 import org.nova.backend.board.application.port.in.PostUseCase;
-import org.nova.backend.board.domain.model.valueobject.BoardCategory;
+import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -112,10 +112,11 @@ public class IntegratedBoardController {
     })
     @GetMapping
     public ApiResponse<Page<PostResponse>> getPostsByCategory(
-            @RequestParam BoardCategory category,
+            @PathVariable UUID boardId,
+            @RequestParam PostType postType,
             Pageable pageable
     ) {
-        var posts = postUseCase.getPostsByCategory(category, pageable);
+        var posts = postUseCase.getPostsByCategory(boardId, postType, pageable);
         return ApiResponse.success(posts);
     }
 
