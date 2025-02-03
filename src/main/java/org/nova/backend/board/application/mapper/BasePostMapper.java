@@ -30,8 +30,8 @@ public class BasePostMapper {
                 0,
                 0,
                 0,
-                new ArrayList<>(), //댓글리스트
-                new ArrayList<>(), //첨부파일 리스트
+                new ArrayList<>(),
+                new ArrayList<>(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
