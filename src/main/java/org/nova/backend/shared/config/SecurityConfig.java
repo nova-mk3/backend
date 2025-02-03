@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.nova.backend.shared.jwt.JWTFilter;
 import org.nova.backend.shared.jwt.JWTUtil;
-import org.nova.backend.shared.springsecurity.LoginFilter;
+import org.nova.backend.shared.security.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -40,26 +43,29 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf((auth) -> auth.disable());
+                .csrf(AbstractHttpConfigurer::disable);
 
         http
-                .formLogin((auth) -> auth.disable());
+                .formLogin(AbstractHttpConfigurer::disable);
 
         http
-                .httpBasic((auth) -> auth.disable());
+                .httpBasic(AbstractHttpConfigurer::disable);
 
         http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/api/v1", "/service/**").permitAll()
-                        .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll()                   // 회원가입, 로그인
-                        .requestMatchers("/api/v1/email-auth/**").permitAll()// 회원가입 시 이메일 인증
-                        .requestMatchers("/api/v1/integrated/**").permitAll()
-                        .requestMatchers("/api/v1/comments/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/v1/admin")
-                        .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
-                        .anyRequest().authenticated()
-                );
+                .authorizeHttpRequests((auth) -> {
+                        //게시판 관련 권한
+                        configureBoardPermissions(auth);
+
+                        auth.requestMatchers("/", "/api/v1", "/service/**").permitAll()
+                            .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll() // 회원가입, 로그인
+                            .requestMatchers("/api/v1/email-auth/**").permitAll() // 회원가입 시 이메일 인증
+                            .requestMatchers("/api/v1/comments/**").permitAll()
+                            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                            .requestMatchers("/api/v1/admin")
+
+                            .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+                            .anyRequest().authenticated();
+                });
 
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
@@ -73,5 +79,25 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
+    }
+
+    private void configureBoardPermissions(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+        auth
+                // 로그인 없이 접근 가능한 API
+                .requestMatchers(
+                        "/api/v1/boards",
+                        "/api/v1/boards/{boardId}/posts",
+                        "/api/v1/boards/{boardId}/posts/{postId}"
+                ).permitAll()
+
+                // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
+                .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/posts")
+                .authenticated()
+
+                // 공지사항 게시판의 게시글 작성 & 수정 (관리자 & 회장만)
+                .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/posts")
+                .hasAnyRole(Role.ADMINISTRATOR.toString(), Role.CHAIRMAN.toString());
     }
 }

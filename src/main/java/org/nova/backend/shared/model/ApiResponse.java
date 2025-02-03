@@ -20,7 +20,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(HttpStatus.CREATED.value(), "success created", data);
     }
 
-    public static ApiResponse<Void> noContent() {
+    public static <T> ApiResponse<T> noContent(T data) {
         return new ApiResponse<>(HttpStatus.NO_CONTENT.value(), "success noContent", null);
     }
 

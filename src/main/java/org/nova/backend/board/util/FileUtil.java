@@ -5,7 +5,7 @@ import org.nova.backend.board.domain.exception.FileDomainException;
 import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtil {
-    private static final long MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB 제한
+    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB 제한
     private static final List<String> ALLOWED_EXTENSIONS = List.of(
             "jpg", "jpeg", "png", "gif",  // 이미지 파일
             "pdf", "txt", "docx", "xlsx", "csv", // 문서 파일

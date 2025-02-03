@@ -45,7 +45,7 @@ public class CommentService implements CommentUseCase {
         Comment parentComment = null;
         if (request.getParentCommentId() != null) {
             parentComment = commentPersistencePort.findById(request.getParentCommentId())
-                    .orElseThrow(() -> new CommentDomainException("부모 댓글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new CommentDomainException("대댓글을 찾을 수 없습니다."));
         }
 
         Comment comment = new Comment(
@@ -66,6 +66,7 @@ public class CommentService implements CommentUseCase {
      * 특정 게시글의 댓글 조회
      */
     @Override
+    @Transactional
     public List<CommentResponse> getCommentsByPostId(UUID postId) {
         return commentPersistencePort.findAllByPostId(postId)
                 .stream()
