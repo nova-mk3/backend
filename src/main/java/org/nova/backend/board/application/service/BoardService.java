@@ -34,15 +34,6 @@ public class BoardService implements BoardUseCase {
      * 특정 게시판 조회
      */
     @Override
-    public Board getBoardByCategory(BoardCategory category) {
-        return boardPersistencePort.findByCategory(category)
-                .orElseThrow(() -> new BoardDomainException("게시판을 찾을 수 없습니다. Category: " + category));
-    }
-
-    /**
-     * 특정 게시판 조회
-     */
-    @Override
     public Board getBoardById(UUID boardId) {
         logger.info("게시판 조회 요청 - ID: {}", boardId);
         return boardPersistencePort.findById(boardId)
