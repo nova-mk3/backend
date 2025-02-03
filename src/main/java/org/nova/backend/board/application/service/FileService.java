@@ -1,5 +1,6 @@
 package org.nova.backend.board.application.service;
 
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,6 +70,7 @@ public class FileService implements FileUseCase {
     /**
      * 로컬에서 파일 삭제 + DB에서도 삭제
      */
+    @Transactional
     @Override
     public void deleteFiles(List<UUID> fileIds) {
         List<File> filesToDelete = filePersistencePort.findFilesByIds(fileIds);
@@ -83,6 +85,22 @@ public class FileService implements FileUseCase {
             }
         }
         filePersistencePort.deleteFilesByIds(fileIds);
+    }
+
+    /**
+     * 삭제할 파일 먼저 조회
+     */
+    @Override
+    public List<File> findFilesByIds(List<UUID> fileIds) {
+        List<File> files = filePersistencePort.findFilesByIds(fileIds);
+
+        if (files.isEmpty()) {
+            logger.warn("삭제할 파일이 존재하지 않습니다. ID 목록: {}", fileIds);
+        } else {
+            logger.info("삭제할 파일 조회 완료: {}", files);
+        }
+
+        return files;
     }
 
     /**

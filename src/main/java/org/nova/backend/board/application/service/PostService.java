@@ -134,9 +134,16 @@ public class PostService implements PostUseCase {
             throw new BoardDomainException("게시글 수정 권한이 없습니다.");
         }
 
-        // 삭제할 파일이 있다면 로컬과 DB에서 삭제
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
+            List<File> filesToDelete = fileUseCase.findFilesByIds(request.getDeleteFileIds());
+
+            if (filesToDelete.isEmpty()) {
+                logger.warn("삭제할 파일을 찾을 수 없습니다. ID 목록: {}", request.getDeleteFileIds());
+                throw new BoardDomainException("삭제할 파일이 존재하지 않습니다.");
+            }
+
             fileUseCase.deleteFiles(request.getDeleteFileIds());
+            post.removeFiles(filesToDelete);
         }
 
         List<File> newFiles = fileUseCase.saveFiles(files, post);

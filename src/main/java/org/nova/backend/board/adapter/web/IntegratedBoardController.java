@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
+import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.application.dto.response.PostResponse;
@@ -16,6 +17,7 @@ import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
+import org.nova.backend.shared.security.BoardSecurityChecker;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,17 +35,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Integrated Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
 @RestController
-@RequestMapping("/api/v1/integrated")
+@RequestMapping("/api/v1/boards/{boardId}/posts")
 public class IntegratedBoardController {
     private final PostUseCase postUseCase;
     private final MemberRepository memberRepository;
+    private final BoardSecurityChecker boardSecurityChecker;
 
     public IntegratedBoardController(
             PostUseCase postUseCase,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            BoardSecurityChecker boardSecurityChecker
     ) {
         this.postUseCase = postUseCase;
         this.memberRepository = memberRepository;
+        this.boardSecurityChecker = boardSecurityChecker;
     }
 
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
@@ -55,29 +60,38 @@ public class IntegratedBoardController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = {"multipart/form-data"})
     public ApiResponse<PostResponse> createPost(
-            @RequestParam("title") String title,
-            @RequestParam("content") String content,
-            @RequestParam("postType") PostType postType,
+            @PathVariable UUID boardId,
+            @RequestPart("request") BasePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         Member member = getCurrentMember();
-        var request = new BasePostRequest(title, content, postType);
-        var savedPost = postUseCase.createPost(request, member, files);
+
+        if (request.getPostType() == PostType.NOTICE && !boardSecurityChecker.isAdminOrPresident(member)) {
+            throw new UnauthorizedException("공지사항은 관리자 또는 회장만 작성할 수 있습니다.");
+        }
+        var savedPost = postUseCase.createPost(boardId, request, member, files);
         return ApiResponse.created(savedPost);
     }
 
-    @PutMapping("/{postId}")
+    @Operation(summary = "게시글 수정", description = "기존 게시글을 수정합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "게시글 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "수정 권한 없음", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
+    })
     @PreAuthorize("isAuthenticated()")
+    @PutMapping(value = "/{postId}", consumes = {"multipart/form-data"})
     public ApiResponse<PostResponse> updatePost(
+            @PathVariable UUID boardId,
             @PathVariable UUID postId,
-            @RequestParam("title") String title,
-            @RequestParam("content") String content,
-            @RequestParam(value = "deleteFileIds", required = false) List<UUID> deleteFileIds,
+            @RequestPart("request") UpdatePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         Member member = getCurrentMember();
-        var request = new UpdatePostRequest(title, content, deleteFileIds);
-        return ApiResponse.success(postUseCase.updatePost(postId, request, member, files));
+        var updatedPost = postUseCase.updatePost(boardId, postId, request, member, files);
+        return ApiResponse.noContent(updatedPost);
     }
 
     @Operation(summary = "카테고리별 게시글 조회", description = "특정 게시판 카테고리에 속한 게시글 목록을 가져옵니다.")

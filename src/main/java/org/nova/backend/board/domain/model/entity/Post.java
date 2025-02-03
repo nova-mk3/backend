@@ -84,6 +84,9 @@ public class Post {
     public void addFiles(List<File> files) {
         this.files.addAll(files);
     }
+    public void removeFiles(List<File> filesToRemove) {
+        this.files.removeAll(filesToRemove);
+    }
 }
 
 

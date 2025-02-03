@@ -9,5 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 public interface FileUseCase {
     List<File> saveFiles(List<MultipartFile> files, Post post);
     void deleteFiles(List<UUID> fileIds);
+    List<File> findFilesByIds(List<UUID> fileIds);
 }
 
