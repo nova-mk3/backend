@@ -19,10 +19,10 @@ import org.nova.backend.member.domain.model.valueobject.Role;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Member {
+public class PendingMember {
 
     @Id
-    @Column(name = "member_id")
+    @Column(name = "pending_member_id")
     private UUID id;
 
     @Column(unique = true)
@@ -55,14 +55,17 @@ public class Member {
     private Role role;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "graduation_id")
-    private Graduation graduation;
+    @JoinColumn(name = "pending_graduation_id")
+    private PendingGraduation pendingGraduation;
 
-    private boolean isDeleted;
+    private boolean isRejected;
 
-    // 로그인 세션 생성 용 임시 객체
-    public Member(String studentNumber, Role role) {
-        this.name = studentNumber;
-        this.role = role;
+    //== 비즈니스 로직 ==//
+
+    /**
+     * 회원가입 요청 거절
+     */
+    public void rejectPendingMember() {
+        this.isRejected = true;
     }
 }

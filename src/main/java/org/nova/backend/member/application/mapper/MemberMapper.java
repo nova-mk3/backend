@@ -1,32 +1,33 @@
 package org.nova.backend.member.application.mapper;
 
 import java.util.UUID;
-import org.nova.backend.auth.application.dto.request.MemberSignUpRequest;
-import org.nova.backend.auth.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
+import org.nova.backend.member.domain.model.entity.PendingMember;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MemberMapper {
 
-    public Member toEntity(MemberSignUpRequest request, String encryptedPassword, Graduation graduation) {
+    public Member toEntity(PendingMember pendingMember, Graduation graduation) {
         return new Member(
                 UUID.randomUUID(),
-                request.getStudentNumber(),
-                encryptedPassword,
-                request.getName(),
-                request.getEmail(),
-                request.isGraduation(),
-                request.getYear(),
-                request.getSemester(),
-                request.isAbsence(),
-                request.getProfilePhoto(),
-                request.getPhone(),
-                "안녕하세요^-^",
-                request.getBirth(),
-                request.getRole(),
-                graduation
+                pendingMember.getStudentNumber(),
+                pendingMember.getPassword(),
+                pendingMember.getName(),
+                pendingMember.getEmail(),
+                pendingMember.isGraduation(),
+                pendingMember.getYear(),
+                pendingMember.getSemester(),
+                pendingMember.isAbsence(),
+                pendingMember.getProfilePhoto(),
+                pendingMember.getPhone(),
+                pendingMember.getIntroduction(),
+                pendingMember.getBirth(),
+                pendingMember.getRole(),
+                graduation,
+                false
         );
     }
 

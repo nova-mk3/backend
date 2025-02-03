@@ -6,6 +6,7 @@ import org.nova.backend.email.adapter.persistence.repository.EmailAuthRepository
 import org.nova.backend.email.application.mapper.EmailAuthMapper;
 import org.nova.backend.email.domain.exception.EmailAuthException;
 import org.nova.backend.email.domain.model.EmailAuth;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +47,8 @@ public class EmailAuthService {
      */
     @Transactional
     public void checkAuthCode(String email, String authCode) {
-        EmailAuth emailAuth= emailAuthRepository.findByEmailAndCode(email, authCode)
-                .orElseThrow(()-> new EmailAuthException("email verification failed"));
+        EmailAuth emailAuth = emailAuthRepository.findByEmailAndCode(email, authCode)
+                .orElseThrow(() -> new EmailAuthException("email verification failed", HttpStatus.UNAUTHORIZED));
 
         emailAuthRepository.delete(emailAuth);
     }

@@ -39,13 +39,13 @@ public @interface EmailAuthApiDocument {
                     content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터",
                     content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500", content = @Content(mediaType = "application/json",
+            @ApiResponse(responseCode = "401", content = @Content(mediaType = "application/json",
                     examples = {@ExampleObject(name = "인증 코드 확인 실패",
-                            value = "{\"code\": 500, \"message\": \"email verification failed. nova@chungbuk.ac.kr\"}"),
-                            @ExampleObject(name = "서버 오류",
-                                    value = "{\"code\": 500, \"message\": \"internal server error\"}")
+                            value = "{\"code\": 401, \"message\": \"email verification failed. nova@chungbuk.ac.kr\"}"),
                     }
-            ))
+            )),
+            @ApiResponse(responseCode = "500", description = "서버 오류",
+                    content = @Content(mediaType = "application/json"))
     })
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)

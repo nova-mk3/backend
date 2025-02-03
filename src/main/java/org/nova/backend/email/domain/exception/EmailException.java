@@ -1,12 +1,10 @@
 package org.nova.backend.email.domain.exception;
 
-public class EmailException extends RuntimeException {
+import org.nova.backend.shared.exception.CustomException;
+import org.springframework.http.HttpStatus;
 
-    public EmailException(String message) {
-        super(message);
-    }
-
-    public EmailException(String message, Throwable cause) {
-        super(message, cause);
+public class EmailException extends CustomException {
+    public EmailException(String message, HttpStatus status) {
+        super(message, status);
     }
 }

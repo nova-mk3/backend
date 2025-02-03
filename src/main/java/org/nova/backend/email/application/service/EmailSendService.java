@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.nova.backend.email.domain.exception.EmailException;
 import org.nova.backend.email.domain.model.EmailAuth;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,7 @@ public class EmailSendService {
             javaMailSender.send(mimeMessage);
 
         } catch (MessagingException e) {
-            throw new EmailException("email send failed." + emailAuth.getEmail());
+            throw new EmailException("email send failed." + emailAuth.getEmail(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

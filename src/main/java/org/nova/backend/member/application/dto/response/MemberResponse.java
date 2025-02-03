@@ -1,4 +1,4 @@
-package org.nova.backend.auth.application.dto.response;
+package org.nova.backend.member.application.dto.response;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;
