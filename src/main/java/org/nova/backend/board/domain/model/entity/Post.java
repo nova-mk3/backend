@@ -75,8 +75,17 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime modifiedTime;
 
+    public void updatePost(String title, String content) {
+        this.title = title;
+        this.content = content;
+        this.modifiedTime = LocalDateTime.now();
+    }
+
     public void addFiles(List<File> files) {
         this.files.addAll(files);
+    }
+    public void removeFiles(List<File> filesToRemove) {
+        this.files.removeAll(filesToRemove);
     }
 }
 

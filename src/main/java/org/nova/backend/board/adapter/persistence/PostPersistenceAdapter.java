@@ -1,11 +1,15 @@
 package org.nova.backend.board.adapter.persistence;
 
-import java.util.List;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 import org.nova.backend.board.adapter.persistence.repository.PostRepository;
 import org.nova.backend.board.application.port.out.PostPersistencePort;
 import org.nova.backend.board.domain.model.entity.Post;
+import org.nova.backend.board.domain.model.valueobject.BoardCategory;
+import org.nova.backend.member.domain.model.entity.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,8 +21,8 @@ public class PostPersistenceAdapter implements PostPersistencePort {
     }
 
     @Override
-    public List<Post> findAllPosts() {
-        return postRepository.findAll();
+    public Page<Post> findAllByCategory(BoardCategory category, Pageable pageable) {
+        return postRepository.findAllByBoardCategory(category, pageable);
     }
 
     @Override
@@ -29,6 +33,26 @@ public class PostPersistenceAdapter implements PostPersistencePort {
     @Override
     public Optional<Post> findById(UUID postId) {
         return postRepository.findById(postId);
+    }
+
+    @Override
+    @Transactional
+    public void increaseViewCount(UUID postId) {
+        postRepository.increaseViewCount(postId);
+    }
+
+    @Override
+    @Transactional
+    public int likePost(UUID postId, Member member) {
+        postRepository.increaseLikeCount(postId);
+        return postRepository.getLikeCount(postId);
+    }
+
+    @Override
+    @Transactional
+    public int unlikePost(UUID postId, Member member) {
+        postRepository.decreaseLikeCount(postId);
+        return postRepository.getLikeCount(postId);
     }
 
     @Override

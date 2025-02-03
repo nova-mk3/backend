@@ -1,4 +1,4 @@
-package org.nova.backend.shared.springsecurity;
+package org.nova.backend.shared.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
