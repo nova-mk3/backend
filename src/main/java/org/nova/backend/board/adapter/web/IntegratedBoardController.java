@@ -6,23 +6,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
-import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.application.dto.response.PostResponse;
 import org.nova.backend.board.application.port.in.PostUseCase;
 import org.nova.backend.board.domain.model.valueobject.BoardCategory;
-import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
-import org.nova.backend.shared.security.BoardSecurityChecker;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,16 +37,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class IntegratedBoardController {
     private final PostUseCase postUseCase;
     private final MemberRepository memberRepository;
-    private final BoardSecurityChecker boardSecurityChecker;
 
     public IntegratedBoardController(
             PostUseCase postUseCase,
-            MemberRepository memberRepository,
-            BoardSecurityChecker boardSecurityChecker
+            MemberRepository memberRepository
     ) {
         this.postUseCase = postUseCase;
         this.memberRepository = memberRepository;
-        this.boardSecurityChecker = boardSecurityChecker;
     }
 
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
@@ -64,12 +59,8 @@ public class IntegratedBoardController {
             @RequestPart("request") BasePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        Member member = getCurrentMember();
-
-        if (request.getPostType() == PostType.NOTICE && !boardSecurityChecker.isAdminOrPresident(member)) {
-            throw new UnauthorizedException("공지사항은 관리자 또는 회장만 작성할 수 있습니다.");
-        }
-        var savedPost = postUseCase.createPost(boardId, request, member, files);
+        UUID memberId = getCurrentMemberId();
+        var savedPost = postUseCase.createPost(boardId, request, memberId, files);
         return ApiResponse.created(savedPost);
     }
 
@@ -89,10 +80,29 @@ public class IntegratedBoardController {
             @RequestPart("request") UpdatePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        Member member = getCurrentMember();
-        var updatedPost = postUseCase.updatePost(boardId, postId, request, member, files);
-        return ApiResponse.noContent(updatedPost);
+        UUID memberId = getCurrentMemberId();
+        postUseCase.updatePost(boardId, postId, request, memberId, files);
+        return ApiResponse.noContent();
     }
+
+    @Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다. (작성자 또는 관리자만 가능)")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "게시글 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "삭제 권한 없음", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
+    })
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{postId}")
+    public ApiResponse<Void> deletePost(
+            @PathVariable UUID boardId,
+            @PathVariable UUID postId
+    ) {
+        UUID memberId = getCurrentMemberId();
+        postUseCase.deletePost(boardId, postId, memberId);
+        return ApiResponse.noContent();
+    }
+
 
     @Operation(summary = "카테고리별 게시글 조회", description = "특정 게시판 카테고리에 속한 게시글 목록을 가져옵니다.")
     @ApiResponses(value = {
@@ -120,13 +130,14 @@ public class IntegratedBoardController {
     }
 
     /**
-     * 현재 로그인한 사용자 정보 가져오기
+     * 현재 로그인한 사용자의 UUID 가져오기
      */
-    private Member getCurrentMember() {
+    private UUID getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         String studentNumber = authentication.getName();
+
         return memberRepository.findByStudentNumber(studentNumber)
+                .map(Member::getId)
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다."));
     }
 }
