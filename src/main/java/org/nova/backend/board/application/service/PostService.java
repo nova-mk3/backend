@@ -16,7 +16,6 @@ import org.nova.backend.board.domain.exception.BoardDomainException;
 import org.nova.backend.board.domain.model.entity.Board;
 import org.nova.backend.board.domain.model.entity.File;
 import org.nova.backend.board.domain.model.entity.Post;
-import org.nova.backend.board.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -94,8 +93,8 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public Page<PostResponse> getPostsByCategory(BoardCategory category, Pageable pageable) {
-        return postPersistencePort.findAllByCategory(category, pageable)
+    public Page<PostResponse> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable) {
+        return postPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable)
                 .map(postMapper::toResponse);
     }
 
@@ -130,7 +129,6 @@ public class PostService implements PostUseCase {
      * @param request 업데이트할 게시글 요청 데이터
      * @param memberId 게시글 작성자 ID
      * @param files 새로 업로드할 파일 리스트
-     * @return 수정된 게시글 응답
      */
     @Override
     @Transactional
