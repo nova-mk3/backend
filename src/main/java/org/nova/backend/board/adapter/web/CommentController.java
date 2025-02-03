@@ -13,6 +13,7 @@ import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,6 +64,6 @@ public class CommentController {
     private Member getCurrentMember() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return memberRepository.findByStudentNumber(authentication.getName())
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 }
