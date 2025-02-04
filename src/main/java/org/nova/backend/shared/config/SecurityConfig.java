@@ -113,7 +113,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts/{postId}/comments").authenticated();
     }
 
-private void configureAdministratorPermissions(
+    private void configureAdministratorPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
         auth.requestMatchers("/api/v1/admin")
