@@ -6,7 +6,9 @@ import java.util.UUID;
 import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.request.UpdatePostRequest;
+import org.nova.backend.board.application.dto.response.PostDetailResponse;
 import org.nova.backend.board.application.dto.response.PostResponse;
+import org.nova.backend.board.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.application.mapper.BasePostMapper;
 import org.nova.backend.board.application.port.in.BoardUseCase;
 import org.nova.backend.board.application.port.in.FileUseCase;
@@ -93,9 +95,9 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public Page<PostResponse> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable) {
+    public Page<PostSummaryResponse> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable) {
         return postPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable)
-                .map(postMapper::toResponse);
+                .map(postMapper::toSummaryResponse);
     }
 
     /**
@@ -103,11 +105,11 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public PostResponse getPostById(UUID postId) {
+    public PostDetailResponse getPostById(UUID boardId, UUID postId) {
         postPersistencePort.increaseViewCount(postId);
-        Post post = postPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
-        return postMapper.toResponse(post);
+        Post post = postPersistencePort.findByBoardIdAndPostId(boardId, postId)
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. Board ID: " + boardId + ", Post ID: " + postId));
+        return postMapper.toDetailResponse(post);
     }
 
     @Override

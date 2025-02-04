@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.request.UpdatePostRequest;
+import org.nova.backend.board.application.dto.response.PostDetailResponse;
 import org.nova.backend.board.application.dto.response.PostResponse;
+import org.nova.backend.board.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.application.port.in.PostUseCase;
 import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -110,7 +112,7 @@ public class IntegratedBoardController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json"))
     })
     @GetMapping
-    public ApiResponse<Page<PostResponse>> getPostsByCategory(
+    public ApiResponse<Page<PostSummaryResponse>> getPostsByCategory(
             @PathVariable UUID boardId,
             @RequestParam PostType postType,
             Pageable pageable
@@ -125,8 +127,11 @@ public class IntegratedBoardController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json"))
     })
     @GetMapping("/{postId}")
-    public ApiResponse<PostResponse> getPostById(@PathVariable UUID postId) {
-        var post = postUseCase.getPostById(postId);
+    public ApiResponse<PostDetailResponse> getPostById(
+            @PathVariable UUID boardId,
+            @PathVariable UUID postId
+    ) {
+        var post = postUseCase.getPostById(boardId, postId);
         return ApiResponse.success(post);
     }
 

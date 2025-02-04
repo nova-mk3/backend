@@ -15,6 +15,7 @@ public interface PostPersistencePort {
     Post save(Post post);
     @EntityGraph(attributePaths = {"files"})
     Optional<Post> findById(UUID postId);
+    Optional<Post> findByBoardIdAndPostId(UUID boardId, UUID postId);
     void deleteById(UUID postId);
     void increaseViewCount(@Param("postId") UUID postId);
     int likePost(@Param("postId") UUID postId, Member member);
