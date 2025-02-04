@@ -3,11 +3,15 @@ package org.nova.backend.member.adapter.web;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.nova.backend.member.application.dto.request.AddExecutiveHistoryRequest;
+import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.service.ExecutiveHistoryService;
 import org.nova.backend.member.application.service.MemberService;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,8 +40,13 @@ public class ExecutiveHistoryController {
      */
 
     /**
-     * 특정 role의 임원 추가
+     * 임원 추가 : 특정 연도, role, 이름 또는 Member를 받음
      */
+    @PostMapping("")
+    public ApiResponse<ExecutiveHistoryResponse> addExecutiveHistory(@RequestBody AddExecutiveHistoryRequest request) {
+        ExecutiveHistoryResponse response = executiveHistoryService.addExecutiveHistory(request);
+        return ApiResponse.success(response);
+    }
 
     /**
      * 특정 role의 임원 삭제
