@@ -36,6 +36,11 @@ public class PostPersistenceAdapter implements PostPersistencePort {
     }
 
     @Override
+    public Optional<Post> findByBoardIdAndPostId(UUID boardId, UUID postId) {
+        return postRepository.findByBoardIdAndPostId(boardId, postId);
+    }
+
+    @Override
     @Transactional
     public void increaseViewCount(UUID postId) {
         postRepository.increaseViewCount(postId);

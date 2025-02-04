@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.response.FileResponse;
+import org.nova.backend.board.application.dto.response.PostDetailResponse;
 import org.nova.backend.board.application.dto.response.PostResponse;
+import org.nova.backend.board.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.domain.model.entity.Board;
 import org.nova.backend.board.domain.model.entity.Post;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -50,6 +52,39 @@ public class BasePostMapper {
                 post.getLikeCount(),
                 post.getCreatedTime(),
                 fileResponses
+        );
+    }
+
+    public PostDetailResponse toDetailResponse(Post post) {
+        List<FileResponse> fileResponses = post.getFiles().stream()
+                .map(file -> new FileResponse(file.getId(), file.getOriginalFilename(), file.getFilePath()))
+                .toList();
+        return new PostDetailResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getCreatedTime(),
+                post.getModifiedTime(),
+                fileResponses,
+                post.getMember().getName(),
+                post.getMember().getProfilePhoto()
+        );
+    }
+
+    public PostSummaryResponse toSummaryResponse(Post post) {
+        return new PostSummaryResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                post.getCreatedTime(),
+                post.getModifiedTime(),
+                post.getMember().getName(),
+                post.getMember().getProfilePhoto()
         );
     }
 }
