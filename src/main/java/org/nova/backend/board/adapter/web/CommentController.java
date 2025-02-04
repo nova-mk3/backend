@@ -13,7 +13,6 @@ import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Comment API", description = "모든 게시글 댓글 API")
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequestMapping("/api/v1/posts/{postId}/comments")
 public class CommentController {
     private final CommentUseCase commentUseCase;
     private final MemberRepository memberRepository;
@@ -33,7 +32,7 @@ public class CommentController {
     public CommentController(
             CommentUseCase commentUseCase,
             MemberRepository memberRepository
-    ){
+    ) {
         this.commentUseCase = commentUseCase;
         this.memberRepository = memberRepository;
     }
@@ -45,9 +44,12 @@ public class CommentController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
     })
     @PostMapping
-    public ApiResponse<CommentResponse> createComment(@RequestBody CommentRequest request) {
-        Member member = getCurrentMember();
-        return ApiResponse.success(commentUseCase.addComment(request, member));
+    public ApiResponse<CommentResponse> createComment(
+            @PathVariable UUID postId,
+            @RequestBody CommentRequest request
+    ) {
+        UUID memberId = getCurrentMemberId();
+        return ApiResponse.created(commentUseCase.addComment(postId, request, memberId));
     }
 
     @Operation(summary = "게시글의 모든 댓글 조회", description = "특정 게시글에 달린 모든 댓글을 조회합니다.")
@@ -56,14 +58,20 @@ public class CommentController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글이 존재하지 않음", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
     })
-    @GetMapping("/{postId}")
+    @GetMapping
     public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable UUID postId) {
         return ApiResponse.success(commentUseCase.getCommentsByPostId(postId));
     }
 
-    private Member getCurrentMember() {
+    /**
+     * 현재 로그인한 사용자의 UUID 가져오기
+     */
+    private UUID getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return memberRepository.findByStudentNumber(authentication.getName())
+        String studentNumber = authentication.getName();
+
+        return memberRepository.findByStudentNumber(studentNumber)
+                .map(Member::getId)
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 }
