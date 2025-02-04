@@ -55,6 +55,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> {
                     //게시판 관련 권한
                     configureBoardPermissions(auth);
+                    //댓글 관련 권한
+                    configureCommentPermissions(auth);
                     //로그인 회원가입 관련 권한
                     configureAuthPermissions(auth);
                     //관리자 관련 권한
@@ -100,7 +102,18 @@ public class SecurityConfig {
                 .hasAnyRole(Role.ADMINISTRATOR.toString(), Role.CHAIRMAN.toString());
     }
 
-    private void configureAdministratorPermissions(
+    private void configureCommentPermissions(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+        auth
+                // 댓글 조회는 모든 사용자 허용
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId}/comments").permitAll()
+
+                // 댓글 작성은 로그인 사용자만 가능
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts/{postId}/comments").authenticated();
+    }
+
+private void configureAdministratorPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
         auth.requestMatchers("/api/v1/admin")
