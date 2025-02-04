@@ -23,6 +23,13 @@ public class ExecutiveHistoryController {
     /**
      * 연도 리스트 불러오기
      */
+    @GetMapping("/years")
+    public ApiResponse<List<Integer>> getYears() {
+
+        List<Integer> response = executiveHistoryService.getYears();
+
+        return ApiResponse.success(response);
+    }
 
     /**
      * 특정 연도의 임원들 불러오기
