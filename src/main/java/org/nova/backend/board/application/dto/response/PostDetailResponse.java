@@ -10,12 +10,16 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentResponse {
+public class PostDetailResponse {
     private UUID id;
+    private String title;
     private String content;
+    private int viewCount;
+    private int likeCount;
+    private int commentCount;
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
+    private List<FileResponse> files;
     private String authorName;
     private String authorProfilePhoto;
-    private List<CommentResponse> children;
 }

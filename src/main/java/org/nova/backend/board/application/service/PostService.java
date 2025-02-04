@@ -6,7 +6,9 @@ import java.util.UUID;
 import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.application.dto.request.BasePostRequest;
 import org.nova.backend.board.application.dto.request.UpdatePostRequest;
+import org.nova.backend.board.application.dto.response.PostDetailResponse;
 import org.nova.backend.board.application.dto.response.PostResponse;
+import org.nova.backend.board.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.application.mapper.BasePostMapper;
 import org.nova.backend.board.application.port.in.BoardUseCase;
 import org.nova.backend.board.application.port.in.FileUseCase;
@@ -16,7 +18,6 @@ import org.nova.backend.board.domain.exception.BoardDomainException;
 import org.nova.backend.board.domain.model.entity.Board;
 import org.nova.backend.board.domain.model.entity.File;
 import org.nova.backend.board.domain.model.entity.Post;
-import org.nova.backend.board.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -94,9 +95,9 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public Page<PostResponse> getPostsByCategory(BoardCategory category, Pageable pageable) {
-        return postPersistencePort.findAllByCategory(category, pageable)
-                .map(postMapper::toResponse);
+    public Page<PostSummaryResponse> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable) {
+        return postPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable)
+                .map(postMapper::toSummaryResponse);
     }
 
     /**
@@ -104,11 +105,11 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public PostResponse getPostById(UUID postId) {
+    public PostDetailResponse getPostById(UUID boardId, UUID postId) {
         postPersistencePort.increaseViewCount(postId);
-        Post post = postPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
-        return postMapper.toResponse(post);
+        Post post = postPersistencePort.findByBoardIdAndPostId(boardId, postId)
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. Board ID: " + boardId + ", Post ID: " + postId));
+        return postMapper.toDetailResponse(post);
     }
 
     @Override
@@ -130,7 +131,6 @@ public class PostService implements PostUseCase {
      * @param request 업데이트할 게시글 요청 데이터
      * @param memberId 게시글 작성자 ID
      * @param files 새로 업로드할 파일 리스트
-     * @return 수정된 게시글 응답
      */
     @Override
     @Transactional

@@ -87,6 +87,9 @@ public class Post {
     public void removeFiles(List<File> filesToRemove) {
         this.files.removeAll(filesToRemove);
     }
+    public void incrementCommentCount() {
+        this.commentCount += 1;
+    }
 }
 
 
