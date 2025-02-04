@@ -16,10 +16,10 @@ import org.nova.backend.member.domain.model.valueobject.Role;
 @Entity
 @NoArgsConstructor
 @Getter
-public class ManagerHistory {
+public class ExecutiveHistory {
 
     @Id
-    @Column(name = "manager_history_id")
+    @Column(name = "executive_history_id")
     private UUID id;
 
     private int year;
