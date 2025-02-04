@@ -53,8 +53,9 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> {
-                        //게시판 관련 권한
+
                         configureBoardPermissions(auth);
+                        configureCommentPermissions(auth);
 
                         auth.requestMatchers("/", "/api/v1", "/service/**").permitAll()
                             .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll() // 회원가입, 로그인
@@ -96,8 +97,19 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/posts")
                 .authenticated()
 
-                // 공지사항 게시판의 게시글 작성 & 수정 (관리자 & 회장만)
+                // 공지사항 게시판의 게시글 작성 (관리자 & 회장만)
                 .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/posts")
                 .hasAnyRole(Role.ADMINISTRATOR.toString(), Role.CHAIRMAN.toString());
+    }
+
+    private void configureCommentPermissions(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+        auth
+                // 댓글 조회는 모든 사용자 허용
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId}/comments").permitAll()
+
+                // 댓글 작성은 로그인 사용자만 가능
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts/{postId}/comments").authenticated();
     }
 }
