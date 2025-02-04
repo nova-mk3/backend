@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentRequest {
-    private UUID postId;
     private UUID parentCommentId;
     @NotBlank(message = "댓글 내용은 비어 있을 수 없습니다.")
     private String content;
