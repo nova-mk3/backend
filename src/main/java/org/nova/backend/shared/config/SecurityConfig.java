@@ -50,7 +50,6 @@ public class SecurityConfig {
 
         http
                 .httpBasic(AbstractHttpConfigurer::disable);
-
         http
                 .authorizeHttpRequests((auth) -> {
                     //게시판 관련 권한
