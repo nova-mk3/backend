@@ -11,11 +11,15 @@ import org.springframework.stereotype.Component;
 public class ExecutiveHistoryMapper {
 
     public ExecutiveHistory toEntity(AddExecutiveHistoryRequest request, Member member) {
+        String name = request.getName();
+        if (name == null || name.isBlank()) {
+            name = member.getName();
+        }
         return new ExecutiveHistory(
                 UUID.randomUUID(),
                 request.getYear(),
                 request.getRole(),
-                request.getName(),
+                name,
                 member
         );
     }
@@ -26,7 +30,7 @@ public class ExecutiveHistoryMapper {
                 executiveHistory.getYear(),
                 executiveHistory.getRole(),
                 executiveHistory.getName(),
-                executiveHistory.getMember().getId()
+                executiveHistory.getMember() != null ? executiveHistory.getMember().getId() : null
         );
     }
 
