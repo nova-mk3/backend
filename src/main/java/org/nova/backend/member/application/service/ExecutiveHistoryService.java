@@ -8,7 +8,6 @@ import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.application.dto.request.AddExecutiveHistoryRequest;
 import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse;
 import org.nova.backend.member.application.mapper.ExecutiveHistoryMapper;
-import org.nova.backend.member.application.mapper.MemberMapper;
 import org.nova.backend.member.domain.exception.ExecutiveHistoryDomainException;
 import org.nova.backend.member.domain.model.entity.ExecutiveHistory;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -73,6 +72,11 @@ public class ExecutiveHistoryService {
     /**
      * 특정 연도의 임원들 불러오기
      */
+    public List<ExecutiveHistoryResponse> getExecutiveHistoryByYear(int year) {
+
+        List<ExecutiveHistory> executiveHistoryList = executiveHistoryRepository.getExecutiveHistoriesByYear(year);
+        return executiveHistoryList.stream().map(executiveHistoryMapper::toResponse).toList();
+    }
 
     /**
      * 특정 role의 임원 삭제

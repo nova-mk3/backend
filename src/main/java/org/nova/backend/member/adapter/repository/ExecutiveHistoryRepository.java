@@ -12,4 +12,6 @@ public interface ExecutiveHistoryRepository extends JpaRepository<ExecutiveHisto
 
     @Query("select m.year from Member m")
     List<Integer> findAllYears();
+
+    List<ExecutiveHistory> getExecutiveHistoriesByYear(int year);
 }
