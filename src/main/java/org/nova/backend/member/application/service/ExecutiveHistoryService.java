@@ -1,6 +1,7 @@
 package org.nova.backend.member.application.service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.adapter.repository.ExecutiveHistoryRepository;
@@ -70,16 +71,27 @@ public class ExecutiveHistoryService {
     }
 
     /**
-     * 특정 연도의 임원들 불러오기
+     * 특정 연도의 임원 이력 조회
      */
-    public List<ExecutiveHistoryResponse> getExecutiveHistoryByYear(int year) {
+    public List<ExecutiveHistoryResponse> getExecutiveHistoryByYear(final int year) {
 
         List<ExecutiveHistory> executiveHistoryList = executiveHistoryRepository.getExecutiveHistoriesByYear(year);
+
         return executiveHistoryList.stream().map(executiveHistoryMapper::toResponse).toList();
     }
 
     /**
-     * 특정 role의 임원 삭제
+     * 특정 임원 삭제
      */
+    @Transactional
+    public void deleteExecutiveHistory(final UUID executiveHistoryId) {
+        ExecutiveHistory executiveHistory = findExecutiveHistory(executiveHistoryId);
+        executiveHistoryRepository.delete(executiveHistory);
+    }
+
+    private ExecutiveHistory findExecutiveHistory(final UUID executiveHistoryId) {
+        return executiveHistoryRepository.findById(executiveHistoryId)
+                .orElseThrow(() -> new ExecutiveHistoryDomainException("ExecutiveHistory Not Found", HttpStatus.NOT_FOUND));
+    }
 
 }
