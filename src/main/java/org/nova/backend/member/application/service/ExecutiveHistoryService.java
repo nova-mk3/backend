@@ -47,6 +47,7 @@ public class ExecutiveHistoryService {
     /**
      * 임원 추가 : 특정 연도, role, 이름 또는 Member를 받음
      */
+    @Transactional
     public ExecutiveHistoryResponse addExecutiveHistory(AddExecutiveHistoryRequest request) {
 
         checkValidAddExecutiveHistoryRequest(request);
