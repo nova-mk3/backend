@@ -33,7 +33,7 @@ public class CommentController {
     public CommentController(
             CommentUseCase commentUseCase,
             MemberRepository memberRepository
-    ){
+    ) {
         this.commentUseCase = commentUseCase;
         this.memberRepository = memberRepository;
     }

@@ -51,9 +51,6 @@ public class PendingMember {
 
     private String birth;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "pending_graduation_id")
     private PendingGraduation pendingGraduation;

@@ -21,7 +21,6 @@ public class PendingMemberResponse {
     private String phone;
     private String introduction;
     private String birth;
-    private Role role;
     private boolean isRejected;
 
 }

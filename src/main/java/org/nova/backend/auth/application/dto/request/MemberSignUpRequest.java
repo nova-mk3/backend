@@ -48,6 +48,4 @@ public class MemberSignUpRequest {
     @Schema(example = "20000202")
     private String birth;
 
-    private Role role;
-
 }
