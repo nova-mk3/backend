@@ -1,7 +1,7 @@
 package org.nova.backend.board.util;
 
 import java.util.List;
-import org.nova.backend.board.domain.exception.FileDomainException;
+import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtil {
