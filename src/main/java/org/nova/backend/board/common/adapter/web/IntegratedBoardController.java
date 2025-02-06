@@ -1,6 +1,7 @@
 package org.nova.backend.board.common.adapter.web;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.nova.backend.board.common.adapter.doc.IntegratedBoardApiDocument;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
@@ -104,6 +105,15 @@ public class IntegratedBoardController {
     ) {
         var post = postUseCase.getPostById(boardId, postId);
         return ApiResponse.success(post);
+    }
+
+    @GetMapping("/latest")
+    @IntegratedBoardApiDocument.GetLatestPostByType
+    public ApiResponse<Map<PostType, List<PostSummaryResponse>>> getLatestPostsByType(
+            @PathVariable UUID boardId
+    ) {
+        var latestPosts = postUseCase.getLatestPostsByType(boardId);
+        return ApiResponse.success(latestPosts);
     }
 
     /**

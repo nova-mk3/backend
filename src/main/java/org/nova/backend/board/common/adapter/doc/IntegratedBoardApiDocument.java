@@ -67,5 +67,15 @@ public @interface IntegratedBoardApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface GetPostById {
     }
+
+    @Operation(summary = "각 PostType별 최신 게시글 조회", description = "각 PostType(QnA, 자유게시판, 자기소개, 공지사항)별 최신 6개 게시글을 가져옵니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 조회 성공", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json"))
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface GetLatestPostByType {
+    }
 }
 
