@@ -23,11 +23,16 @@ public class CommentPersistenceAdapter implements CommentPersistencePort {
 
     @Override
     public List<Comment> findAllByPostId(UUID postId) {
-        return commentRepository.findAllByPostId(postId);
+        return commentRepository.findAllByPostIdOrderByCreatedTimeAsc(postId);
     }
 
     @Override
     public Optional<Comment> findById(UUID commentId) {
         return commentRepository.findById(commentId);
+    }
+
+    @Override
+    public void deleteById(UUID commentId) {
+        commentRepository.deleteById(commentId);
     }
 }
