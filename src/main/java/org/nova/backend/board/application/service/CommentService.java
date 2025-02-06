@@ -3,7 +3,6 @@ package org.nova.backend.board.application.service;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
-import org.hibernate.sql.Update;
 import org.nova.backend.board.application.dto.request.CommentRequest;
 import org.nova.backend.board.application.dto.request.UpdateCommentRequest;
 import org.nova.backend.board.application.dto.response.CommentResponse;
@@ -17,10 +16,15 @@ import org.nova.backend.board.domain.model.entity.Comment;
 import org.nova.backend.board.domain.model.entity.Post;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
+import org.nova.backend.member.domain.model.valueobject.Role;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CommentService implements CommentUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+
     private final CommentPersistencePort commentPersistencePort;
     private final PostPersistencePort postPersistencePort;
     private final MemberRepository memberRepository;
@@ -61,7 +65,28 @@ public class CommentService implements CommentUseCase {
         return commentMapper.toResponse(comment, List.of(comment));
     }
 
+    /**
+     * 댓글 삭제 (작성자 본인과 관리자만 삭제 가능)
+     */
+    @Override
+    @Transactional
+    public void deleteComment(
+            UUID commentId,
+            UUID memberId
+    ) {
+        Comment comment = commentPersistencePort.findById(commentId)
+                .orElseThrow(() -> new CommentDomainException("댓글을 찾을 수 없습니다."));
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+
+        if (!comment.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
+            logger.warn("사용자 {}가 댓글 {}를 삭제하려 했으나 권한이 없습니다.", memberId, commentId);
+            throw new CommentDomainException("댓글 삭제 권한이 없습니다.");
+        }
+
+        commentPersistencePort.deleteById(commentId);
+    }
 
 
     /**

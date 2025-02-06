@@ -71,7 +71,20 @@ public class CommentController {
         return ApiResponse.success(commentUseCase.updateComment(commentId, request, memberId));
     }
 
-   
+    @Operation(summary = "댓글 삭제", description = "사용자가 자신의 댓글을 삭제합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "댓글 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "삭제 권한 없음", content = @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "댓글이 존재하지 않음", content = @Content(mediaType = "application/json"))
+    })
+    @DeleteMapping("/comments/{commentId}")
+    public ApiResponse<Void> deleteComment(
+            @PathVariable UUID commentId
+    ) {
+        UUID memberId = getCurrentMemberId();
+        commentUseCase.deleteComment(commentId, memberId);
+        return ApiResponse.noContent();
+    }
 
     @Operation(summary = "게시글의 모든 댓글 조회", description = "특정 게시글에 달린 모든 댓글을 조회합니다.")
     @ApiResponses(value = {
