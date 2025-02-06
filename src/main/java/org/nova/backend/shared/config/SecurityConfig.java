@@ -90,7 +90,8 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/api/v1/boards",
                         "/api/v1/boards/{boardId}/posts",
-                        "/api/v1/boards/{boardId}/posts/{postId}"
+                        "/api/v1/boards/{boardId}/posts/{postId}",
+                        "/api/v1/boards/{boardId}/posts/latest"
                 ).permitAll()
 
                 // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
