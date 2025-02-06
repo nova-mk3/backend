@@ -118,7 +118,9 @@ public class SecurityConfig {
     ) {
         auth.requestMatchers("/api/v1/admin")
                 .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
-                .requestMatchers("/api/v1/pendingMembers/**").permitAll(); //추후 관리자한테만 권한 줄 예정..
+                .requestMatchers("/api/v1/pendingMembers/**").hasRole(Role.ADMINISTRATOR.toString())
+                .requestMatchers("/api/v1/executiveHistories/**")
+                .hasRole(Role.ADMINISTRATOR.toString());
     }
 
     private void configureAuthPermissions(

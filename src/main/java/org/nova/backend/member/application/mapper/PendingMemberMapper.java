@@ -26,7 +26,6 @@ public class PendingMemberMapper {
                 request.getPhone(),
                 "안녕하세요^-^",
                 request.getBirth(),
-                request.getRole(),
                 pendingGraduation,
                 false
         );
@@ -46,7 +45,6 @@ public class PendingMemberMapper {
                 pendingMember.getPhone(),
                 pendingMember.getIntroduction(),
                 pendingMember.getBirth(),
-                pendingMember.getRole(),
                 pendingMember.isRejected()
         );
     }
