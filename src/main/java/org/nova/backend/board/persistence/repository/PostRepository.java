@@ -1,5 +1,6 @@
 package org.nova.backend.board.persistence.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.nova.backend.board.common.domain.model.entity.Post;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findAllByBoardIdAndPostType(UUID boardId, PostType postType, Pageable pageable);
+
+    List<Post> findTop6ByBoardIdAndPostTypeOrderByCreatedTimeDesc(UUID boardId, PostType postType);
 
     @Query("SELECT p FROM Post p WHERE p.board.id = :boardId AND p.id = :postId")
     Optional<Post> findByBoardIdAndPostId(@Param("boardId") UUID boardId, @Param("postId") UUID postId);

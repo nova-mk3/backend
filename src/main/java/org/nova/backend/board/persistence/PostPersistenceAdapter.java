@@ -1,6 +1,7 @@
 package org.nova.backend.board.persistence;
 
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.nova.backend.board.persistence.repository.PostRepository;
@@ -62,5 +63,10 @@ public class PostPersistenceAdapter implements PostPersistencePort {
     @Override
     public void deleteById(UUID postId) {
         postRepository.deleteById(postId);
+    }
+
+    @Override
+    public List<Post> findLatestPostsByType(UUID boardId, PostType postType, int limit) {
+        return postRepository.findTop6ByBoardIdAndPostTypeOrderByCreatedTimeDesc(boardId, postType);
     }
 }

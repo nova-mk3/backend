@@ -1,6 +1,7 @@
 package org.nova.backend.board.common.application.port.in;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
@@ -16,6 +17,8 @@ public interface PostUseCase {
     PostResponse createPost(UUID boardId, BasePostRequest request, UUID memberId, List<MultipartFile> files);
     Page<PostSummaryResponse> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable);
     PostDetailResponse getPostById(UUID boardId, UUID postId);
+    Map<PostType, List<PostSummaryResponse>> getLatestPostsByType(UUID boardId);
+
     void updatePost(UUID boardId, UUID postId, UpdatePostRequest request, UUID memberId, List<MultipartFile> files);
     void deletePost(UUID boardId, UUID postId, UUID memberId);
 

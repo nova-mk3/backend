@@ -77,6 +77,7 @@ public class BasePostMapper {
     public PostSummaryResponse toSummaryResponse(Post post) {
         return new PostSummaryResponse(
                 post.getId(),
+                post.getPostType(),
                 post.getTitle(),
                 post.getContent(),
                 post.getViewCount(),

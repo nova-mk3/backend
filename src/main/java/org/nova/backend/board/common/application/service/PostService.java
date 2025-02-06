@@ -1,7 +1,9 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
@@ -112,6 +114,9 @@ public class PostService implements PostUseCase {
         return postMapper.toDetailResponse(post);
     }
 
+    /**
+     * 특정 게시글 좋아요
+     */
     @Override
     @Transactional
     public int likePost(
@@ -121,6 +126,9 @@ public class PostService implements PostUseCase {
         return postPersistencePort.likePost(postId, memberId);
     }
 
+    /**
+     * 특정 게시글 좋아요 취소
+     */
     @Override
     @Transactional
     public int unlikePost(
@@ -215,5 +223,35 @@ public class PostService implements PostUseCase {
 
         postPersistencePort.deleteById(postId);
         logger.info("게시글이 성공적으로 삭제되었습니다. Board ID: {}, Post ID: {}", boardId, postId);
+    }
+
+    /**
+     *
+     * @param boardId 게시판 ID
+     * @return 긱 카테고리별 게시판 리스트
+     */
+    @Override
+    @Transactional
+    public Map<PostType, List<PostSummaryResponse>> getLatestPostsByType(UUID boardId) {
+
+        List<PostType> allowedPostTypes = List.of(
+                PostType.QNA,
+                PostType.FREE,
+                PostType.INTRODUCTION,
+                PostType.NOTICE
+        );
+
+        Map<PostType, List<PostSummaryResponse>> groupedPosts = new HashMap<>();
+
+        for (PostType postType : allowedPostTypes) {
+            List<Post> posts = postPersistencePort.findLatestPostsByType(boardId, postType, 6);
+            List<PostSummaryResponse> postResponses = posts.stream()
+                    .map(postMapper::toSummaryResponse)
+                    .toList();
+
+            groupedPosts.put(postType, postResponses);
+        }
+
+        return groupedPosts;
     }
 }
