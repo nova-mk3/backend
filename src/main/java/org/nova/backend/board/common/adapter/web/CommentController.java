@@ -1,6 +1,5 @@
 package org.nova.backend.board.common.adapter.web;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.common.adapter.doc.CommentApiDocument;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Comment API", description = "모든 게시글 댓글 API")
 @RestController
 @RequestMapping("/api/v1")
 public class CommentController {
@@ -57,7 +55,7 @@ public class CommentController {
     public ApiResponse<CommentResponse> updateComment(
             @PathVariable UUID commentId,
             @RequestBody UpdateCommentRequest request
-            ) {
+    ) {
         UUID memberId = getCurrentMemberId();
         return ApiResponse.success(commentUseCase.updateComment(commentId, request, memberId));
     }

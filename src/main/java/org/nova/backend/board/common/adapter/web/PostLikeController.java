@@ -1,9 +1,5 @@
 package org.nova.backend.board.common.adapter.web;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import org.nova.backend.board.common.adapter.doc.PostLikeApiDocument;
 import org.nova.backend.board.common.application.port.in.PostUseCase;
@@ -17,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Post Like API", description = "게시글 좋아요 및 좋아요 취소 API")
 @RestController
 @RequestMapping("/api/v1/posts/{postId}")
 public class PostLikeController {
@@ -36,8 +31,8 @@ public class PostLikeController {
     @PostMapping("/like")
     @PostLikeApiDocument.LikePost
     public ApiResponse<Integer> likePost(@PathVariable UUID postId) {
-        Member member = getCurrentMember();
-        int likeCount = postUseCase.likePost(postId, member);
+        UUID memberId = getCurrentMemberId();
+        int likeCount = postUseCase.likePost(postId, memberId);
         return ApiResponse.success(likeCount);
     }
 
@@ -45,14 +40,20 @@ public class PostLikeController {
     @PostMapping("/unlike")
     @PostLikeApiDocument.UnlikePost
     public ApiResponse<Integer> unlikePost(@PathVariable UUID postId) {
-        Member member = getCurrentMember();
-        int likeCount = postUseCase.unlikePost(postId, member);
+        UUID memberId = getCurrentMemberId();
+        int likeCount = postUseCase.unlikePost(postId, memberId);
         return ApiResponse.success(likeCount);
     }
 
-    private Member getCurrentMember() {
+    /**
+     * 현재 로그인한 사용자의 UUID 가져오기
+     */
+    private UUID getCurrentMemberId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return memberRepository.findByStudentNumber(authentication.getName())
+        String studentNumber = authentication.getName();
+
+        return memberRepository.findByStudentNumber(studentNumber)
+                .map(Member::getId)
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 }

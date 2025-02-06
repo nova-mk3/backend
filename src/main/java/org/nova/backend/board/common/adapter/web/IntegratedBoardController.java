@@ -1,9 +1,5 @@
 package org.nova.backend.board.common.adapter.web;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.common.adapter.doc.IntegratedBoardApiDocument;
@@ -35,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "Integrated Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
 @RestController
 @RequestMapping("/api/v1/boards/{boardId}/posts")
 public class IntegratedBoardController {
