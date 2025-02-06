@@ -8,7 +8,6 @@ import org.nova.backend.board.common.application.dto.response.PostDetailResponse
 import org.nova.backend.board.common.application.dto.response.PostResponse;
 import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.member.domain.model.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +19,6 @@ public interface PostUseCase {
     void updatePost(UUID boardId, UUID postId, UpdatePostRequest request, UUID memberId, List<MultipartFile> files);
     void deletePost(UUID boardId, UUID postId, UUID memberId);
 
-    int likePost(UUID postId, Member member);
-    int unlikePost(UUID postId, Member member);
+    int likePost(UUID postId, UUID memberId);
+    int unlikePost(UUID postId, UUID memberId);
 }

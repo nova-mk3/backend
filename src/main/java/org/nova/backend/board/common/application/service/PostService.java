@@ -114,14 +114,20 @@ public class PostService implements PostUseCase {
 
     @Override
     @Transactional
-    public int likePost(UUID postId, Member member) {
-        return postPersistencePort.likePost(postId, member);
+    public int likePost(
+            UUID postId,
+            UUID memberId
+    ) {
+        return postPersistencePort.likePost(postId, memberId);
     }
 
     @Override
     @Transactional
-    public int unlikePost(UUID postId, Member member) {
-        return postPersistencePort.unlikePost(postId, member);
+    public int unlikePost(
+            UUID postId,
+            UUID memberId
+    ) {
+        return postPersistencePort.unlikePost(postId, memberId);
     }
 
     /**

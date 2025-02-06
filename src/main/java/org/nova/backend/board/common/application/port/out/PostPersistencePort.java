@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.UUID;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.member.domain.model.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -18,7 +17,7 @@ public interface PostPersistencePort {
     Optional<Post> findByBoardIdAndPostId(UUID boardId, UUID postId);
     void deleteById(UUID postId);
     void increaseViewCount(@Param("postId") UUID postId);
-    int likePost(@Param("postId") UUID postId, Member member);
-    int unlikePost(@Param("postId") UUID postId, Member member);
+    int likePost(@Param("postId") UUID postId, @Param("memberId") UUID memberId);
+    int unlikePost(@Param("postId") UUID postId, @Param("memberId") UUID memberId);
 
 }
