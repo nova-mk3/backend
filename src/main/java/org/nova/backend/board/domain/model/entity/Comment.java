@@ -47,4 +47,9 @@ public class Comment {
 
     @Column
     private LocalDateTime modifiedTime;
+
+    public void updateContent(String content){
+        this.content = content;
+        this.modifiedTime = LocalDateTime.now();
+    }
 }

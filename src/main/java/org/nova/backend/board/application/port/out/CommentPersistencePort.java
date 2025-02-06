@@ -9,4 +9,5 @@ public interface CommentPersistencePort {
     Comment save(Comment comment);
     List<Comment> findAllByPostId(UUID postId);
     Optional<Comment> findById(UUID commentId);
+    void deleteById(UUID commentId);
 }
