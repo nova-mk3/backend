@@ -1,45 +1,40 @@
 package org.nova.backend.board.common.adapter.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.board.common.adapter.doc.PostLikeApiDocument;
-import org.nova.backend.board.common.application.port.in.PostUseCase;
+import org.nova.backend.board.common.adapter.doc.FileApiDocument;
+import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
-import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Post Like API", description = "게시글 좋아요 및 좋아요 취소 API")
-
+@Tag(name = "File API", description = "파일 업로드 및 다운로드 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/posts/{postId}")
-public class PostLikeController {
-    private final PostUseCase postUseCase;
+@RequestMapping("/api/v1/files")
+public class FileController {
+    private final FileUseCase fileUseCase;
     private final MemberRepository memberRepository;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/like")
-    @PostLikeApiDocument.LikePost
-    public ApiResponse<Integer> likePost(@PathVariable UUID postId) {
+    @GetMapping("/{fileId}/download")
+    @FileApiDocument.DownloadFile
+    public void downloadFile(
+            @PathVariable UUID fileId,
+            HttpServletResponse response
+    ) {
         UUID memberId = getCurrentMemberId();
-        int likeCount = postUseCase.likePost(postId, memberId);
-        return ApiResponse.success(likeCount);
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/unlike")
-    @PostLikeApiDocument.UnlikePost
-    public ApiResponse<Integer> unlikePost(@PathVariable UUID postId) {
-        UUID memberId = getCurrentMemberId();
-        int likeCount = postUseCase.unlikePost(postId, memberId);
-        return ApiResponse.success(likeCount);
+        fileUseCase.downloadFile(fileId, response, memberId);
     }
 
     /**

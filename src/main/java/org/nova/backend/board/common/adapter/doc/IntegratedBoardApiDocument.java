@@ -9,6 +9,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
 @Tag(name = "Integrated Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
 public @interface IntegratedBoardApiDocument {
 
@@ -18,8 +20,6 @@ public @interface IntegratedBoardApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
     })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
     @interface CreatePost {
     }
 
@@ -31,8 +31,6 @@ public @interface IntegratedBoardApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
     })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
     @interface UpdatePost {
     }
 
@@ -43,8 +41,6 @@ public @interface IntegratedBoardApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
     })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
     @interface DeletePost {
     }
 
@@ -53,8 +49,6 @@ public @interface IntegratedBoardApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json"))
     })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
     @interface GetPostsByCategory {
     }
 
@@ -63,8 +57,6 @@ public @interface IntegratedBoardApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 조회 성공", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json"))
     })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
     @interface GetPostById {
     }
 
@@ -73,8 +65,6 @@ public @interface IntegratedBoardApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 조회 성공", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json"))
     })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
     @interface GetLatestPostByType {
     }
 }

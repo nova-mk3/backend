@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class FileResponse {
     private UUID id;
     private String originalFileName;
-    private String filePath;
+    private String downloadUrl;
 }

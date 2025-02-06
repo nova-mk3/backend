@@ -41,7 +41,11 @@ public class BasePostMapper {
 
     public PostResponse toResponse(Post post) {
         List<FileResponse> fileResponses = post.getFiles().stream()
-                .map(file -> new FileResponse(file.getId(), file.getOriginalFilename(), file.getFilePath()))
+                .map(file -> new FileResponse(
+                        file.getId(),
+                        file.getOriginalFilename(),
+                        "/api/v1/files/" + file.getId() + "/download"
+                ))
                 .distinct()
                 .toList();
         return new PostResponse(
@@ -57,7 +61,11 @@ public class BasePostMapper {
 
     public PostDetailResponse toDetailResponse(Post post) {
         List<FileResponse> fileResponses = post.getFiles().stream()
-                .map(file -> new FileResponse(file.getId(), file.getOriginalFilename(), file.getFilePath()))
+                .map(file -> new FileResponse(
+                        file.getId(),
+                        file.getOriginalFilename(),
+                        "/api/v1/files/" + file.getId() + "/download"
+                ))
                 .toList();
         return new PostDetailResponse(
                 post.getId(),
