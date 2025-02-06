@@ -1,7 +1,9 @@
 package org.nova.backend.board.common.adapter.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.FileApiDocument;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -16,19 +18,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "File API", description = "파일 업로드 및 다운로드 관련 API")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/files")
 public class FileController {
     private final FileUseCase fileUseCase;
     private final MemberRepository memberRepository;
-
-    public FileController(
-            FileUseCase fileUseCase,
-            MemberRepository memberRepository
-    ){
-        this.fileUseCase = fileUseCase;
-        this.memberRepository = memberRepository;
-    }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{fileId}/download")

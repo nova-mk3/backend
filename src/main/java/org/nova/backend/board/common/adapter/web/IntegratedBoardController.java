@@ -1,8 +1,10 @@
 package org.nova.backend.board.common.adapter.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.IntegratedBoardApiDocument;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
@@ -32,19 +34,14 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "Integrated Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/boards/{boardId}/posts")
 public class IntegratedBoardController {
     private final PostUseCase postUseCase;
     private final MemberRepository memberRepository;
 
-    public IntegratedBoardController(
-            PostUseCase postUseCase,
-            MemberRepository memberRepository
-    ) {
-        this.postUseCase = postUseCase;
-        this.memberRepository = memberRepository;
-    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = {"multipart/form-data"})

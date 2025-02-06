@@ -1,6 +1,8 @@
 package org.nova.backend.board.common.adapter.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.PostLikeApiDocument;
 import org.nova.backend.board.common.application.port.in.PostUseCase;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -13,19 +15,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Post Like API", description = "게시글 좋아요 및 좋아요 취소 API")
+
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/posts/{postId}")
 public class PostLikeController {
     private final PostUseCase postUseCase;
     private final MemberRepository memberRepository;
-
-    public PostLikeController(
-            PostUseCase postUseCase,
-            MemberRepository memberRepository
-    ) {
-        this.postUseCase = postUseCase;
-        this.memberRepository = memberRepository;
-    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/like")
