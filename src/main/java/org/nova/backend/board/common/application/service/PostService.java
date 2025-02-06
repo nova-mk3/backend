@@ -97,7 +97,11 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public Page<PostSummaryResponse> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable) {
+    public Page<PostSummaryResponse> getPostsByCategory(
+            UUID boardId,
+            PostType postType,
+            Pageable pageable
+    ) {
         return postPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable)
                 .map(postMapper::toSummaryResponse);
     }
@@ -107,7 +111,10 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public PostDetailResponse getPostById(UUID boardId, UUID postId) {
+    public PostDetailResponse getPostById(
+            UUID boardId,
+            UUID postId
+    ) {
         postPersistencePort.increaseViewCount(postId);
         Post post = postPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. Board ID: " + boardId + ", Post ID: " + postId));
