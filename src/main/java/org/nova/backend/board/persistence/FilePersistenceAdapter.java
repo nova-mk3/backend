@@ -1,6 +1,7 @@
 package org.nova.backend.board.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.nova.backend.board.persistence.repository.FileRepository;
 import org.nova.backend.board.common.application.port.out.FilePersistencePort;
@@ -28,5 +29,10 @@ public class FilePersistenceAdapter implements FilePersistencePort {
     @Override
     public void save(File file) {
         fileRepository.save(file);
+    }
+
+    @Override
+    public Optional<File> findFileById(UUID fileId) {
+        return fileRepository.findById(fileId);
     }
 }
