@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ExecutiveHistoryRepository extends JpaRepository<ExecutiveHistory, UUID> {
 
-    @Query("select m.year from Member m")
+    @Query("select m.year from ExecutiveHistory m")
     List<Integer> findAllYears();
 
     List<ExecutiveHistory> getExecutiveHistoriesByYear(int year);
