@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.BasePostResponse;
 import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.Post;
@@ -36,26 +35,6 @@ public class BasePostMapper {
                 new ArrayList<>(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
-        );
-    }
-
-    public BasePostResponse toResponse(Post post) {
-        List<FileResponse> fileResponses = post.getFiles().stream()
-                .map(file -> new FileResponse(
-                        file.getId(),
-                        file.getOriginalFilename(),
-                        "/api/v1/files/" + file.getId() + "/download"
-                ))
-                .distinct()
-                .toList();
-        return new BasePostResponse(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getViewCount(),
-                post.getLikeCount(),
-                post.getCreatedTime(),
-                fileResponses
         );
     }
 

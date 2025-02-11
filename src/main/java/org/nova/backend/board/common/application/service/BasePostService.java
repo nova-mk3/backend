@@ -9,7 +9,6 @@ import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.BasePostResponse;
 import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.common.application.mapper.BasePostMapper;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
@@ -69,7 +68,7 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public BasePostResponse createPost(
+    public PostDetailResponse createPost(
             UUID boardId,
             BasePostRequest request,
             UUID memberId,
@@ -89,7 +88,7 @@ public class BasePostService implements BasePostUseCase {
         List<File> savedFiles = fileUseCase.saveFiles(files, savedPost);
         savedPost.addFiles(savedFiles);
 
-        return postMapper.toResponse(savedPost);
+        return postMapper.toDetailResponse(savedPost);
     }
 
     /**

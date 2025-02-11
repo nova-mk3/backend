@@ -9,7 +9,6 @@ import org.nova.backend.board.common.adapter.doc.IntegratedBoardApiDocument;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.BasePostResponse;
 import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
@@ -46,7 +45,7 @@ public class IntegratedBoardController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = {"multipart/form-data"})
     @IntegratedBoardApiDocument.CreatePost
-    public ApiResponse<BasePostResponse> createPost(
+    public ApiResponse<PostDetailResponse> createPost(
             @PathVariable UUID boardId,
             @RequestPart("request") BasePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
@@ -59,7 +58,7 @@ public class IntegratedBoardController {
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/{postId}", consumes = {"multipart/form-data"})
     @IntegratedBoardApiDocument.UpdatePost
-    public ApiResponse<BasePostResponse> updatePost(
+    public ApiResponse<PostDetailResponse> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
             @RequestPart("request") UpdatePostRequest request,
