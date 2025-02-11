@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePostRequest {
+public class UpdateBasePostRequest {
     private String title;
     private String content;
     private List<UUID> deleteFileIds;

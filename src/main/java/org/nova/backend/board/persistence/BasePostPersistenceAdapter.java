@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.nova.backend.board.persistence.repository.PostRepository;
-import org.nova.backend.board.common.application.port.out.PostPersistencePort;
+import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.springframework.data.domain.Page;
@@ -13,10 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostPersistenceAdapter implements PostPersistencePort {
+public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     private final PostRepository postRepository;
 
-    public PostPersistenceAdapter(PostRepository postRepository) {
+    public BasePostPersistenceAdapter(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
 

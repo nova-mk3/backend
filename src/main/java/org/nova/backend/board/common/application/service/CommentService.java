@@ -9,7 +9,7 @@ import org.nova.backend.board.common.application.dto.response.CommentResponse;
 import org.nova.backend.board.common.application.mapper.CommentMapper;
 import org.nova.backend.board.common.application.port.in.CommentUseCase;
 import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
-import org.nova.backend.board.common.application.port.out.PostPersistencePort;
+import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.CommentDomainException;
 import org.nova.backend.board.common.domain.model.entity.Comment;
@@ -26,18 +26,18 @@ public class CommentService implements CommentUseCase {
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
     private final CommentPersistencePort commentPersistencePort;
-    private final PostPersistencePort postPersistencePort;
+    private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
     private final CommentMapper commentMapper;
 
     public CommentService(
             CommentPersistencePort commentPersistencePort,
-            PostPersistencePort postPersistencePort,
+            BasePostPersistencePort basePostPersistencePort,
             MemberRepository memberRepository,
             CommentMapper commentMapper
     ) {
         this.commentPersistencePort = commentPersistencePort;
-        this.postPersistencePort = postPersistencePort;
+        this.basePostPersistencePort = basePostPersistencePort;
         this.memberRepository = memberRepository;
         this.commentMapper = commentMapper;
     }
@@ -102,7 +102,7 @@ public class CommentService implements CommentUseCase {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
 
-        Post post = postPersistencePort.findById(postId)
+        Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
         Comment parentComment = null;
@@ -115,7 +115,7 @@ public class CommentService implements CommentUseCase {
         comment = commentPersistencePort.save(comment);
 
         post.incrementCommentCount();
-        postPersistencePort.save(post);
+        basePostPersistencePort.save(post);
 
         List<Comment> allComments = commentPersistencePort.findAllByPostId(postId);
 

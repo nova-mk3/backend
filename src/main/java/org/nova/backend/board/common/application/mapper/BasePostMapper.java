@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
-import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -38,7 +38,7 @@ public class BasePostMapper {
         );
     }
 
-    public PostDetailResponse toDetailResponse(Post post) {
+    public BasePostDetailResponse toDetailResponse(Post post) {
         List<FileResponse> fileResponses = post.getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
@@ -46,7 +46,7 @@ public class BasePostMapper {
                         "/api/v1/files/" + file.getId() + "/download"
                 ))
                 .toList();
-        return new PostDetailResponse(
+        return new BasePostDetailResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
@@ -61,8 +61,8 @@ public class BasePostMapper {
         );
     }
 
-    public PostSummaryResponse toSummaryResponse(Post post) {
-        return new PostSummaryResponse(
+    public BasePostSummaryResponse toSummaryResponse(Post post) {
+        return new BasePostSummaryResponse(
                 post.getId(),
                 post.getPostType(),
                 post.getTitle(),

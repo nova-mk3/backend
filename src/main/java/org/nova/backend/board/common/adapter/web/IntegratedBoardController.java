@@ -7,9 +7,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.IntegratedBoardApiDocument;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
-import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
-import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
+import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
+import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
 import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -45,7 +45,7 @@ public class IntegratedBoardController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = {"multipart/form-data"})
     @IntegratedBoardApiDocument.CreatePost
-    public ApiResponse<PostDetailResponse> createPost(
+    public ApiResponse<BasePostDetailResponse> createPost(
             @PathVariable UUID boardId,
             @RequestPart("request") BasePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
@@ -58,10 +58,10 @@ public class IntegratedBoardController {
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/{postId}", consumes = {"multipart/form-data"})
     @IntegratedBoardApiDocument.UpdatePost
-    public ApiResponse<PostDetailResponse> updatePost(
+    public ApiResponse<BasePostDetailResponse> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
-            @RequestPart("request") UpdatePostRequest request,
+            @RequestPart("request") UpdateBasePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         UUID memberId = getCurrentMemberId();
@@ -84,7 +84,7 @@ public class IntegratedBoardController {
 
     @GetMapping
     @IntegratedBoardApiDocument.GetPostsByCategory
-    public ApiResponse<Page<PostSummaryResponse>> getPostsByCategory(
+    public ApiResponse<Page<BasePostSummaryResponse>> getPostsByCategory(
             @PathVariable UUID boardId,
             @RequestParam PostType postType,
             Pageable pageable
@@ -95,7 +95,7 @@ public class IntegratedBoardController {
 
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
-    public ApiResponse<PostDetailResponse> getPostById(
+    public ApiResponse<BasePostDetailResponse> getPostById(
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
@@ -105,7 +105,7 @@ public class IntegratedBoardController {
 
     @GetMapping("/latest")
     @IntegratedBoardApiDocument.GetLatestPostByType
-    public ApiResponse<Map<PostType, List<PostSummaryResponse>>> getLatestPostsByType(
+    public ApiResponse<Map<PostType, List<BasePostSummaryResponse>>> getLatestPostsByType(
             @PathVariable UUID boardId
     ) {
         var latestPosts = basePostUseCase.getLatestPostsByType(boardId);

@@ -7,14 +7,14 @@ import java.util.Map;
 import java.util.UUID;
 import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
-import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
-import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
+import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
+import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
 import org.nova.backend.board.common.application.mapper.BasePostMapper;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.in.BasePostUseCase;
-import org.nova.backend.board.common.application.port.out.PostPersistencePort;
+import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
@@ -35,7 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class BasePostService implements BasePostUseCase {
     private static final Logger logger = LoggerFactory.getLogger(BasePostService.class);
 
-    private final PostPersistencePort postPersistencePort;
+    private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
     private final BoardSecurityChecker boardSecurityChecker;
     private final BoardUseCase boardUseCase;
@@ -43,14 +43,14 @@ public class BasePostService implements BasePostUseCase {
     private final BasePostMapper postMapper;
 
     public BasePostService(
-            PostPersistencePort postPersistencePort,
+            BasePostPersistencePort basePostPersistencePort,
             MemberRepository memberRepository,
             BoardSecurityChecker boardSecurityChecker,
             BoardUseCase boardUseCase,
             FileUseCase fileUseCase,
             BasePostMapper postMapper
     ) {
-        this.postPersistencePort = postPersistencePort;
+        this.basePostPersistencePort = basePostPersistencePort;
         this.memberRepository = memberRepository;
         this.boardSecurityChecker = boardSecurityChecker;
         this.boardUseCase = boardUseCase;
@@ -68,7 +68,7 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public PostDetailResponse createPost(
+    public BasePostDetailResponse createPost(
             UUID boardId,
             BasePostRequest request,
             UUID memberId,
@@ -84,7 +84,7 @@ public class BasePostService implements BasePostUseCase {
         Board board = boardUseCase.getBoardById(boardId);
         Post post = postMapper.toEntity(request, member, board);
 
-        Post savedPost = postPersistencePort.save(post);
+        Post savedPost = basePostPersistencePort.save(post);
         List<File> savedFiles = fileUseCase.saveFiles(files, savedPost);
         savedPost.addFiles(savedFiles);
 
@@ -96,12 +96,12 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public Page<PostSummaryResponse> getPostsByCategory(
+    public Page<BasePostSummaryResponse> getPostsByCategory(
             UUID boardId,
             PostType postType,
             Pageable pageable
     ) {
-        return postPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable)
+        return basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable)
                 .map(postMapper::toSummaryResponse);
     }
 
@@ -110,12 +110,12 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public PostDetailResponse getPostById(
+    public BasePostDetailResponse getPostById(
             UUID boardId,
             UUID postId
     ) {
-        postPersistencePort.increaseViewCount(postId);
-        Post post = postPersistencePort.findByBoardIdAndPostId(boardId, postId)
+        basePostPersistencePort.increaseViewCount(postId);
+        Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. Board ID: " + boardId + ", Post ID: " + postId));
         return postMapper.toDetailResponse(post);
     }
@@ -129,7 +129,7 @@ public class BasePostService implements BasePostUseCase {
             UUID postId,
             UUID memberId
     ) {
-        return postPersistencePort.likePost(postId, memberId);
+        return basePostPersistencePort.likePost(postId, memberId);
     }
 
     /**
@@ -141,7 +141,7 @@ public class BasePostService implements BasePostUseCase {
             UUID postId,
             UUID memberId
     ) {
-        return postPersistencePort.unlikePost(postId, memberId);
+        return basePostPersistencePort.unlikePost(postId, memberId);
     }
 
     /**
@@ -157,11 +157,11 @@ public class BasePostService implements BasePostUseCase {
     public void updatePost(
             UUID boardId,
             UUID postId,
-            UpdatePostRequest request,
+            UpdateBasePostRequest request,
             UUID memberId,
             List<MultipartFile> files
     ) {
-        Post post = postPersistencePort.findById(postId)
+        Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
 
         if (!post.getBoard().getId().equals(boardId)) {
@@ -206,7 +206,7 @@ public class BasePostService implements BasePostUseCase {
     ) {
         logger.info("게시글 삭제 요청 - Board ID: {}, Post ID: {}, Member ID: {}", boardId, postId, memberId);
 
-        Post post = postPersistencePort.findById(postId)
+        Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> {
                     logger.error("삭제 요청한 게시글이 존재하지 않습니다. ID: {}", postId);
                     return new BoardDomainException("게시글을 찾을 수 없습니다.");
@@ -227,7 +227,7 @@ public class BasePostService implements BasePostUseCase {
         List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();
         fileUseCase.deleteFiles(fileIds);
 
-        postPersistencePort.deleteById(postId);
+        basePostPersistencePort.deleteById(postId);
         logger.info("게시글이 성공적으로 삭제되었습니다. Board ID: {}, Post ID: {}", boardId, postId);
     }
 
@@ -238,7 +238,7 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public Map<PostType, List<PostSummaryResponse>> getLatestPostsByType(UUID boardId) {
+    public Map<PostType, List<BasePostSummaryResponse>> getLatestPostsByType(UUID boardId) {
 
         List<PostType> allowedPostTypes = List.of(
                 PostType.QNA,
@@ -247,11 +247,11 @@ public class BasePostService implements BasePostUseCase {
                 PostType.NOTICE
         );
 
-        Map<PostType, List<PostSummaryResponse>> groupedPosts = new HashMap<>();
+        Map<PostType, List<BasePostSummaryResponse>> groupedPosts = new HashMap<>();
 
         for (PostType postType : allowedPostTypes) {
-            List<Post> posts = postPersistencePort.findLatestPostsByType(boardId, postType, 6);
-            List<PostSummaryResponse> postResponses = posts.stream()
+            List<Post> posts = basePostPersistencePort.findLatestPostsByType(boardId, postType, 6);
+            List<BasePostSummaryResponse> postResponses = posts.stream()
                     .map(postMapper::toSummaryResponse)
                     .toList();
 
