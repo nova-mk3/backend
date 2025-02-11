@@ -1,4 +1,4 @@
-package org.nova.backend.board.examarchive.domain.model.valueobject;
+package org.nova.backend.board.examarchive.domain.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.Table;
 import org.nova.backend.board.common.domain.model.entity.Post;
+import org.nova.backend.board.examarchive.domain.model.valueobject.Semester;
 
 @Entity
 @Getter
