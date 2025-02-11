@@ -37,7 +37,7 @@ public class PendingMember {
 
     private boolean isGraduation;
 
-    private int year;
+    private int grade;
 
     private int semester;
 

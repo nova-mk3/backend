@@ -9,12 +9,12 @@ import org.nova.backend.member.domain.model.valueobject.Role;
 @AllArgsConstructor
 public class PendingMemberResponse {
 
-    private UUID memberId;
+    private UUID pendingMemberId;
     private String studentNumber;
     private String name;
     private String email;
     private boolean isGraduation;
-    private int year;
+    private int grade;
     private int semester;
     private boolean isAbsence;
     private String profilePhoto;

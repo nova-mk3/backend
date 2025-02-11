@@ -61,7 +61,7 @@ public class PendingMemberService {
     }
 
     /**
-     * 늑정 PendingMember 상세 정보 확인
+     * 특정 PendingMember 상세 정보 확인
      *
      * @return PendingMemberDetailResponse
      */
