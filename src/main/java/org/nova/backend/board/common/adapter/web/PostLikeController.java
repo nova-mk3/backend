@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.PostLikeApiDocument;
-import org.nova.backend.board.common.application.port.in.PostUseCase;
+import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts/{postId}")
 public class PostLikeController {
-    private final PostUseCase postUseCase;
+    private final BasePostUseCase postUseCase;
     private final MemberRepository memberRepository;
 
     @PreAuthorize("isAuthenticated()")

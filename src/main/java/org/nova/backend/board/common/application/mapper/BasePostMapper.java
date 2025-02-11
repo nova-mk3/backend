@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.PostResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostResponse;
 import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.Post;
@@ -39,7 +39,7 @@ public class BasePostMapper {
         );
     }
 
-    public PostResponse toResponse(Post post) {
+    public BasePostResponse toResponse(Post post) {
         List<FileResponse> fileResponses = post.getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
@@ -48,7 +48,7 @@ public class BasePostMapper {
                 ))
                 .distinct()
                 .toList();
-        return new PostResponse(
+        return new BasePostResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),

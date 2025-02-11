@@ -9,9 +9,9 @@ import org.nova.backend.board.common.adapter.doc.IntegratedBoardApiDocument;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.PostResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostResponse;
 import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
-import org.nova.backend.board.common.application.port.in.PostUseCase;
+import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
@@ -39,34 +39,34 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/boards/{boardId}/posts")
 public class IntegratedBoardController {
-    private final PostUseCase postUseCase;
+    private final BasePostUseCase basePostUseCase;
     private final MemberRepository memberRepository;
 
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = {"multipart/form-data"})
     @IntegratedBoardApiDocument.CreatePost
-    public ApiResponse<PostResponse> createPost(
+    public ApiResponse<BasePostResponse> createPost(
             @PathVariable UUID boardId,
             @RequestPart("request") BasePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         UUID memberId = getCurrentMemberId();
-        var savedPost = postUseCase.createPost(boardId, request, memberId, files);
+        var savedPost = basePostUseCase.createPost(boardId, request, memberId, files);
         return ApiResponse.created(savedPost);
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/{postId}", consumes = {"multipart/form-data"})
     @IntegratedBoardApiDocument.UpdatePost
-    public ApiResponse<PostResponse> updatePost(
+    public ApiResponse<BasePostResponse> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
             @RequestPart("request") UpdatePostRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         UUID memberId = getCurrentMemberId();
-        postUseCase.updatePost(boardId, postId, request, memberId, files);
+        basePostUseCase.updatePost(boardId, postId, request, memberId, files);
         return ApiResponse.noContent();
     }
 
@@ -78,7 +78,7 @@ public class IntegratedBoardController {
             @PathVariable UUID postId
     ) {
         UUID memberId = getCurrentMemberId();
-        postUseCase.deletePost(boardId, postId, memberId);
+        basePostUseCase.deletePost(boardId, postId, memberId);
         return ApiResponse.noContent();
     }
 
@@ -90,7 +90,7 @@ public class IntegratedBoardController {
             @RequestParam PostType postType,
             Pageable pageable
     ) {
-        var posts = postUseCase.getPostsByCategory(boardId, postType, pageable);
+        var posts = basePostUseCase.getPostsByCategory(boardId, postType, pageable);
         return ApiResponse.success(posts);
     }
 
@@ -100,7 +100,7 @@ public class IntegratedBoardController {
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
-        var post = postUseCase.getPostById(boardId, postId);
+        var post = basePostUseCase.getPostById(boardId, postId);
         return ApiResponse.success(post);
     }
 
@@ -109,7 +109,7 @@ public class IntegratedBoardController {
     public ApiResponse<Map<PostType, List<PostSummaryResponse>>> getLatestPostsByType(
             @PathVariable UUID boardId
     ) {
-        var latestPosts = postUseCase.getLatestPostsByType(boardId);
+        var latestPosts = basePostUseCase.getLatestPostsByType(boardId);
         return ApiResponse.success(latestPosts);
     }
 

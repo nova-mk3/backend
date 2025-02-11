@@ -9,12 +9,12 @@ import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
 import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.PostResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostResponse;
 import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
 import org.nova.backend.board.common.application.mapper.BasePostMapper;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
-import org.nova.backend.board.common.application.port.in.PostUseCase;
+import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.application.port.out.PostPersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
@@ -33,8 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-public class PostService implements PostUseCase {
-    private static final Logger logger = LoggerFactory.getLogger(PostService.class);
+public class BasePostService implements BasePostUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(BasePostService.class);
 
     private final PostPersistencePort postPersistencePort;
     private final MemberRepository memberRepository;
@@ -43,7 +43,7 @@ public class PostService implements PostUseCase {
     private final FileUseCase fileUseCase;
     private final BasePostMapper postMapper;
 
-    public PostService(
+    public BasePostService(
             PostPersistencePort postPersistencePort,
             MemberRepository memberRepository,
             BoardSecurityChecker boardSecurityChecker,
@@ -69,7 +69,7 @@ public class PostService implements PostUseCase {
      */
     @Override
     @Transactional
-    public PostResponse createPost(
+    public BasePostResponse createPost(
             UUID boardId,
             BasePostRequest request,
             UUID memberId,
