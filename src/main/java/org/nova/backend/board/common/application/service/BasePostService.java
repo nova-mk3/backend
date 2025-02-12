@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
@@ -29,9 +30,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@RequiredArgsConstructor
 public class BasePostService implements BasePostUseCase {
     private static final Logger logger = LoggerFactory.getLogger(BasePostService.class);
 
@@ -42,28 +43,11 @@ public class BasePostService implements BasePostUseCase {
     private final FileUseCase fileUseCase;
     private final BasePostMapper postMapper;
 
-    public BasePostService(
-            BasePostPersistencePort basePostPersistencePort,
-            MemberRepository memberRepository,
-            BoardSecurityChecker boardSecurityChecker,
-            BoardUseCase boardUseCase,
-            FileUseCase fileUseCase,
-            BasePostMapper postMapper
-    ) {
-        this.basePostPersistencePort = basePostPersistencePort;
-        this.memberRepository = memberRepository;
-        this.boardSecurityChecker = boardSecurityChecker;
-        this.boardUseCase = boardUseCase;
-        this.fileUseCase = fileUseCase;
-        this.postMapper = postMapper;
-    }
-
     /**
      * 새로운 게시글과 첨부파일 저장
      *
      * @param request  생성할 게시글 객체
      * @param memberId  게시글 작성자
-     * @param files 첨부파일 리스트
      * @return 저장된 게시글 객체
      */
     @Override
@@ -71,8 +55,7 @@ public class BasePostService implements BasePostUseCase {
     public BasePostDetailResponse createPost(
             UUID boardId,
             BasePostRequest request,
-            UUID memberId,
-            List<MultipartFile> files
+            UUID memberId
     ) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
@@ -83,11 +66,14 @@ public class BasePostService implements BasePostUseCase {
 
         Board board = boardUseCase.getBoardById(boardId);
         Post post = postMapper.toEntity(request, member, board);
-
         Post savedPost = basePostPersistencePort.save(post);
-        List<File> savedFiles = fileUseCase.saveFiles(files, savedPost);
-        savedPost.addFiles(savedFiles);
 
+        if(request.getFileIds() != null && !request.getFileIds().isEmpty()) {
+            List<File> files = fileUseCase.findFilesByIds(request.getFileIds());
+            files.forEach(file -> file.setPost(savedPost));
+            savedPost.addFiles(files);
+        }
+        basePostPersistencePort.save(savedPost);
         return postMapper.toDetailResponse(savedPost);
     }
 
@@ -150,7 +136,6 @@ public class BasePostService implements BasePostUseCase {
      * @param postId 수정할 게시글 ID
      * @param request 업데이트할 게시글 요청 데이터
      * @param memberId 게시글 작성자 ID
-     * @param files 새로 업로드할 파일 리스트
      */
     @Override
     @Transactional
@@ -158,8 +143,7 @@ public class BasePostService implements BasePostUseCase {
             UUID boardId,
             UUID postId,
             UpdateBasePostRequest request,
-            UUID memberId,
-            List<MultipartFile> files
+            UUID memberId
     ) {
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
@@ -173,21 +157,17 @@ public class BasePostService implements BasePostUseCase {
         }
 
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
-            List<File> filesToDelete = fileUseCase.findFilesByIds(request.getDeleteFileIds());
-
-            if (filesToDelete.isEmpty()) {
-                logger.warn("삭제할 파일을 찾을 수 없습니다. ID 목록: {}", request.getDeleteFileIds());
-                throw new BoardDomainException("삭제할 파일이 존재하지 않습니다.");
-            }
-
             fileUseCase.deleteFiles(request.getDeleteFileIds());
-            post.removeFiles(filesToDelete);
+            post.removeFilesByIds(request.getDeleteFileIds());
         }
 
-        List<File> newFiles = fileUseCase.saveFiles(files, post);
-        post.addFiles(newFiles);
-
+        if (request.getFileIds() != null && !request.getFileIds().isEmpty()) {
+            List<File> newFiles = fileUseCase.findFilesByIds(request.getFileIds());
+            newFiles.forEach(file -> file.setPost(post));
+            post.addFiles(newFiles);
+        }
         post.updatePost(request.getTitle(), request.getContent());
+        basePostPersistencePort.save(post);
     }
 
     /**

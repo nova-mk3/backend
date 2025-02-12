@@ -10,15 +10,14 @@ import org.nova.backend.board.common.application.dto.response.BasePostSummaryRes
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface BasePostUseCase {
-    BasePostDetailResponse createPost(UUID boardId, BasePostRequest request, UUID memberId, List<MultipartFile> files);
+    BasePostDetailResponse createPost(UUID boardId, BasePostRequest request, UUID memberId);
     Page<BasePostSummaryResponse> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable);
     BasePostDetailResponse getPostById(UUID boardId, UUID postId);
     Map<PostType, List<BasePostSummaryResponse>> getLatestPostsByType(UUID boardId);
 
-    void updatePost(UUID boardId, UUID postId, UpdateBasePostRequest request, UUID memberId, List<MultipartFile> files);
+    void updatePost(UUID boardId, UUID postId, UpdateBasePostRequest request, UUID memberId);
     void deletePost(UUID boardId, UUID postId, UUID memberId);
 
     int likePost(UUID postId, UUID memberId);

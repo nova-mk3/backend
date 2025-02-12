@@ -27,11 +27,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Integrated Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
 @RestController
@@ -43,29 +42,27 @@ public class IntegratedBoardController {
 
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping
     @IntegratedBoardApiDocument.CreatePost
     public ApiResponse<BasePostDetailResponse> createPost(
             @PathVariable UUID boardId,
-            @RequestPart("request") BasePostRequest request,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestBody BasePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        var savedPost = basePostUseCase.createPost(boardId, request, memberId, files);
+        var savedPost = basePostUseCase.createPost(boardId, request, memberId);
         return ApiResponse.created(savedPost);
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PutMapping(value = "/{postId}", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/{postId}")
     @IntegratedBoardApiDocument.UpdatePost
     public ApiResponse<BasePostDetailResponse> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
-            @RequestPart("request") UpdateBasePostRequest request,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestBody UpdateBasePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        basePostUseCase.updatePost(boardId, postId, request, memberId, files);
+        basePostUseCase.updatePost(boardId, postId, request, memberId);
         return ApiResponse.noContent();
     }
 
