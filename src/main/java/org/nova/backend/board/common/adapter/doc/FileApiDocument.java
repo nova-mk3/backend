@@ -9,8 +9,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
 @Tag(name = "File API", description = "파일 업로드 및 다운로드 관련 API")
 public @interface FileApiDocument {
 
@@ -20,5 +18,7 @@ public @interface FileApiDocument {
             @ApiResponse(responseCode = "404", description = "파일을 찾을 수 없음"),
             @ApiResponse(responseCode = "500", description = "서버 에러 발생")
     })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface DownloadFile {}
 }
