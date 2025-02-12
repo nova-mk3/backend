@@ -1,0 +1,27 @@
+package org.nova.backend.board.examarchive.application.dto.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.nova.backend.board.examarchive.domain.model.valueobject.Semester;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class JokboPostRequest {
+    @Schema(example = "[2024] [인공지능] 이건명 - 1학기")
+    private String title;
+    @Schema(example = "열심히 구했습니다")
+    private String content;
+    @Schema(example = "2024")
+    private int year;
+    @Schema(example = "인공지능")
+    private String subject;
+    private Semester semester;
+    @Schema(example = "이건명")
+    private String professorName;
+    private List<UUID> fileIds;
+}
