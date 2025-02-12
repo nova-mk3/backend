@@ -3,6 +3,7 @@ package org.nova.backend.board.common.application.service;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.dto.request.CommentRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateCommentRequest;
 import org.nova.backend.board.common.application.dto.response.CommentResponse;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService implements CommentUseCase {
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
@@ -29,18 +31,6 @@ public class CommentService implements CommentUseCase {
     private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
     private final CommentMapper commentMapper;
-
-    public CommentService(
-            CommentPersistencePort commentPersistencePort,
-            BasePostPersistencePort basePostPersistencePort,
-            MemberRepository memberRepository,
-            CommentMapper commentMapper
-    ) {
-        this.commentPersistencePort = commentPersistencePort;
-        this.basePostPersistencePort = basePostPersistencePort;
-        this.memberRepository = memberRepository;
-        this.commentMapper = commentMapper;
-    }
 
     /**
      * 댓글 수정 (본인 댓글만 수정 가능)
