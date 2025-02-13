@@ -33,7 +33,7 @@ public class MemberSignUpRequest {
     private boolean graduation;
 
     @Schema(description = "학년", example = "1")
-    private int year;
+    private int grade;
 
     @Schema(description = "이수 학기", example = "1")
     private int semester;

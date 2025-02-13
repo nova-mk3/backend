@@ -63,6 +63,11 @@ public class ExecutiveHistoryService {
         return executiveHistoryMapper.toResponse(savedExecutiveHistory);
     }
 
+    /**
+     * 임원 이력 추가 시 임원 이름, 임원 객체 모두 입력하지 않은 경우
+     *
+     * @param request 임원 이력 추가 요청 객체
+     */
     private void checkValidAddExecutiveHistoryRequest(AddExecutiveHistoryRequest request) {
         if (request.getName() == null && request.getMemberId() == null) {
             throw new ExecutiveHistoryDomainException("Invalid request. Please enter name or member.",

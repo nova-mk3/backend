@@ -14,7 +14,7 @@ public class MemberResponse {
     private String name;
     private String email;
     private boolean isGraduation;
-    private int year;
+    private int grade;
     private int semester;
     private boolean isAbsence;
     private String profilePhoto;
