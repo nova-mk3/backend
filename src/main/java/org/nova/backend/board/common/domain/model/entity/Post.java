@@ -63,6 +63,9 @@ public class Post {
     @Column(nullable = false)
     private int commentCount;
 
+    @Column(nullable = false)
+    private int totalDownloadCount;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
@@ -84,11 +87,14 @@ public class Post {
     public void addFiles(List<File> files) {
         this.files.addAll(files);
     }
-    public void removeFiles(List<File> filesToRemove) {
-        this.files.removeAll(filesToRemove);
+    public void removeFilesByIds(List<UUID> fileIds) {
+        this.files.removeIf(file -> fileIds.contains(file.getId()));
     }
     public void incrementCommentCount() {
         this.commentCount += 1;
+    }
+    public void incrementTotalDownloadCount() {
+        this.totalDownloadCount += 1;
     }
 }
 

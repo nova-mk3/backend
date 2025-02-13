@@ -27,12 +27,16 @@ public class FilePersistenceAdapter implements FilePersistencePort {
     }
 
     @Override
-    public void save(File file) {
-        fileRepository.save(file);
+    public File save(File file) {
+        return fileRepository.save(file);
     }
 
     @Override
     public Optional<File> findFileById(UUID fileId) {
         return fileRepository.findById(fileId);
     }
+
+    @Override
+    public void deleteFileById(UUID fileId) {fileRepository.deleteById(fileId);}
+
 }

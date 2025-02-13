@@ -7,11 +7,10 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.IntegratedBoardApiDocument;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
-import org.nova.backend.board.common.application.dto.request.UpdatePostRequest;
-import org.nova.backend.board.common.application.dto.response.PostDetailResponse;
-import org.nova.backend.board.common.application.dto.response.PostResponse;
-import org.nova.backend.board.common.application.dto.response.PostSummaryResponse;
-import org.nova.backend.board.common.application.port.in.PostUseCase;
+import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
+import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
+import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
@@ -28,45 +27,42 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Integrated Post API", description = "통합 게시판 공통 API (QnA, 자유게시판, 자기소개, 공지사항)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/boards/{boardId}/posts")
 public class IntegratedBoardController {
-    private final PostUseCase postUseCase;
+    private final BasePostUseCase basePostUseCase;
     private final MemberRepository memberRepository;
 
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping
     @IntegratedBoardApiDocument.CreatePost
-    public ApiResponse<PostResponse> createPost(
+    public ApiResponse<BasePostDetailResponse> createPost(
             @PathVariable UUID boardId,
-            @RequestPart("request") BasePostRequest request,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestBody BasePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        var savedPost = postUseCase.createPost(boardId, request, memberId, files);
+        var savedPost = basePostUseCase.createPost(boardId, request, memberId);
         return ApiResponse.created(savedPost);
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PutMapping(value = "/{postId}", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/{postId}")
     @IntegratedBoardApiDocument.UpdatePost
-    public ApiResponse<PostResponse> updatePost(
+    public ApiResponse<BasePostDetailResponse> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
-            @RequestPart("request") UpdatePostRequest request,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestBody UpdateBasePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        postUseCase.updatePost(boardId, postId, request, memberId, files);
+        basePostUseCase.updatePost(boardId, postId, request, memberId);
         return ApiResponse.noContent();
     }
 
@@ -78,39 +74,49 @@ public class IntegratedBoardController {
             @PathVariable UUID postId
     ) {
         UUID memberId = getCurrentMemberId();
-        postUseCase.deletePost(boardId, postId, memberId);
+        basePostUseCase.deletePost(boardId, postId, memberId);
         return ApiResponse.noContent();
     }
 
 
     @GetMapping
     @IntegratedBoardApiDocument.GetPostsByCategory
-    public ApiResponse<Page<PostSummaryResponse>> getPostsByCategory(
+    public ApiResponse<Page<BasePostSummaryResponse>> getPostsByCategory(
             @PathVariable UUID boardId,
             @RequestParam PostType postType,
             Pageable pageable
     ) {
-        var posts = postUseCase.getPostsByCategory(boardId, postType, pageable);
+        var posts = basePostUseCase.getPostsByCategory(boardId, postType, pageable);
         return ApiResponse.success(posts);
     }
 
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
-    public ApiResponse<PostDetailResponse> getPostById(
+    public ApiResponse<BasePostDetailResponse> getPostById(
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
-        var post = postUseCase.getPostById(boardId, postId);
+        var post = basePostUseCase.getPostById(boardId, postId);
         return ApiResponse.success(post);
     }
 
     @GetMapping("/latest")
     @IntegratedBoardApiDocument.GetLatestPostByType
-    public ApiResponse<Map<PostType, List<PostSummaryResponse>>> getLatestPostsByType(
+    public ApiResponse<Map<PostType, List<BasePostSummaryResponse>>> getLatestPostsByType(
             @PathVariable UUID boardId
     ) {
-        var latestPosts = postUseCase.getLatestPostsByType(boardId);
+        var latestPosts = basePostUseCase.getLatestPostsByType(boardId);
         return ApiResponse.success(latestPosts);
+    }
+
+    @GetMapping("/all")
+    @IntegratedBoardApiDocument.GetAllPosts
+    public ApiResponse<Page<BasePostSummaryResponse>> getAllPosts(
+            @PathVariable UUID boardId,
+            Pageable pageable
+    ) {
+        var posts = basePostUseCase.getAllPosts(boardId, pageable);
+        return ApiResponse.success(posts);
     }
 
     /**

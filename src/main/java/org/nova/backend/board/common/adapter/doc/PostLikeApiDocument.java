@@ -9,8 +9,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
 @Tag(name = "Post Like API", description = "게시글 좋아요 및 좋아요 취소 API")
 public @interface PostLikeApiDocument {
 
@@ -20,7 +18,8 @@ public @interface PostLikeApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json"))
     })
-
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface LikePost {
     }
 
@@ -30,6 +29,8 @@ public @interface PostLikeApiDocument {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자", content = @Content(mediaType = "application/json")),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음", content = @Content(mediaType = "application/json"))
     })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface UnlikePost {
     }
 }

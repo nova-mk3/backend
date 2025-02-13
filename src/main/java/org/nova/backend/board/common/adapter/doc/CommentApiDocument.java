@@ -10,8 +10,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
 @Tag(name = "Comment API", description = "모든 게시글 댓글 API")
 public @interface CommentApiDocument {
 
@@ -21,6 +19,8 @@ public @interface CommentApiDocument {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
     })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface CreateComment {
     }
 
@@ -30,6 +30,8 @@ public @interface CommentApiDocument {
             @ApiResponse(responseCode = "403", description = "수정 권한 없음", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "댓글이 존재하지 않음", content = @Content(mediaType = "application/json"))
     })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface UpdateComment {
     }
 
@@ -39,6 +41,8 @@ public @interface CommentApiDocument {
             @ApiResponse(responseCode = "403", description = "삭제 권한 없음", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "댓글이 존재하지 않음", content = @Content(mediaType = "application/json"))
     })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface DeleteComment {
     }
 
@@ -48,6 +52,8 @@ public @interface CommentApiDocument {
             @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않음", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
     })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @interface GetCommentsByPost {
     }
 }

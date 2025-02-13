@@ -39,7 +39,7 @@ public class File {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id")
     @JsonIgnore
     private Post post;
 
@@ -54,6 +54,10 @@ public class File {
         return Objects.equals(id, file.id) &&
                 Objects.equals(originalFilename, file.originalFilename) &&
                 Objects.equals(filePath, file.filePath);
+    }
+
+    public void incrementDownloadCount() {
+        this.downloadCount += 1;
     }
 
     @Override

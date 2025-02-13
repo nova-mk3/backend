@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDetailResponse {
+public class BasePostDetailResponse {
     private UUID id;
     private String title;
     private String content;
