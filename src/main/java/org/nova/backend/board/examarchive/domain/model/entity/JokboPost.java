@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -31,7 +32,7 @@ public class JokboPost {
     private Post post;
 
     @Column(nullable = false)
-    private String ProfessorName;
+    private String professorName;
 
     @Column(nullable = false)
     private int year;
