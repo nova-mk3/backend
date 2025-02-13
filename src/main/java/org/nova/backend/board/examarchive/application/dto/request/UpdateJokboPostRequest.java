@@ -22,7 +22,7 @@ public class UpdateJokboPostRequest {
     private String subject;
     private Semester semester;
     @Schema(example = "이건명")
-    private String ProfessorName;
+    private String professorName;
     private List<UUID> fileIds;
     private List<UUID> deleteFileIds;
 }

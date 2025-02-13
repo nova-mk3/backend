@@ -43,4 +43,11 @@ public class JokboPost {
 
     @Column(nullable = false)
     private String subject;
+
+    public void updateJokbo(String professorName, int year, Semester semester, String subject) {
+        this.professorName = professorName;
+        this.year = year;
+        this.semester = semester;
+        this.subject = subject;
+    }
 }
