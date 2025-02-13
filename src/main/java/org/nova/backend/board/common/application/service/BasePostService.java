@@ -21,6 +21,7 @@ import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
+import org.nova.backend.board.examarchive.application.dto.response.JokboPostSummaryResponse;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
@@ -95,13 +96,29 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public Page<BasePostSummaryResponse> getPostsByCategory(
+    public Page<?> getPostsByCategory(
             UUID boardId,
             PostType postType,
             Pageable pageable
     ) {
-        return basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable)
-                .map(postMapper::toSummaryResponse);
+        Page<Post> posts = basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable);
+
+        if (postType == PostType.EXAM_ARCHIVE) {
+            return posts.map(post -> new JokboPostSummaryResponse(
+                    post.getId(),
+                    post.getTitle(),
+                    post.getContent(),
+                    post.getViewCount(),
+                    post.getLikeCount(),
+                    post.getCreatedTime(),
+                    post.getModifiedTime(),
+                    post.getMember().getName(),
+                    post.getTotalDownloadCount(),
+                    post.getFiles().size()
+            ));
+        } else {
+            return posts.map(postMapper::toSummaryResponse);
+        }
     }
 
     /**

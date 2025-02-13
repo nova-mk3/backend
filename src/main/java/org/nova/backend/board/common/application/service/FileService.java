@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
+import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.application.port.out.FilePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.common.domain.model.entity.File;
+import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.util.FileUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ public class FileService implements FileUseCase {
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
 
     private final FilePersistencePort filePersistencePort;
+    private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
 
     @Value("${file.storage.path}")
@@ -39,9 +42,11 @@ public class FileService implements FileUseCase {
 
     public FileService(
             FilePersistencePort filePersistencePort,
+            BasePostPersistencePort basePostPersistencePort,
             MemberRepository memberRepository
     ) {
         this.filePersistencePort = filePersistencePort;
+        this.basePostPersistencePort = basePostPersistencePort;
         this.memberRepository = memberRepository;
     }
 
@@ -86,15 +91,19 @@ public class FileService implements FileUseCase {
      */
     @Transactional
     @Override
-    public List<UUID> uploadFiles(List<MultipartFile> files, UUID memberId) {
+    public List<UUID> uploadFiles(List<MultipartFile> files, UUID memberId, PostType postType) {
         if (files == null || files.isEmpty()) {
             throw new FileDomainException("업로드할 파일이 없습니다.");
         }
         if (files.size() > 10) {
             throw new FileDomainException("첨부파일은 최대 10개까지 가능합니다.");
         }
-        for(MultipartFile file : files){
-            FileUtil.validateFileExtension(file);
+        for (MultipartFile file : files) {
+            if (postType == PostType.PICTURES) {
+                FileUtil.validateImageFile(file);  // 사진게시판이면 이미지 파일 검증
+            } else {
+                FileUtil.validateFileExtension(file);
+            }
             FileUtil.validateFileSize(file);
         }
 
@@ -167,6 +176,16 @@ public class FileService implements FileUseCase {
             StreamUtils.copy(inputStream, response.getOutputStream());
             response.flushBuffer();
             logger.info("파일 다운로드 성공: {}", file.getOriginalFilename());
+            file.incrementDownloadCount();
+
+            if (file.getPost() != null) {
+                file.getPost().incrementTotalDownloadCount();
+            }
+
+            filePersistencePort.save(file);
+            if (file.getPost() != null) {
+                basePostPersistencePort.save(file.getPost());
+            }
         } catch (IOException e) {
             logger.error("파일 다운로드 중 오류 발생: {}", file.getOriginalFilename(), e);
             throw new FileDomainException("파일 다운로드 중 오류 발생", e);

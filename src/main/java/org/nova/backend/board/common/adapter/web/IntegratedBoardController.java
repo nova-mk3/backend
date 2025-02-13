@@ -81,7 +81,7 @@ public class IntegratedBoardController {
 
     @GetMapping
     @IntegratedBoardApiDocument.GetPostsByCategory
-    public ApiResponse<Page<BasePostSummaryResponse>> getPostsByCategory(
+    public ApiResponse<Page<?>> getPostsByCategory(
             @PathVariable UUID boardId,
             @RequestParam PostType postType,
             Pageable pageable

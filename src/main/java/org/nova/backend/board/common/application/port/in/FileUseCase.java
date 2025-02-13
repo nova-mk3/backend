@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.common.domain.model.entity.File;
+import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileUseCase {
@@ -11,6 +12,6 @@ public interface FileUseCase {
     void downloadFile(UUID fileId, HttpServletResponse response, UUID memberId);
     void deleteFiles(List<UUID> fileIds);
     List<File> findFilesByIds(List<UUID> fileIds);
-    List<UUID> uploadFiles(List<MultipartFile> files, UUID memberId);
+    List<UUID> uploadFiles(List<MultipartFile> files, UUID memberId , PostType postType);
 }
 
