@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface BasePostPersistencePort {
     Page<Post> findAllByBoardAndCategory(UUID boardId, PostType postType, Pageable pageable);
+    Page<Post> findAllByBoard(UUID boardId, Pageable pageable);
     Post save(Post post);
     List<Post> findLatestPostsByType(UUID boardId, PostType postType, int limit);
 

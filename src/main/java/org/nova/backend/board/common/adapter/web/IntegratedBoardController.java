@@ -109,6 +109,16 @@ public class IntegratedBoardController {
         return ApiResponse.success(latestPosts);
     }
 
+    @GetMapping("/all")
+    @IntegratedBoardApiDocument.GetAllPosts
+    public ApiResponse<Page<BasePostSummaryResponse>> getAllPosts(
+            @PathVariable UUID boardId,
+            Pageable pageable
+    ) {
+        var posts = basePostUseCase.getAllPosts(boardId, pageable);
+        return ApiResponse.success(posts);
+    }
+
     /**
      * 현재 로그인한 사용자의 UUID 가져오기
      */

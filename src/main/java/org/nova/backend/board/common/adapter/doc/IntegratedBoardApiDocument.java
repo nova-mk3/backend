@@ -71,4 +71,13 @@ public @interface IntegratedBoardApiDocument {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface GetLatestPostByType {}
+    @Operation(summary = "모든 게시글 조회", description = "카테고리 구분 없이 특정 게시판 내의 모든 게시글을 페이징하여 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface GetAllPosts {}
+
 }

@@ -17,6 +17,9 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findAllByBoardIdAndPostType(UUID boardId, PostType postType, Pageable pageable);
 
+    @Query("SELECT p FROM Post p WHERE p.board.id = :boardId ORDER BY p.createdTime DESC")
+    Page<Post> findAllByBoardId(@Param("boardId") UUID boardId, Pageable pageable);
+
     List<Post> findTop6ByBoardIdAndPostTypeOrderByCreatedTimeDesc(UUID boardId, PostType postType);
 
     @Query("SELECT p FROM Post p WHERE p.board.id = :boardId AND p.id = :postId")

@@ -78,6 +78,19 @@ public class BasePostService implements BasePostUseCase {
     }
 
     /**
+     * 모든 게시글 조회 (페이징)
+     */
+    @Override
+    @Transactional
+    public Page<BasePostSummaryResponse> getAllPosts(
+            UUID boardId,
+            Pageable pageable
+    ) {
+        return basePostPersistencePort.findAllByBoard(boardId, pageable)
+                .map(postMapper::toSummaryResponse);
+    }
+
+    /**
      * 특정 카테고리의 모든 게시글 조회 (페이징)
      */
     @Override
@@ -105,6 +118,8 @@ public class BasePostService implements BasePostUseCase {
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. Board ID: " + boardId + ", Post ID: " + postId));
         return postMapper.toDetailResponse(post);
     }
+
+
 
     /**
      * 특정 게시글 좋아요
