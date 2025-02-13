@@ -17,6 +17,7 @@ import org.nova.backend.board.common.application.port.out.FilePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.common.domain.model.entity.File;
+import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.util.FileUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.slf4j.Logger;
@@ -90,15 +91,19 @@ public class FileService implements FileUseCase {
      */
     @Transactional
     @Override
-    public List<UUID> uploadFiles(List<MultipartFile> files, UUID memberId) {
+    public List<UUID> uploadFiles(List<MultipartFile> files, UUID memberId, PostType postType) {
         if (files == null || files.isEmpty()) {
             throw new FileDomainException("업로드할 파일이 없습니다.");
         }
         if (files.size() > 10) {
             throw new FileDomainException("첨부파일은 최대 10개까지 가능합니다.");
         }
-        for(MultipartFile file : files){
-            FileUtil.validateFileExtension(file);
+        for (MultipartFile file : files) {
+            if (postType == PostType.PICTURES) {
+                FileUtil.validateImageFile(file);  // 사진게시판이면 이미지 파일 검증
+            } else {
+                FileUtil.validateFileExtension(file);
+            }
             FileUtil.validateFileSize(file);
         }
 

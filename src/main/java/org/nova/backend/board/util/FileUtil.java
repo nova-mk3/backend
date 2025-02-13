@@ -12,6 +12,8 @@ public class FileUtil {
             "hwp", "pptx", "ppt", "zip", "tar", "7z", // 추가된 문서 및 압축 파일
             "mp4", "avi", "mov", "wmv", "mkv" // 동영상 파일
     );
+    private static final List<String> ALLOWED_IMAGE_EXTENSIONS = List.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
+
 
     /**
      * 파일 크기 검증
@@ -46,5 +48,26 @@ public class FileUtil {
             return "";
         }
         return fileName.substring(lastIndex + 1);
+    }
+
+    /**
+     * 이미지 파일인지 검증하는 메서드
+     */
+    public static boolean isImageFile(MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        if (fileName == null) {
+            return false;
+        }
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        return ALLOWED_IMAGE_EXTENSIONS.contains(extension);
+    }
+
+    /**
+     * 파일 확장자 검증 (사진게시판 전용)
+     */
+    public static void validateImageFile(MultipartFile file) {
+        if (!isImageFile(file)) {
+            throw new FileDomainException("미리보기가 가능한 이미지 파일만 업로드할 수 있습니다. (지원 형식: JPG, PNG, GIF, BMP, WEBP)");
+        }
     }
 }
