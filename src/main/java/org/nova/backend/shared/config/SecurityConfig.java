@@ -55,6 +55,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> {
                     //게시판 관련 권한
                     configureBoardPermissions(auth);
+                    //족보 게시판 관련 권한
+                    configureJokboBoardPermissions(auth);
                     //댓글 관련 권한
                     configureCommentPermissions(auth);
                     //로그인 회원가입 관련 권한
@@ -103,6 +105,21 @@ public class SecurityConfig {
                 .hasAnyRole(Role.ADMINISTRATOR.toString(), Role.CHAIRMAN.toString());
     }
 
+    private void configureJokboBoardPermissions(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+        auth
+                // 로그인 없이 접근 가능한 API
+                .requestMatchers(
+                        "/api/v1/boards/{boardId}/exam-posts",
+                        "/api/v1/boards/{boardId}/exam-posts/{postId}"
+                ).permitAll()
+
+                // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
+                .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/exam-posts/posts")
+                .authenticated();
+    }
+
     private void configureCommentPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
@@ -117,11 +134,11 @@ public class SecurityConfig {
     private void configureAdministratorPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
-        auth.requestMatchers("/api/v1/admin").permitAll()
-                //.hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
-                .requestMatchers("/api/v1/pendingMembers/**").permitAll()
+        auth.requestMatchers("/api/v1/admin")
+                .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+                .requestMatchers("/api/v1/pendingMembers/**").hasRole(Role.ADMINISTRATOR.toString())
                 .requestMatchers("/api/v1/executiveHistories/**")
-                .permitAll();
+                .hasRole(Role.ADMINISTRATOR.toString());
     }
 
     private void configureAuthPermissions(
