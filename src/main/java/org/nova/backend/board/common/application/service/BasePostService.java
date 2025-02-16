@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
+import org.nova.backend.board.clubArchive.application.dto.response.ImageResponse;
+import org.nova.backend.board.clubArchive.application.dto.response.PicturePostSummaryResponse;
+import org.nova.backend.board.clubArchive.application.service.ImageFileService;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
@@ -21,7 +24,7 @@ import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostSummaryResponse;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
@@ -42,6 +45,7 @@ public class BasePostService implements BasePostUseCase {
     private final BoardSecurityChecker boardSecurityChecker;
     private final BoardUseCase boardUseCase;
     private final FileUseCase fileUseCase;
+    private final ImageFileService imageFileService;
     private final BasePostMapper postMapper;
 
     /**
@@ -116,7 +120,29 @@ public class BasePostService implements BasePostUseCase {
                     post.getTotalDownloadCount(),
                     post.getFiles().size()
             ));
-        } else {
+        }
+        else if (postType == PostType.PICTURES) {
+            return posts.map(post -> {
+                List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();
+                ImageResponse thumbnail = imageFileService.getThumbnail(fileIds);
+
+                return new PicturePostSummaryResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getViewCount(),
+                        post.getLikeCount(),
+                        post.getCreatedTime(),
+                        post.getModifiedTime(),
+                        post.getMember().getName(),
+                        post.getFiles().size(),
+                        thumbnail != null ? thumbnail.getId() : null,
+                        thumbnail != null ? thumbnail.getDownloadUrl() : null,
+                        thumbnail != null ? thumbnail.getWidth() : 0,
+                        thumbnail != null ? thumbnail.getHeight() : 0
+                );
+            });
+        }
+        else {
             return posts.map(postMapper::toSummaryResponse);
         }
     }

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.shared.model.ApiResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +21,8 @@ public class BoardController {
 
     @Operation(summary = "모든 게시판 조회", description = "전체 게시판 목록을 조회합니다.")
     @GetMapping
-    public ApiResponse<List<Board>> getAllBoards() {
+    public ResponseEntity<ApiResponse<List<Board>>> getAllBoards() {
         List<Board> boards = boardUseCase.getAllBoards();
-        return ApiResponse.success(boards);
+        return ResponseEntity.ok(ApiResponse.success(boards));
     }
 }

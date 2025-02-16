@@ -13,6 +13,7 @@ import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,40 +44,43 @@ public class CommentController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/posts/{postId}/comments")
     @CommentApiDocument.CreateComment
-    public ApiResponse<CommentResponse> createComment(
+    public ResponseEntity<ApiResponse<CommentResponse>> createComment(
             @PathVariable UUID postId,
             @RequestBody CommentRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        return ApiResponse.created(commentUseCase.addComment(postId, request, memberId));
+        CommentResponse createdComment = commentUseCase.addComment(postId, request, memberId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(createdComment));
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/comments/{commentId}")
     @CommentApiDocument.UpdateComment
-    public ApiResponse<CommentResponse> updateComment(
+    public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
             @PathVariable UUID commentId,
             @RequestBody UpdateCommentRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        return ApiResponse.success(commentUseCase.updateComment(commentId, request, memberId));
+        CommentResponse updatedComment = commentUseCase.updateComment(commentId, request, memberId);
+        return ResponseEntity.ok(ApiResponse.success(updatedComment));
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/comments/{commentId}")
     @CommentApiDocument.DeleteComment
-    public ApiResponse<Void> deleteComment(
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
             @PathVariable UUID commentId
     ) {
         UUID memberId = getCurrentMemberId();
         commentUseCase.deleteComment(commentId, memberId);
-        return ApiResponse.noContent();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
     @GetMapping("/posts/{postId}/comments")
     @CommentApiDocument.GetCommentsByPost
-    public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable UUID postId) {
-        return ApiResponse.success(commentUseCase.getCommentsByPostId(postId));
+    public ResponseEntity<ApiResponse<List<CommentResponse>>> getCommentsByPostId(@PathVariable UUID postId) {
+        List<CommentResponse> comments = commentUseCase.getCommentsByPostId(postId);
+        return ResponseEntity.ok(ApiResponse.success(comments));
     }
 
     /**

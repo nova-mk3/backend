@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
@@ -87,11 +88,23 @@ public class FileService implements FileUseCase {
     }
 
     /**
+     * 특정 파일 조회
+     */
+    @Override
+    public Optional<File> findFileById(UUID fileId) {
+        return filePersistencePort.findFileById(fileId);
+    }
+
+    /**
      * 파일 업로드
      */
     @Transactional
     @Override
-    public List<UUID> uploadFiles(List<MultipartFile> files, UUID memberId, PostType postType) {
+    public List<UUID> uploadFiles(
+            List<MultipartFile> files,
+            UUID memberId,
+            PostType postType
+    ) {
         if (files == null || files.isEmpty()) {
             throw new FileDomainException("업로드할 파일이 없습니다.");
         }
@@ -100,22 +113,38 @@ public class FileService implements FileUseCase {
         }
         for (MultipartFile file : files) {
             if (postType == PostType.PICTURES) {
-                FileUtil.validateImageFile(file);  // 사진게시판이면 이미지 파일 검증
+                FileUtil.validateImageFile(file);
             } else {
                 FileUtil.validateFileExtension(file);
             }
             FileUtil.validateFileSize(file);
         }
 
-        String storagePath = Paths.get(baseFileStoragePath, "general").toString();
+        String storagePath = getStoragePath(postType);
 
         return files.stream()
-                .map(file -> {
-                    String savedFilePath = saveFileToLocal(file, storagePath);
-                    File savedFile = filePersistencePort.save(new File(null, file.getOriginalFilename(), savedFilePath, null, 0));
-                    return savedFile.getId();
-                })
+                .map(file -> processFileUpload(file, storagePath))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 파일 업로드 처리
+     */
+    private UUID processFileUpload(
+            MultipartFile file,
+            String storagePath
+    ) {
+        String savedFilePath = saveFileToLocal(file, storagePath);
+        File savedFile = new File(null, file.getOriginalFilename(), savedFilePath, null, 0);
+
+        return filePersistencePort.save(savedFile).getId();
+    }
+
+    /**
+     * 파일 저장 경로 결정 (PostType 기준)
+     */
+    private String getStoragePath(PostType postType) {
+        return Paths.get(baseFileStoragePath, "post", postType.name()).toString();
     }
 
     /**
@@ -164,6 +193,14 @@ public class FileService implements FileUseCase {
         File file = filePersistencePort.findFileById(fileId)
                 .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다."));
 
+        processFileDownload(file, response);
+        updateDownloadCount(file);
+    }
+
+    /**
+     * 파일 다운로드 처리
+     */
+    private void processFileDownload(File file, HttpServletResponse response) {
         Path filePath = Paths.get(file.getFilePath());
         if (!Files.exists(filePath)) {
             throw new FileDomainException("파일이 존재하지 않습니다.");
@@ -175,23 +212,22 @@ public class FileService implements FileUseCase {
         try (InputStream inputStream = new FileInputStream(filePath.toFile())) {
             StreamUtils.copy(inputStream, response.getOutputStream());
             response.flushBuffer();
-            logger.info("파일 다운로드 성공: {}", file.getOriginalFilename());
-            file.incrementDownloadCount();
-
-            if (file.getPost() != null) {
-                file.getPost().incrementTotalDownloadCount();
-            }
-
-            filePersistencePort.save(file);
-            if (file.getPost() != null) {
-                basePostPersistencePort.save(file.getPost());
-            }
         } catch (IOException e) {
-            logger.error("파일 다운로드 중 오류 발생: {}", file.getOriginalFilename(), e);
             throw new FileDomainException("파일 다운로드 중 오류 발생", e);
         }
     }
 
+    /**
+     * 다운로드 횟수 증가
+     */
+    private void updateDownloadCount(File file) {
+        file.incrementDownloadCount();
+        if (file.getPost() != null) {
+            file.getPost().incrementTotalDownloadCount();
+            basePostPersistencePort.save(file.getPost());
+        }
+        filePersistencePort.save(file);
+    }
 
     /**
      * 로컬에 파일 저장
@@ -199,7 +235,7 @@ public class FileService implements FileUseCase {
     private String saveFileToLocal(
             MultipartFile file,
             String storagePath
-            ) {
+    ) {
         try {
             Path fileDir = Paths.get(storagePath);
             if (!Files.exists(fileDir)) {

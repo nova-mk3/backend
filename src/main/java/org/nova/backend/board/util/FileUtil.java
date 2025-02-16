@@ -67,7 +67,7 @@ public class FileUtil {
      */
     public static void validateImageFile(MultipartFile file) {
         if (!isImageFile(file)) {
-            throw new FileDomainException("미리보기가 가능한 이미지 파일만 업로드할 수 있습니다. (지원 형식: JPG, PNG, GIF, BMP, WEBP)");
+            throw new FileDomainException("미리보기가 가능한 이미지 파일만 업로드할 수 있습니다. (지원 형식: JPG, JPEG, PNG, GIF, BMP, WEBP)");
         }
     }
 }
