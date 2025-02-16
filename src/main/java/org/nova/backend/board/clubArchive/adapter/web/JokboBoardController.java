@@ -1,15 +1,15 @@
-package org.nova.backend.board.examarchive.adapter.web;
+package org.nova.backend.board.clubArchive.adapter.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.board.examarchive.adapter.doc.JokboBoardApiDocument;
-import org.nova.backend.board.examarchive.application.dto.request.JokboPostRequest;
-import org.nova.backend.board.examarchive.application.dto.request.UpdateJokboPostRequest;
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostDetailResponse;
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostSummaryResponse;
-import org.nova.backend.board.examarchive.application.port.in.JokboPostUseCase;
-import org.nova.backend.board.examarchive.domain.model.valueobject.Semester;
+import org.nova.backend.board.clubArchive.adapter.doc.JokboBoardApiDocument;
+import org.nova.backend.board.clubArchive.application.dto.request.JokboPostRequest;
+import org.nova.backend.board.clubArchive.application.dto.request.UpdateJokboPostRequest;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostDetailResponse;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
+import org.nova.backend.board.clubArchive.application.port.in.JokboPostUseCase;
+import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;

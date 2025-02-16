@@ -1,13 +1,13 @@
-package org.nova.backend.board.examarchive.application.port.in;
+package org.nova.backend.board.clubArchive.application.port.in;
 
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostDetailResponse;
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostSummaryResponse;
-import org.nova.backend.board.examarchive.application.dto.request.UpdateJokboPostRequest;
-import org.nova.backend.board.examarchive.application.dto.request.JokboPostRequest;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostDetailResponse;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
+import org.nova.backend.board.clubArchive.application.dto.request.UpdateJokboPostRequest;
+import org.nova.backend.board.clubArchive.application.dto.request.JokboPostRequest;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.nova.backend.board.examarchive.domain.model.valueobject.Semester;
+import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 
 public interface JokboPostUseCase {
     JokboPostDetailResponse createPost(UUID boardId, JokboPostRequest request, UUID memberId);

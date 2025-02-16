@@ -1,4 +1,4 @@
-package org.nova.backend.board.examarchive.domain.exception;
+package org.nova.backend.board.clubArchive.domain.exception;
 
 import org.nova.backend.shared.exception.CustomException;
 import org.springframework.http.HttpStatus;

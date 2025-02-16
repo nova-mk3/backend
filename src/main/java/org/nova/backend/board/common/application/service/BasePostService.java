@@ -21,7 +21,7 @@ import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostSummaryResponse;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;

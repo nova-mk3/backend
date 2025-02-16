@@ -1,4 +1,4 @@
-package org.nova.backend.board.examarchive.application.dto.request;
+package org.nova.backend.board.clubArchive.application.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.nova.backend.board.examarchive.domain.model.valueobject.Semester;
+import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 
 @Getter
 @NoArgsConstructor

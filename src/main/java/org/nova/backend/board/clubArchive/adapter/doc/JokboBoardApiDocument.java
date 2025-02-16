@@ -1,4 +1,4 @@
-package org.nova.backend.board.examarchive.adapter.doc;
+package org.nova.backend.board.clubArchive.adapter.doc;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

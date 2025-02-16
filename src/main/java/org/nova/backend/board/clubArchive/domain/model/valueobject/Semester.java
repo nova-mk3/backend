@@ -1,4 +1,4 @@
-package org.nova.backend.board.examarchive.domain.model.valueobject;
+package org.nova.backend.board.clubArchive.domain.model.valueobject;
 
 import lombok.Getter;
 

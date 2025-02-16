@@ -1,4 +1,4 @@
-package org.nova.backend.board.examarchive.application.dto.response;
+package org.nova.backend.board.clubArchive.application.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -6,10 +6,10 @@ import java.util.UUID;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.nova.backend.board.examarchive.application.port.out.JokboPostPersistencePort;
-import org.nova.backend.board.examarchive.domain.model.entity.JokboPost;
+import org.nova.backend.board.clubArchive.application.port.out.JokboPostPersistencePort;
+import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
 import org.nova.backend.board.persistence.repository.JokboPostRepository;
-import org.nova.backend.board.examarchive.domain.model.valueobject.Semester;
+import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 import org.springframework.stereotype.Component;
 
 @Component

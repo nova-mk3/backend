@@ -1,11 +1,10 @@
-package org.nova.backend.board.examarchive.domain.model.entity;
+package org.nova.backend.board.clubArchive.domain.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -15,7 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.Table;
 import org.nova.backend.board.common.domain.model.entity.Post;
-import org.nova.backend.board.examarchive.domain.model.valueobject.Semester;
+import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 
 @Entity
 @Getter

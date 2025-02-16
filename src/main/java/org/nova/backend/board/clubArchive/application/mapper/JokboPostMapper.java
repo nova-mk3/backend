@@ -1,12 +1,12 @@
-package org.nova.backend.board.examarchive.application.mapper;
+package org.nova.backend.board.clubArchive.application.mapper;
 
 import java.util.List;
 import java.util.UUID;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
-import org.nova.backend.board.examarchive.application.dto.request.JokboPostRequest;
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostDetailResponse;
-import org.nova.backend.board.examarchive.application.dto.response.JokboPostSummaryResponse;
-import org.nova.backend.board.examarchive.domain.model.entity.JokboPost;
+import org.nova.backend.board.clubArchive.application.dto.request.JokboPostRequest;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostDetailResponse;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
+import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
 import org.nova.backend.board.common.domain.model.entity.Post;
 
 import org.springframework.stereotype.Component;
