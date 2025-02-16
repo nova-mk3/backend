@@ -10,6 +10,7 @@ import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,19 +28,19 @@ public class PostLikeController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/like")
     @PostLikeApiDocument.LikePost
-    public ApiResponse<Integer> likePost(@PathVariable UUID postId) {
+    public ResponseEntity<ApiResponse<Integer>> likePost(@PathVariable UUID postId) {
         UUID memberId = getCurrentMemberId();
         int likeCount = postUseCase.likePost(postId, memberId);
-        return ApiResponse.success(likeCount);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(likeCount));
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/unlike")
     @PostLikeApiDocument.UnlikePost
-    public ApiResponse<Integer> unlikePost(@PathVariable UUID postId) {
+    public ResponseEntity<ApiResponse<Integer>> unlikePost(@PathVariable UUID postId) {
         UUID memberId = getCurrentMemberId();
         int likeCount = postUseCase.unlikePost(postId, memberId);
-        return ApiResponse.success(likeCount);
+        return ResponseEntity.ok(ApiResponse.success(likeCount));
     }
 
     /**

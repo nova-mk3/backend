@@ -19,6 +19,7 @@ import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,79 +45,79 @@ public class IntegratedBoardController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping
     @IntegratedBoardApiDocument.CreatePost
-    public ApiResponse<BasePostDetailResponse> createPost(
+    public ResponseEntity<ApiResponse<BasePostDetailResponse>> createPost(
             @PathVariable UUID boardId,
             @RequestBody BasePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
         var savedPost = basePostUseCase.createPost(boardId, request, memberId);
-        return ApiResponse.created(savedPost);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(savedPost));
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/{postId}")
     @IntegratedBoardApiDocument.UpdatePost
-    public ApiResponse<BasePostDetailResponse> updatePost(
+    public ResponseEntity<ApiResponse<BasePostDetailResponse>> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
             @RequestBody UpdateBasePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
         basePostUseCase.updatePost(boardId, postId, request, memberId);
-        return ApiResponse.noContent();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{postId}")
     @IntegratedBoardApiDocument.DeletePost
-    public ApiResponse<Void> deletePost(
+    public ResponseEntity<ApiResponse<Void>> deletePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
         UUID memberId = getCurrentMemberId();
         basePostUseCase.deletePost(boardId, postId, memberId);
-        return ApiResponse.noContent();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
 
     @GetMapping
     @IntegratedBoardApiDocument.GetPostsByCategory
-    public ApiResponse<Page<?>> getPostsByCategory(
+    public ResponseEntity<ApiResponse<Page<?>>> getPostsByCategory(
             @PathVariable UUID boardId,
             @RequestParam PostType postType,
             Pageable pageable
     ) {
         var posts = basePostUseCase.getPostsByCategory(boardId, postType, pageable);
-        return ApiResponse.success(posts);
+        return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
-    public ApiResponse<BasePostDetailResponse> getPostById(
+    public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
         var post = basePostUseCase.getPostById(boardId, postId);
-        return ApiResponse.success(post);
+        return ResponseEntity.ok(ApiResponse.success(post));
     }
 
     @GetMapping("/latest")
     @IntegratedBoardApiDocument.GetLatestPostByType
-    public ApiResponse<Map<PostType, List<BasePostSummaryResponse>>> getLatestPostsByType(
+    public ResponseEntity<ApiResponse<Map<PostType, List<BasePostSummaryResponse>>>> getLatestPostsByType(
             @PathVariable UUID boardId
     ) {
         var latestPosts = basePostUseCase.getLatestPostsByType(boardId);
-        return ApiResponse.success(latestPosts);
+        return ResponseEntity.ok(ApiResponse.success(latestPosts));
     }
 
     @GetMapping("/all")
     @IntegratedBoardApiDocument.GetAllPosts
-    public ApiResponse<Page<BasePostSummaryResponse>> getAllPosts(
+    public ResponseEntity<ApiResponse<Page<BasePostSummaryResponse>>> getAllPosts(
             @PathVariable UUID boardId,
             Pageable pageable
     ) {
         var posts = basePostUseCase.getAllPosts(boardId, pageable);
-        return ApiResponse.success(posts);
+        return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
     /**

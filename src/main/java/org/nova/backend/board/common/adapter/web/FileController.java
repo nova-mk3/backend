@@ -14,6 +14,7 @@ import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,13 +40,13 @@ public class FileController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @FileApiDocument.UploadFiles
     @GetMapping("/upload")
-    public ApiResponse<List<UUID>> uploadFiles(
+    public ResponseEntity<ApiResponse<List<UUID>>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam("postType") PostType postType
     ) {
         UUID memberId = getCurrentMemberId();
         List<UUID> fileIds = fileUseCase.uploadFiles(files, memberId, postType);
-        return ApiResponse.success(fileIds);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(fileIds));
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -62,12 +63,12 @@ public class FileController {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{fileId}")
     @FileApiDocument.DeleteFile
-    public ApiResponse<Void> deleteFile(
+    public ResponseEntity<ApiResponse<Void>> deleteFile(
             @PathVariable UUID fileId
     ) {
         UUID memberId = getCurrentMemberId();
         fileUseCase.deleteFileById(fileId, memberId);
-        return ApiResponse.noContent();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
     /**

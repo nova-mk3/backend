@@ -17,6 +17,7 @@ import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,53 +34,53 @@ public class JokboBoardController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping
     @JokboBoardApiDocument.CreatePost
-    public ApiResponse<JokboPostDetailResponse> createPost(
+    public ResponseEntity<ApiResponse<JokboPostDetailResponse>> createPost(
             @PathVariable UUID boardId,
             @RequestBody JokboPostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
         var savedPost = jokboPostUseCase.createPost(boardId, request, memberId);
-        return ApiResponse.created(savedPost);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(savedPost));
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/{postId}")
     @JokboBoardApiDocument.UpdatePost
-    public ApiResponse<JokboPostDetailResponse> updatePost(
+    public ResponseEntity<ApiResponse<JokboPostDetailResponse>> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
             @RequestBody UpdateJokboPostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
         jokboPostUseCase.updatePost(boardId, postId, request, memberId);
-        return ApiResponse.noContent();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{postId}")
     @JokboBoardApiDocument.DeletePost
-    public ApiResponse<Void> deletePost(
+    public ResponseEntity<ApiResponse<Void>> deletePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
         UUID memberId = getCurrentMemberId();
         jokboPostUseCase.deletePost(boardId, postId, memberId);
-        return ApiResponse.noContent();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
     @GetMapping("/{postId}")
     @JokboBoardApiDocument.GetPostById
-    public ApiResponse<JokboPostDetailResponse> getPostById(
+    public ResponseEntity<ApiResponse<JokboPostDetailResponse>> getPostById(
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
         var post = jokboPostUseCase.getPostById(boardId, postId);
-        return ApiResponse.success(post);
+        return ResponseEntity.ok(ApiResponse.success(post));
     }
 
     @GetMapping
     @JokboBoardApiDocument.GetPostsByFilter
-    public ApiResponse<Page<JokboPostSummaryResponse>> getPostsByFilter(
+    public ResponseEntity<ApiResponse<Page<JokboPostSummaryResponse>>> getPostsByFilter(
             @PathVariable UUID boardId,
             @RequestParam(required = false) String professorName,
             @RequestParam(required = false) Integer year,
@@ -87,7 +88,7 @@ public class JokboBoardController {
             Pageable pageable
     ) {
         var posts = jokboPostUseCase.getPostsByFilter(boardId, professorName, year, semester, pageable);
-        return ApiResponse.success(posts);
+        return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
     /**
