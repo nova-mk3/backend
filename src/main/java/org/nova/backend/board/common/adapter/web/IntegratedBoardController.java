@@ -17,7 +17,9 @@ import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -85,12 +87,16 @@ public class IntegratedBoardController {
     public ResponseEntity<ApiResponse<Page<?>>> getPostsByCategory(
             @PathVariable UUID boardId,
             @RequestParam PostType postType,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
             Pageable pageable
     ) {
-        var posts = basePostUseCase.getPostsByCategory(boardId, postType, pageable);
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        var posts = basePostUseCase.getPostsByCategory(boardId, postType, sortedPageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
-
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(
@@ -114,9 +120,14 @@ public class IntegratedBoardController {
     @IntegratedBoardApiDocument.GetAllPosts
     public ResponseEntity<ApiResponse<Page<BasePostSummaryResponse>>> getAllPosts(
             @PathVariable UUID boardId,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
             Pageable pageable
     ) {
-        var posts = basePostUseCase.getAllPosts(boardId, pageable);
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        var posts = basePostUseCase.getAllPosts(boardId, sortedPageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
