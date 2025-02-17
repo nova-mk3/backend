@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.application.port.out.FilePersistencePort;
@@ -92,7 +93,7 @@ public class FileService implements FileUseCase {
      */
     @Transactional
     @Override
-    public List<UUID> uploadFiles(
+    public List<FileResponse> uploadFiles(
             List<MultipartFile> files,
             UUID memberId,
             PostType postType
@@ -122,14 +123,20 @@ public class FileService implements FileUseCase {
     /**
      * 파일 업로드 처리
      */
-    private UUID processFileUpload(
+    private FileResponse processFileUpload(
             MultipartFile file,
             String storagePath
     ) {
         String savedFilePath = saveFileToLocal(file, storagePath);
         File savedFile = new File(null, file.getOriginalFilename(), savedFilePath, null, 0);
+        savedFile = filePersistencePort.save(savedFile);
 
-        return filePersistencePort.save(savedFile).getId();
+        return new FileResponse(
+                savedFile.getId(),
+                savedFile.getOriginalFilename(),
+                "/api/v1/files/" + savedFile.getId() + "/download"
+        );
+
     }
 
     /**

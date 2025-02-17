@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.FileApiDocument;
+import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,13 +40,13 @@ public class FileController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @FileApiDocument.UploadFiles
     @GetMapping("/upload")
-    public ResponseEntity<ApiResponse<List<UUID>>> uploadFiles(
+    public ResponseEntity<ApiResponse<List<FileResponse>>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam("postType") PostType postType
     ) {
         UUID memberId = getCurrentMemberId();
-        List<UUID> fileIds = fileUseCase.uploadFiles(files, memberId, postType);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(fileIds));
+        List<FileResponse> fileResponses = fileUseCase.uploadFiles(files, memberId, postType);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(fileResponses));
     }
 
     @PreAuthorize("isAuthenticated()")

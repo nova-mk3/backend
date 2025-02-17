@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.suggestion.adapter.doc.SuggestionFileApiDocument;
+import org.nova.backend.board.suggestion.application.dto.response.SuggestionFileResponse;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionFileUseCase;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
@@ -37,12 +38,12 @@ public class SuggestionFileController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SuggestionFileApiDocument.UploadFiles
     @GetMapping("/upload")
-    public ResponseEntity<ApiResponse<List<UUID>>> uploadFiles(
+    public ResponseEntity<ApiResponse<List<SuggestionFileResponse>>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files
     ) {
         UUID memberId = getCurrentMemberId();
-        List<UUID> fileIds = fileUseCase.uploadFiles(files, memberId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(fileIds));
+        List<SuggestionFileResponse> fileResponses = fileUseCase.uploadFiles(files, memberId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(fileResponses));
     }
 
     @PreAuthorize("isAuthenticated()")

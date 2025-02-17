@@ -39,7 +39,7 @@ public class SuggestionPostMapper {
                 .map(file -> new SuggestionFileResponse(
                         file.getId(),
                         file.getOriginalFilename(),
-                        "/api/v1/files/" + file.getId() + "/download"
+                        "/api/v1/suggestion-files/" + file.getId() + "/download"
                 ))
                 .toList();
         return new SuggestionPostDetailResponse(
