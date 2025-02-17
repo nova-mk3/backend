@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
@@ -19,10 +20,12 @@ import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
+import org.nova.backend.board.common.domain.model.entity.PostLike;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -33,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,6 +46,7 @@ public class BasePostService implements BasePostUseCase {
     private static final Logger logger = LoggerFactory.getLogger(BasePostService.class);
 
     private final BasePostPersistencePort basePostPersistencePort;
+    private final PostLikePersistencePort postLikePersistencePort;
     private final MemberRepository memberRepository;
     private final BoardSecurityChecker boardSecurityChecker;
     private final BoardUseCase boardUseCase;
@@ -79,7 +85,7 @@ public class BasePostService implements BasePostUseCase {
             savedPost.addFiles(files);
         }
         basePostPersistencePort.save(savedPost);
-        return postMapper.toDetailResponse(savedPost);
+        return postMapper.toDetailResponse(savedPost, false);
     }
 
     /**
@@ -148,7 +154,7 @@ public class BasePostService implements BasePostUseCase {
     }
 
     /**
-     * 특정 게시글 조회
+     * 게시글 상세 조회
      */
     @Override
     @Transactional
@@ -156,24 +162,53 @@ public class BasePostService implements BasePostUseCase {
             UUID boardId,
             UUID postId
     ) {
+
         basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. Board ID: " + boardId + ", Post ID: " + postId));
-        return postMapper.toDetailResponse(post);
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
+
+        UUID memberId = getCurrentMemberId().orElse(null);
+        boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+
+        return postMapper.toDetailResponse(post, isLiked);
     }
 
+    /**
+     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
+     */
+    private Optional<UUID> getCurrentMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return Optional.empty();
+        }
+
+        String studentNumber = authentication.getName();
+
+        return memberRepository.findByStudentNumber(studentNumber)
+                .map(Member::getId);
+    }
 
     /**
      * 특정 게시글 좋아요
      */
     @Override
     @Transactional
-    public int likePost(
-            UUID postId,
-            UUID memberId
-    ) {
-        return basePostPersistencePort.likePost(postId, memberId);
+    public int likePost(UUID postId, UUID memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+
+        Post post = basePostPersistencePort.findById(postId)
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
+
+        if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent()) {
+            throw new BoardDomainException("이미 좋아요를 눌렀습니다.");
+        }
+
+        postLikePersistencePort.save(new PostLike(post, member));
+        basePostPersistencePort.increaseLikeCount(postId);
+
+        return basePostPersistencePort.getLikeCount(postId);
     }
 
     /**
@@ -181,11 +216,15 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public int unlikePost(
-            UUID postId,
-            UUID memberId
-    ) {
-        return basePostPersistencePort.unlikePost(postId, memberId);
+    public int unlikePost(UUID postId, UUID memberId) {
+        if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isEmpty()) {
+            throw new BoardDomainException("좋아요를 누르지 않은 게시글입니다.");
+        }
+
+        postLikePersistencePort.deleteByPostIdAndMemberId(postId, memberId);
+        basePostPersistencePort.decreaseLikeCount(postId);
+
+        return basePostPersistencePort.getLikeCount(postId);
     }
 
     /**

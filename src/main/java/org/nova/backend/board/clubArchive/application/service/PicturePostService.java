@@ -3,6 +3,7 @@ package org.nova.backend.board.clubArchive.application.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
@@ -15,6 +16,7 @@ import org.nova.backend.board.clubArchive.domain.exception.PictureDomainExceptio
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
@@ -25,6 +27,8 @@ import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PicturePostService implements PicturePostUseCase {
     private final BasePostPersistencePort basePostPersistencePort;
+    private final PostLikePersistencePort postLikePersistencePort;
     private final FileUseCase fileUseCase;
     private final BoardUseCase boardUseCase;
     private final ImageFileService imageFileService;
@@ -78,7 +83,7 @@ public class PicturePostService implements PicturePostUseCase {
         }
 
         basePostPersistencePort.save(savedPost);
-        return toDetailResponse(savedPost);
+        return toDetailResponse(savedPost, false);
     }
 
     /**
@@ -149,17 +154,40 @@ public class PicturePostService implements PicturePostUseCase {
      */
     @Override
     @Transactional
-    public PicturePostDetailResponse getPostById(UUID boardId, UUID postId) {
+    public PicturePostDetailResponse getPostById(
+            UUID boardId,
+            UUID postId
+    ) {
+        basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
-        return toDetailResponse(post);
+        UUID memberId = getCurrentMemberId().orElse(null);
+        boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+
+        return toDetailResponse(post, isLiked);
+    }
+
+    /**
+     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
+     */
+    private Optional<UUID> getCurrentMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return Optional.empty();
+        }
+
+        String studentNumber = authentication.getName();
+
+        return memberRepository.findByStudentNumber(studentNumber)
+                .map(Member::getId);
     }
 
     /**
      * 사진 게시글 상세 응답 변환
      */
-    private PicturePostDetailResponse toDetailResponse(Post post) {
+    private PicturePostDetailResponse toDetailResponse(Post post, boolean isLiked) {
         List<ImageResponse> images = post.getFiles().stream()
                 .map(imageFileService::createImageResponse)
                 .toList();
@@ -173,7 +201,8 @@ public class PicturePostService implements PicturePostUseCase {
                 post.getCreatedTime(),
                 post.getModifiedTime(),
                 post.getMember().getName(),
-                images
+                images,
+                isLiked
         );
     }
 }

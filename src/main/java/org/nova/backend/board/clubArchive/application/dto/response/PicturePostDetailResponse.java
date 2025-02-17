@@ -20,4 +20,5 @@ public class PicturePostDetailResponse {
     private LocalDateTime modifiedTime;
     private String authorName;
     private List<ImageResponse> images;
+    private boolean isLiked;
 }

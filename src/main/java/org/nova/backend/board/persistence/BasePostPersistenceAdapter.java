@@ -53,15 +53,18 @@ public class BasePostPersistenceAdapter implements BasePostPersistencePort {
 
     @Override
     @Transactional
-    public int likePost(UUID postId, UUID memberId) {
+    public void increaseLikeCount(UUID postId) {
         postRepository.increaseLikeCount(postId);
-        return postRepository.getLikeCount(postId);
     }
 
     @Override
     @Transactional
-    public int unlikePost(UUID postId, UUID memberId) {
+    public void decreaseLikeCount(UUID postId) {
         postRepository.decreaseLikeCount(postId);
+    }
+
+    @Override
+    public int getLikeCount(UUID postId) {
         return postRepository.getLikeCount(postId);
     }
 

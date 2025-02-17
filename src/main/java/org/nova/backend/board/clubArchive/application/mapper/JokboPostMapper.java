@@ -28,7 +28,7 @@ public class JokboPostMapper {
         );
     }
 
-    public JokboPostDetailResponse toDetailResponseFromPost(Post post) {
+    public JokboPostDetailResponse toDetailResponseFromPost(Post post, boolean isLiked) {
         List<FileResponse> fileResponses = post.getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
@@ -47,11 +47,12 @@ public class JokboPostMapper {
                 post.getModifiedTime(),
                 fileResponses,
                 post.getMember().getName(),
-                post.getMember().getProfilePhoto()
+                post.getMember().getProfilePhoto(),
+                isLiked
         );
     }
 
-    public JokboPostDetailResponse toDetailResponse(JokboPost post) {
+    public JokboPostDetailResponse toDetailResponse(JokboPost post, boolean isLiked) {
         List<FileResponse> fileResponses = post.getPost().getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
@@ -69,7 +70,8 @@ public class JokboPostMapper {
                 post.getPost().getModifiedTime(),
                 fileResponses,
                 post.getPost().getMember().getName(),
-                post.getPost().getMember().getProfilePhoto()
+                post.getPost().getMember().getProfilePhoto(),
+                isLiked
         );
     }
 

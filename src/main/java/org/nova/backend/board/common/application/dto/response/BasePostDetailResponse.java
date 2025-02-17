@@ -22,4 +22,5 @@ public class BasePostDetailResponse {
     private List<FileResponse> files;
     private String authorName;
     private String authorProfilePhoto;
+    private boolean isLiked;
 }
