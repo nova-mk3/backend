@@ -39,7 +39,7 @@ public class BasePostMapper {
         );
     }
 
-    public BasePostDetailResponse toDetailResponse(Post post) {
+    public BasePostDetailResponse toDetailResponse(Post post, boolean isLiked) {
         List<FileResponse> fileResponses = post.getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
@@ -58,7 +58,8 @@ public class BasePostMapper {
                 post.getModifiedTime(),
                 fileResponses,
                 post.getMember().getName(),
-                post.getMember().getProfilePhoto()
+                post.getMember().getProfilePhoto(),
+                isLiked
         );
     }
 

@@ -22,8 +22,7 @@ public interface BasePostPersistencePort {
 
     void deleteById(UUID postId);
     void increaseViewCount(@Param("postId") UUID postId);
-
-    int likePost(@Param("postId") UUID postId, @Param("memberId") UUID memberId);
-    int unlikePost(@Param("postId") UUID postId, @Param("memberId") UUID memberId);
-
+    void increaseLikeCount(@Param("postId") UUID postId);
+    void decreaseLikeCount(@Param("postId") UUID postId);
+    int getLikeCount(@Param("postId") UUID postId);
 }

@@ -4,11 +4,13 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
@@ -33,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,6 +46,7 @@ public class JokboPostService implements JokboPostUseCase {
 
     private final JokboPostPersistencePort jokboPostPersistencePort;
     private final BasePostPersistencePort basePostPersistencePort;
+    private final PostLikePersistencePort postLikePersistencePort;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final BoardUseCase boardUseCase;
@@ -91,7 +96,7 @@ public class JokboPostService implements JokboPostUseCase {
             savedPost.addFiles(files);
             basePostPersistencePort.save(savedPost);
         }
-        return jokboPostMapper.toDetailResponse(jokboPost);
+        return jokboPostMapper.toDetailResponse(jokboPost, false);
     }
 
     /**
@@ -166,15 +171,38 @@ public class JokboPostService implements JokboPostUseCase {
     }
 
     /**
+     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
+     */
+    private Optional<UUID> getCurrentMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return Optional.empty();
+        }
+
+        String studentNumber = authentication.getName();
+
+        return memberRepository.findByStudentNumber(studentNumber)
+                .map(Member::getId);
+    }
+
+    /**
      * 특정 족보 게시글 조회
      */
     @Override
     @Transactional
-    public JokboPostDetailResponse getPostById(UUID boardId, UUID postId) {
+    public JokboPostDetailResponse getPostById(
+            UUID boardId,
+            UUID postId
+    ) {
+        basePostPersistencePort.increaseViewCount(postId);
         Post post = postRepository.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("족보 게시글을 찾을 수 없습니다."));
 
-        return jokboPostMapper.toDetailResponseFromPost(post);
+        UUID memberId = getCurrentMemberId().orElse(null);
+        boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+
+        return jokboPostMapper.toDetailResponseFromPost(post, isLiked);
     }
 
     /**
