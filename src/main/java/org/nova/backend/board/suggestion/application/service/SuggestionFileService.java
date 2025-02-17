@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
+import org.nova.backend.board.suggestion.application.dto.response.SuggestionFileResponse;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionFileUseCase;
 import org.nova.backend.board.suggestion.application.port.out.SuggestionFilePersistencePort;
 import org.nova.backend.board.suggestion.domain.exception.SuggestionFileDomainException;
@@ -45,7 +46,7 @@ public class SuggestionFileService implements SuggestionFileUseCase {
      */
     @Transactional
     @Override
-    public List<UUID> uploadFiles(
+    public List<SuggestionFileResponse> uploadFiles(
             List<MultipartFile> files,
             UUID postId
     ) {
@@ -62,14 +63,19 @@ public class SuggestionFileService implements SuggestionFileUseCase {
                 .collect(Collectors.toList());
     }
 
-    private UUID processFileUpload(
+    private SuggestionFileResponse processFileUpload(
             MultipartFile file,
             String storagePath
     ) {
         String savedFilePath = saveFileToLocal(file, storagePath);
         SuggestionFile savedFile = new SuggestionFile(null, file.getOriginalFilename(), savedFilePath, null);
+        savedFile = filePersistencePort.save(savedFile);
 
-        return filePersistencePort.save(savedFile).getId();
+        return new SuggestionFileResponse(
+                savedFile.getId(),
+                savedFile.getOriginalFilename(),
+                "/api/v1/suggestion-files/" + savedFile.getId() + "/download"
+        );
     }
 
     private String getStoragePath() {
