@@ -26,8 +26,7 @@ public class BoardInitializer implements CommandLineRunner {
     public void run(String... args) {
         List<BoardCategory> categories = Arrays.asList(
                 BoardCategory.INTEGRATED,
-                BoardCategory.CLUB_ARCHIVE,
-                BoardCategory.SUGGESTION
+                BoardCategory.CLUB_ARCHIVE
         );
 
         for (BoardCategory category : categories) {
