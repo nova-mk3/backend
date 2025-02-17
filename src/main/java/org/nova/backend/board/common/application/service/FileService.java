@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.application.port.out.FilePersistencePort;
@@ -31,6 +32,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@RequiredArgsConstructor
 public class FileService implements FileUseCase {
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
 
@@ -40,16 +42,6 @@ public class FileService implements FileUseCase {
 
     @Value("${file.storage.path}")
     private String baseFileStoragePath;
-
-    public FileService(
-            FilePersistencePort filePersistencePort,
-            BasePostPersistencePort basePostPersistencePort,
-            MemberRepository memberRepository
-    ) {
-        this.filePersistencePort = filePersistencePort;
-        this.basePostPersistencePort = basePostPersistencePort;
-        this.memberRepository = memberRepository;
-    }
 
     /**
      * 로컬에서 파일 삭제 + DB에서도 삭제
@@ -72,7 +64,7 @@ public class FileService implements FileUseCase {
     }
 
     /**
-     * 삭제할 파일 먼저 조회
+     * 파일 list로 조회
      */
     @Override
     public List<File> findFilesByIds(List<UUID> fileIds) {
@@ -200,7 +192,10 @@ public class FileService implements FileUseCase {
     /**
      * 파일 다운로드 처리
      */
-    private void processFileDownload(File file, HttpServletResponse response) {
+    private void processFileDownload(
+            File file,
+            HttpServletResponse response
+    ) {
         Path filePath = Paths.get(file.getFilePath());
         if (!Files.exists(filePath)) {
             throw new FileDomainException("파일이 존재하지 않습니다.");
