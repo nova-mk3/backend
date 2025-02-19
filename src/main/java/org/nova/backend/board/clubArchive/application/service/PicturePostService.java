@@ -91,7 +91,7 @@ public class PicturePostService implements PicturePostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public PicturePostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdatePicturePostRequest request,
@@ -121,6 +121,9 @@ public class PicturePostService implements PicturePostUseCase {
 
         post.updatePost(request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return toDetailResponse(post,isLiked);
     }
 
     /**

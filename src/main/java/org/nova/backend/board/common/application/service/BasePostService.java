@@ -242,7 +242,7 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public BasePostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdateBasePostRequest request,
@@ -271,6 +271,9 @@ public class BasePostService implements BasePostUseCase {
         }
         post.updatePost(request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return postMapper.toDetailResponse(post, isLiked);
     }
 
     /**

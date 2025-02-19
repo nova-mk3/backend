@@ -11,7 +11,7 @@ import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 
 public interface JokboPostUseCase {
     JokboPostDetailResponse createPost(UUID boardId, JokboPostRequest request, UUID memberId);
-    void updatePost(UUID boardId, UUID postId, UpdateJokboPostRequest request, UUID memberId);
+    JokboPostDetailResponse updatePost(UUID boardId, UUID postId, UpdateJokboPostRequest request, UUID memberId);
     void deletePost(UUID boardId, UUID postId, UUID memberId);
     JokboPostDetailResponse getPostById(UUID boardId, UUID postId);
     Page<JokboPostSummaryResponse> getPostsByFilter(UUID boardId, String professorName, Integer year, Semester semester, Pageable pageable);

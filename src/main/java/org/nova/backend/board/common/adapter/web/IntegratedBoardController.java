@@ -65,8 +65,8 @@ public class IntegratedBoardController {
             @RequestBody UpdateBasePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        basePostUseCase.updatePost(boardId, postId, request, memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+        BasePostDetailResponse updatedPost = basePostUseCase.updatePost(boardId, postId, request, memberId);
+        return ResponseEntity.ok(ApiResponse.success(updatedPost));
     }
 
     @PreAuthorize("isAuthenticated()")

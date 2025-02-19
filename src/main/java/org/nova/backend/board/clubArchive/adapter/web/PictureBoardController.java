@@ -48,14 +48,14 @@ public class PictureBoardController {
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{postId}")
     @PictureBoardApiDocument.UpdatePost
-    public ResponseEntity<ApiResponse<Void>> updatePost(
+    public ResponseEntity<ApiResponse<PicturePostDetailResponse>> updatePost(
             @PathVariable UUID boardId,
             @PathVariable UUID postId,
             @RequestBody UpdatePicturePostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        picturePostUseCase.updatePost(boardId, postId, request, memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+        PicturePostDetailResponse updatedPost = picturePostUseCase.updatePost(boardId, postId, request, memberId);
+        return ResponseEntity.ok(ApiResponse.success(updatedPost));
     }
 
     /**

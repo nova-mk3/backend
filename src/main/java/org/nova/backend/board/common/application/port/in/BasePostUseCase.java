@@ -19,7 +19,7 @@ public interface BasePostUseCase {
     BasePostDetailResponse getPostById(UUID boardId, UUID postId);
     Map<PostType, List<BasePostSummaryResponse>> getLatestPostsByType(UUID boardId);
 
-    void updatePost(UUID boardId, UUID postId, UpdateBasePostRequest request, UUID memberId);
+    BasePostDetailResponse updatePost(UUID boardId, UUID postId, UpdateBasePostRequest request, UUID memberId);
     void deletePost(UUID boardId, UUID postId, UUID memberId);
 
     int likePost(UUID postId, UUID memberId);
