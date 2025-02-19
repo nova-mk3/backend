@@ -234,7 +234,7 @@ public class FileService implements FileUseCase {
     /**
      * 로컬에 파일 저장
      */
-    private String saveFileToLocal(
+    public String saveFileToLocal(
             MultipartFile file,
             String storagePath
     ) {

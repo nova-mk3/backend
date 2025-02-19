@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 
 @Getter
 @NoArgsConstructor
@@ -21,6 +22,6 @@ public class BasePostDetailResponse {
     private LocalDateTime modifiedTime;
     private List<FileResponse> files;
     private String authorName;
-    private String authorProfilePhoto;
+    private ProfilePhotoResponse authorProfilePhoto;
     private boolean isLiked;
 }

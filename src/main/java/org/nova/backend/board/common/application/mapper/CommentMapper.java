@@ -3,15 +3,21 @@ package org.nova.backend.board.common.application.mapper;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.nova.backend.board.common.application.dto.request.CommentRequest;
 import org.nova.backend.board.common.application.dto.response.CommentResponse;
 import org.nova.backend.board.common.domain.model.entity.Comment;
 import org.nova.backend.board.common.domain.model.entity.Post;
+import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
+import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class CommentMapper {
+
+    private MemberProfilePhotoMapper profilePhotoMapper;
 
     public Comment toEntity(
             CommentRequest request,
@@ -41,13 +47,16 @@ public class CommentMapper {
                 .map(c -> toResponse(c, allComments))
                 .toList();
 
+        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(
+                comment.getMember().getProfilePhoto());
+
         return new CommentResponse(
                 comment.getId(),
                 comment.getContent(),
                 comment.getCreatedTime(),
                 comment.getModifiedTime(),
                 comment.getMember().getName(),
-                comment.getMember().getProfilePhoto(),
+                profilePhotoResponse,
                 childComment
         );
     }

@@ -43,7 +43,9 @@ public class Member {
 
     private boolean isAbsence;
 
-    private String profilePhoto;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_photo_id")
+    private ProfilePhoto profilePhoto;
 
     private String phone;
 

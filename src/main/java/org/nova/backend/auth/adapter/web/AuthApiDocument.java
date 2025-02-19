@@ -32,6 +32,17 @@ public @interface AuthApiDocument {
     @interface SignUpApiDoc {
     }
 
+    @Operation(summary = "회원가입시 프로필 사진 업로드", description = "회원가입 시 프로필 사진을 업로드합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "회원 프로필 사진 업로드 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "500", description = "서버 오류"),
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface UploadProfilePhotoApiDoc {
+    }
+
     @Operation(summary = "로그인", description = "회원가입된 정보로 본인 인증 로그인")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공",

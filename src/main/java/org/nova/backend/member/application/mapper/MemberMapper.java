@@ -1,6 +1,7 @@
 package org.nova.backend.member.application.mapper;
 
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -9,7 +10,10 @@ import org.nova.backend.member.domain.model.valueobject.Role;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class MemberMapper {
+
+    private MemberProfilePhotoMapper profilePhotoMapper;
 
     public Member toEntity(PendingMember pendingMember, Graduation graduation) {
         return new Member(
@@ -42,7 +46,7 @@ public class MemberMapper {
                 member.getGrade(),
                 member.getSemester(),
                 member.isAbsence(),
-                member.getProfilePhoto(),
+                profilePhotoMapper.toResponse(member.getProfilePhoto()),
                 member.getPhone(),
                 member.getIntroduction(),
                 member.getBirth(),

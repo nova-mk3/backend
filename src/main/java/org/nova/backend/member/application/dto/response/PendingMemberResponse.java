@@ -3,7 +3,6 @@ package org.nova.backend.member.application.dto.response;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.nova.backend.member.domain.model.valueobject.Role;
 
 @Getter
 @AllArgsConstructor
@@ -17,7 +16,7 @@ public class PendingMemberResponse {
     private int grade;
     private int semester;
     private boolean isAbsence;
-    private String profilePhoto;
+    private ProfilePhotoResponse profilePhoto;
     private String phone;
     private String introduction;
     private String birth;

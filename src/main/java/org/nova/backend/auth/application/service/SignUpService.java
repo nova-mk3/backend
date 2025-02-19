@@ -10,10 +10,12 @@ import org.nova.backend.member.adapter.repository.PendingGraduationRepository;
 import org.nova.backend.member.adapter.repository.PendingMemberRepository;
 import org.nova.backend.member.application.mapper.PendingGraduationMapper;
 import org.nova.backend.member.application.mapper.PendingMemberMapper;
+import org.nova.backend.member.application.service.ProfilePhotoFileService;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.exception.PendingMemberDomainException;
 import org.nova.backend.member.domain.model.entity.PendingGraduation;
 import org.nova.backend.member.domain.model.entity.PendingMember;
+import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,8 @@ public class SignUpService {
     private final PendingGraduationRepository pendingGraduationRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final ProfilePhotoFileService profilePhotoFileService;
 
     /**
      * 회원가입
@@ -56,18 +60,35 @@ public class SignUpService {
         return createPendingMember(signUpRequest.getMemberSignUpRequest(), pendingGraduation);
     }
 
+    /**
+     * 졸업생 회원가입 정보 저장
+     */
     private PendingGraduation createPendingGraduation(final GraduationSignUpRequest request) {
         PendingGraduation signupGraduation = pendingGraduationMapper.toEntity(request);
         return pendingGraduationRepository.save(signupGraduation);
     }
 
+    /**
+     * 회원가입 성공 시 PendingMember 생성
+     */
     private PendingMember createPendingMember(final MemberSignUpRequest request,
                                               final PendingGraduation pendingGraduation) {
         String encryptedPassword = bCryptPasswordEncoder.encode(request.getPassword());
-        PendingMember signUpMember = pendingMemberMapper.toEntity(request, encryptedPassword, pendingGraduation);
+
+        //TODO: 기본 프로필 사진
+        ProfilePhoto profilePhoto = null;
+        if (request.getProfilePhoto() != null) {  //프로필 사진 등록
+            profilePhoto = profilePhotoFileService.findProfilePhotoById(request.getProfilePhoto());
+        }
+
+        PendingMember signUpMember = pendingMemberMapper.toEntity(request, encryptedPassword, profilePhoto,
+                pendingGraduation);
         return pendingMemberRepository.save(signUpMember);
     }
 
+    /**
+     * 동일 정보의 회원이 있는지 확인
+     */
     private void isMemberAlreadyExist(final String studentNumber, final String email) {
         if (memberRepository.existsByStudentNumberOrEmail(studentNumber, email)) {
             throw new MemberDomainException(
@@ -76,6 +97,9 @@ public class SignUpService {
         }
     }
 
+    /**
+     * 동일 정보의 회원 가입 대기 상태가 있는지 확인
+     */
     private void isPendingMemberAlreadyExist(final String studentNumber, final String email) {
         if (pendingMemberRepository.existsByStudentNumberOrEmail(studentNumber, email)) {
             throw new PendingMemberDomainException(
