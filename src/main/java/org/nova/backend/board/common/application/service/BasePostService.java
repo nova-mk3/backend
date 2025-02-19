@@ -194,7 +194,10 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public int likePost(UUID postId, UUID memberId) {
+    public int likePost(
+            UUID postId,
+            UUID memberId
+    ) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
 
@@ -216,7 +219,10 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public int unlikePost(UUID postId, UUID memberId) {
+    public int unlikePost(
+            UUID postId,
+            UUID memberId
+    ) {
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isEmpty()) {
             throw new BoardDomainException("좋아요를 누르지 않은 게시글입니다.");
         }

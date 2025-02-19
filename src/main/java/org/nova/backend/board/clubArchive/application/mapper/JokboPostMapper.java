@@ -28,7 +28,10 @@ public class JokboPostMapper {
         );
     }
 
-    public JokboPostDetailResponse toDetailResponseFromPost(Post post, boolean isLiked) {
+    public JokboPostDetailResponse toDetailResponseFromPost(
+            Post post,
+            boolean isLiked
+    ) {
         List<FileResponse> fileResponses = post.getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
@@ -52,7 +55,10 @@ public class JokboPostMapper {
         );
     }
 
-    public JokboPostDetailResponse toDetailResponse(JokboPost post, boolean isLiked) {
+    public JokboPostDetailResponse toDetailResponse(
+            JokboPost post,
+            boolean isLiked
+    ) {
         List<FileResponse> fileResponses = post.getPost().getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
