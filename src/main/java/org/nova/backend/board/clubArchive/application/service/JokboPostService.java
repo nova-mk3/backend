@@ -104,7 +104,7 @@ public class JokboPostService implements JokboPostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public JokboPostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdateJokboPostRequest request,
@@ -136,6 +136,9 @@ public class JokboPostService implements JokboPostUseCase {
 
         jokboPost.updateJokbo(request.getProfessorName(), request.getYear(), request.getSemester(), request.getSubject());
         jokboPostPersistencePort.save(jokboPost);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return jokboPostMapper.toDetailResponse(jokboPost, isLiked);
     }
 
     /**

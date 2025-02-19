@@ -194,7 +194,10 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public int likePost(UUID postId, UUID memberId) {
+    public int likePost(
+            UUID postId,
+            UUID memberId
+    ) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
 
@@ -216,7 +219,10 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public int unlikePost(UUID postId, UUID memberId) {
+    public int unlikePost(
+            UUID postId,
+            UUID memberId
+    ) {
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isEmpty()) {
             throw new BoardDomainException("좋아요를 누르지 않은 게시글입니다.");
         }
@@ -236,7 +242,7 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public BasePostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdateBasePostRequest request,
@@ -265,6 +271,9 @@ public class BasePostService implements BasePostUseCase {
         }
         post.updatePost(request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return postMapper.toDetailResponse(post, isLiked);
     }
 
     /**

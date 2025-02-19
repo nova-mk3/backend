@@ -35,4 +35,9 @@ public class CommentPersistenceAdapter implements CommentPersistencePort {
     public void deleteById(UUID commentId) {
         commentRepository.deleteById(commentId);
     }
+
+    @Override
+    public List<Comment> findAllByParentId(UUID parentId) {
+        return commentRepository.findAllByParentCommentId(parentId);
+    }
 }

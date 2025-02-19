@@ -52,8 +52,8 @@ public class JokboBoardController {
             @RequestBody UpdateJokboPostRequest request
     ) {
         UUID memberId = getCurrentMemberId();
-        jokboPostUseCase.updatePost(boardId, postId, request, memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+        JokboPostDetailResponse updatedPost = jokboPostUseCase.updatePost(boardId, postId, request, memberId);
+        return ResponseEntity.ok(ApiResponse.success(updatedPost));
     }
 
     @PreAuthorize("isAuthenticated()")

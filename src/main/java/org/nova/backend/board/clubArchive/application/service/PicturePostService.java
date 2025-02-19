@@ -91,7 +91,7 @@ public class PicturePostService implements PicturePostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public PicturePostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdatePicturePostRequest request,
@@ -121,6 +121,9 @@ public class PicturePostService implements PicturePostUseCase {
 
         post.updatePost(request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return toDetailResponse(post,isLiked);
     }
 
     /**
@@ -128,7 +131,11 @@ public class PicturePostService implements PicturePostUseCase {
      */
     @Override
     @Transactional
-    public void deletePost(UUID boardId, UUID postId, UUID memberId) {
+    public void deletePost(
+            UUID boardId,
+            UUID postId,
+            UUID memberId
+    ) {
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
 
@@ -187,7 +194,10 @@ public class PicturePostService implements PicturePostUseCase {
     /**
      * 사진 게시글 상세 응답 변환
      */
-    private PicturePostDetailResponse toDetailResponse(Post post, boolean isLiked) {
+    private PicturePostDetailResponse toDetailResponse(
+            Post post,
+            boolean isLiked
+    ) {
         List<ImageResponse> images = post.getFiles().stream()
                 .map(imageFileService::createImageResponse)
                 .toList();
