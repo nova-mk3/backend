@@ -75,7 +75,20 @@ public class CommentService implements CommentUseCase {
             throw new CommentDomainException("댓글 삭제 권한이 없습니다.");
         }
 
+        Post post = comment.getPost();
+
+        int deletedCommentCount = 1;
+        List<Comment> childComments = commentPersistencePort.findAllByParentId(commentId);
+        deletedCommentCount += childComments.size();
+
+        for (Comment childComment : childComments) {
+            commentPersistencePort.deleteById(childComment.getId());
+        }
+
         commentPersistencePort.deleteById(commentId);
+
+        post.decrementCommentCount(deletedCommentCount);
+        basePostPersistencePort.save(post);
     }
 
 

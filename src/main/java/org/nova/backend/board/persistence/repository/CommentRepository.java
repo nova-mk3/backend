@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
+    List<Comment> findAllByParentCommentId(UUID parentCommentId);
     List<Comment> findAllByPostIdOrderByCreatedTimeAsc(UUID postId);
 }

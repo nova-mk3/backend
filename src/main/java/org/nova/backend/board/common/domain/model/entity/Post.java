@@ -93,6 +93,11 @@ public class Post {
     public void incrementCommentCount() {
         this.commentCount += 1;
     }
+
+    public void decrementCommentCount(int count) {
+        this.commentCount = Math.max(0, this.commentCount - count);
+    }
+
     public void incrementTotalDownloadCount() {
         this.totalDownloadCount += 1;
     }
