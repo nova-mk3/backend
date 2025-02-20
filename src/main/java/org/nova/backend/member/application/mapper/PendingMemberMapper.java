@@ -4,7 +4,6 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.nova.backend.auth.application.dto.request.MemberSignUpRequest;
 import org.nova.backend.member.application.dto.response.PendingMemberResponse;
-import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.domain.model.entity.PendingGraduation;
 import org.nova.backend.member.domain.model.entity.PendingMember;
 import org.nova.backend.member.domain.model.entity.ProfilePhoto;
@@ -37,9 +36,7 @@ public class PendingMemberMapper {
         );
     }
 
-    public PendingMemberResponse toResponse(PendingMember pendingMember) {
-
-        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(pendingMember.getProfilePhoto());
+    public PendingMemberResponse toResponse(PendingMember pendingMember, ProfilePhoto profilePhoto) {
 
         return new PendingMemberResponse(
                 pendingMember.getId(),
@@ -50,7 +47,7 @@ public class PendingMemberMapper {
                 pendingMember.getGrade(),
                 pendingMember.getSemester(),
                 pendingMember.isAbsence(),
-                profilePhotoResponse,
+                profilePhotoMapper.toResponse(profilePhoto),
                 pendingMember.getPhone(),
                 pendingMember.getIntroduction(),
                 pendingMember.getBirth(),

@@ -52,10 +52,9 @@ public class SignUpService {
         isMemberAlreadyExist(memberRequest.getStudentNumber(), memberRequest.getEmail());
         isPendingMemberAlreadyExist(memberRequest.getStudentNumber(), memberRequest.getEmail());
 
-        PendingGraduation pendingGraduation = null;
-        if (memberRequest.isGraduation()) {
-            pendingGraduation = createPendingGraduation(signUpRequest.getGraduationSignUpRequest());
-        }
+        PendingGraduation pendingGraduation =
+                memberRequest.isGraduation() ? createPendingGraduation(signUpRequest.getGraduationSignUpRequest())
+                        : null;
 
         return createPendingMember(signUpRequest.getMemberSignUpRequest(), pendingGraduation);
     }
@@ -75,14 +74,12 @@ public class SignUpService {
                                               final PendingGraduation pendingGraduation) {
         String encryptedPassword = bCryptPasswordEncoder.encode(request.getPassword());
 
-        //TODO: 기본 프로필 사진
-        ProfilePhoto profilePhoto = null;
-        if (request.getProfilePhoto() != null) {  //프로필 사진 등록
-            profilePhoto = profilePhotoFileService.findProfilePhotoById(request.getProfilePhoto());
-        }
+        ProfilePhoto profilePhoto = request.getProfilePhoto() != null ?
+                profilePhotoFileService.findProfilePhotoById(request.getProfilePhoto()) : null;
 
         PendingMember signUpMember = pendingMemberMapper.toEntity(request, encryptedPassword, profilePhoto,
                 pendingGraduation);
+
         return pendingMemberRepository.save(signUpMember);
     }
 

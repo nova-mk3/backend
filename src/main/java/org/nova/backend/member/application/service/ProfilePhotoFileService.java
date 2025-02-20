@@ -35,6 +35,9 @@ public class ProfilePhotoFileService {
     @Value("${file.storage.path}")
     private String baseFileStoragePath;
 
+    @Value("base_profile_image.png")
+    private String baseProfilePhotoName;
+
     /**
      * 프로필 사진 업로드
      */
@@ -95,4 +98,23 @@ public class ProfilePhotoFileService {
         return memberProfilePhotoMapper.toResponse(savedProfilePhoto);
     }
 
+    /**
+     * 프로필 사진 조회 : profilePhoto를 지정하지 않은 사용자에 대해 기본 이미지를 보여준다.
+     *
+     * @return profilePhoto
+     */
+
+    public ProfilePhoto getProfilePhoto(ProfilePhoto profilePhoto) {
+        return profilePhoto == null ? findBaseProfilePhoto() : findProfilePhotoById(profilePhoto.getId());
+    }
+
+    /**
+     * 기본 프로필 사진 조회
+     *
+     * @return 기본 프로필 사진
+     */
+    private ProfilePhoto findBaseProfilePhoto() {
+        return profilePhotoFileRepository.findProfilePhotoByOriginalFilename(baseProfilePhotoName)
+                .orElseThrow(() -> new ProfilePhotoFileDomainException("기본 이미지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+    }
 }

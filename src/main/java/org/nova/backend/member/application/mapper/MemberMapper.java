@@ -6,6 +6,7 @@ import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.PendingMember;
+import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ public class MemberMapper {
         );
     }
 
-    public MemberResponse toResponse(Member member) {
+    public MemberResponse toResponse(Member member, ProfilePhoto profilePhoto) {
         return new MemberResponse(
                 member.getId(),
                 member.getStudentNumber(),
@@ -46,7 +47,7 @@ public class MemberMapper {
                 member.getGrade(),
                 member.getSemester(),
                 member.isAbsence(),
-                profilePhotoMapper.toResponse(member.getProfilePhoto()),
+                profilePhotoMapper.toResponse(profilePhoto),
                 member.getPhone(),
                 member.getIntroduction(),
                 member.getBirth(),

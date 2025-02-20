@@ -7,8 +7,10 @@ import org.nova.backend.auth.application.service.SignUpService;
 import org.nova.backend.member.application.dto.response.PendingMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.mapper.PendingMemberMapper;
+import org.nova.backend.member.application.service.PendingMemberService;
 import org.nova.backend.member.application.service.ProfilePhotoFileService;
 import org.nova.backend.member.domain.model.entity.PendingMember;
+import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,8 +31,7 @@ public class SignUpController {
 
     private final SignUpService signUpService;
     private final ProfilePhotoFileService profilePhotoFileService;
-
-    private final PendingMemberMapper pendingMemberMapper;
+    private final PendingMemberService pendingMemberService;
 
     /**
      * 회원가입
@@ -43,7 +44,8 @@ public class SignUpController {
     public ApiResponse<PendingMemberResponse> signUp(@RequestBody SignUpRequest signUpRequest) {
 
         PendingMember savedPendingMember = signUpService.signUp(signUpRequest);
-        PendingMemberResponse response = pendingMemberMapper.toResponse(savedPendingMember);
+
+        PendingMemberResponse response = pendingMemberService.getPendingMemberResponseFromPendingMember(savedPendingMember);
 
         return ApiResponse.success(response);
     }
