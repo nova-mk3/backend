@@ -29,6 +29,7 @@ public class JokboPostMapper {
     }
 
     public JokboPostDetailResponse toDetailResponseFromPost(
+            JokboPost jokboPost,
             Post post,
             boolean isLiked
     ) {
@@ -44,6 +45,10 @@ public class JokboPostMapper {
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
+                jokboPost.getYear(),
+                jokboPost.getSubject(),
+                jokboPost.getSemester(),
+                jokboPost.getProfessorName(),
                 post.getViewCount(),
                 post.getLikeCount(),
                 post.getCreatedTime(),
@@ -56,10 +61,12 @@ public class JokboPostMapper {
     }
 
     public JokboPostDetailResponse toDetailResponse(
-            JokboPost post,
+            JokboPost jokboPost,
             boolean isLiked
     ) {
-        List<FileResponse> fileResponses = post.getPost().getFiles().stream()
+        Post post = jokboPost.getPost();
+
+        List<FileResponse> fileResponses = jokboPost.getPost().getFiles().stream()
                 .map(file -> new FileResponse(
                         file.getId(),
                         file.getOriginalFilename(),
@@ -67,32 +74,38 @@ public class JokboPostMapper {
                 ))
                 .toList();
         return new JokboPostDetailResponse(
-                post.getPost().getId(),
-                post.getPost().getTitle(),
-                post.getPost().getContent(),
-                post.getPost().getViewCount(),
-                post.getPost().getLikeCount(),
-                post.getPost().getCreatedTime(),
-                post.getPost().getModifiedTime(),
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                jokboPost.getYear(),
+                jokboPost.getSubject(),
+                jokboPost.getSemester(),
+                jokboPost.getProfessorName(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                post.getCreatedTime(),
+                post.getModifiedTime(),
                 fileResponses,
-                post.getPost().getMember().getName(),
-                post.getPost().getMember().getProfilePhoto(),
+                post.getMember().getName(),
+                post.getMember().getProfilePhoto(),
                 isLiked
         );
     }
 
-    public JokboPostSummaryResponse toSummaryResponse(JokboPost post) {
+    public JokboPostSummaryResponse toSummaryResponse(JokboPost jokboPost) {
+        Post post = jokboPost.getPost();
+
         return new JokboPostSummaryResponse(
-                post.getPost().getId(),
-                post.getPost().getTitle(),
-                post.getPost().getContent(),
-                post.getPost().getViewCount(),
-                post.getPost().getLikeCount(),
-                post.getPost().getCreatedTime(),
-                post.getPost().getModifiedTime(),
-                post.getPost().getMember().getName(),
-                post.getPost().getTotalDownloadCount(),
-                post.getPost().getFiles().size()
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                post.getCreatedTime(),
+                post.getModifiedTime(),
+                post.getMember().getName(),
+                post.getTotalDownloadCount(),
+                post.getFiles().size()
         );
     }
 }

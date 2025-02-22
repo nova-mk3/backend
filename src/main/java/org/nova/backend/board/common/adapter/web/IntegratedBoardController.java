@@ -1,5 +1,6 @@
 package org.nova.backend.board.common.adapter.web;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,6 @@ public class IntegratedBoardController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
-
     @GetMapping
     @IntegratedBoardApiDocument.GetPostsByCategory
     public ResponseEntity<ApiResponse<Page<?>>> getPostsByCategory(
@@ -89,7 +89,7 @@ public class IntegratedBoardController {
             @RequestParam PostType postType,
             @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
             @RequestParam(required = false, defaultValue = "desc") String sortDirection,
-            Pageable pageable
+            @Parameter(hidden = true) Pageable pageable
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -97,6 +97,7 @@ public class IntegratedBoardController {
         var posts = basePostUseCase.getPostsByCategory(boardId, postType, sortedPageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
+
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(
