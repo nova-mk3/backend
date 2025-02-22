@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtil {
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB 제한
+    private static final int MAX_FILE_COUNT = 10;
     private static final List<String> ALLOWED_EXTENSIONS = List.of(
             "jpg", "jpeg", "png", "gif",  // 이미지 파일
             "pdf", "txt", "docx", "xlsx", "csv", // 문서 파일
@@ -13,6 +14,18 @@ public class FileUtil {
             "mp4", "avi", "mov", "wmv", "mkv" // 동영상 파일
     );
     private static final List<String> ALLOWED_IMAGE_EXTENSIONS = List.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
+
+    /**
+     * 업로드할 파일 검증
+     */
+    public static void validateFileList(List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) {
+            throw new FileDomainException("업로드할 파일이 없습니다.");
+        }
+        if (files.size() > MAX_FILE_COUNT) {
+            throw new FileDomainException("첨부파일은 최대 " + MAX_FILE_COUNT + "개까지 가능합니다.");
+        }
+    }
 
 
     /**
