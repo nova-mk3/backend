@@ -1,11 +1,11 @@
-package org.nova.backend.board.persistence;
+package org.nova.backend.board.common.adapter.persistence;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.board.persistence.repository.PostRepository;
+import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;

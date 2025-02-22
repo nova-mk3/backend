@@ -1,4 +1,4 @@
-package org.nova.backend.board.persistence;
+package org.nova.backend.board.clubArchive.adapter.persistence;
 
 import jakarta.transaction.Transactional;
 import java.util.Optional;
@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.nova.backend.board.clubArchive.application.port.out.JokboPostPersistencePort;
 import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
-import org.nova.backend.board.persistence.repository.JokboPostRepository;
+import org.nova.backend.board.clubArchive.adapter.persistence.repository.JokboPostRepository;
 import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 import org.springframework.stereotype.Component;
 

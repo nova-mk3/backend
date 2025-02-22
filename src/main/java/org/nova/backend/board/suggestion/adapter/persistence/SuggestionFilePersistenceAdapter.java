@@ -1,10 +1,10 @@
-package org.nova.backend.board.persistence;
+package org.nova.backend.board.suggestion.adapter.persistence;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.board.persistence.repository.SuggestionFileRepository;
+import org.nova.backend.board.suggestion.adapter.persistence.repository.SuggestionFileRepository;
 import org.nova.backend.board.suggestion.application.port.out.SuggestionFilePersistencePort;
 import org.nova.backend.board.suggestion.domain.model.entity.SuggestionFile;
 import org.springframework.stereotype.Component;

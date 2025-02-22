@@ -25,7 +25,7 @@ import org.nova.backend.board.clubArchive.application.port.in.JokboPostUseCase;
 import org.nova.backend.board.clubArchive.application.port.out.JokboPostPersistencePort;
 import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
 import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
-import org.nova.backend.board.persistence.repository.PostRepository;
+import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;

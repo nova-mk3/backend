@@ -1,4 +1,4 @@
-package org.nova.backend.board.persistence.repository;
+package org.nova.backend.board.suggestion.adapter.persistence.repository;
 
 import java.util.List;
 import java.util.UUID;
