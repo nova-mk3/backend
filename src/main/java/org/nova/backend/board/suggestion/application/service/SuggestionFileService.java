@@ -14,11 +14,13 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
+import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionFileResponse;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionFileUseCase;
 import org.nova.backend.board.suggestion.application.port.out.SuggestionFilePersistencePort;
 import org.nova.backend.board.suggestion.domain.exception.SuggestionFileDomainException;
 import org.nova.backend.board.suggestion.domain.model.entity.SuggestionFile;
+import org.nova.backend.board.util.FileUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,12 @@ public class SuggestionFileService implements SuggestionFileUseCase {
         if (files.size() > 10) {
             throw new FileDomainException("첨부파일은 최대 10개까지 가능합니다.");
         }
+
+        for (MultipartFile file : files) {
+            FileUtil.validateFileExtension(file);
+            FileUtil.validateFileSize(file);
+        }
+
         String storagePath = getStoragePath();
 
         return files.stream()
