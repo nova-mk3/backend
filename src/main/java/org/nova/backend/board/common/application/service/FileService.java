@@ -1,7 +1,7 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,6 +68,7 @@ public class FileService implements FileUseCase {
      * 파일 list로 조회
      */
     @Override
+    @Transactional(readOnly = true)
     public List<File> findFilesByIds(List<UUID> fileIds) {
         List<File> files = filePersistencePort.findFilesByIds(fileIds);
 
@@ -84,6 +85,7 @@ public class FileService implements FileUseCase {
      * 특정 파일 조회
      */
     @Override
+    @Transactional(readOnly = true)
     public Optional<File> findFileById(UUID fileId) {
         return filePersistencePort.findFileById(fileId);
     }

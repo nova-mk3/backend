@@ -160,7 +160,7 @@ public class PicturePostService implements PicturePostUseCase {
      * 사진 게시글 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public PicturePostDetailResponse getPostById(
             UUID boardId,
             UUID postId

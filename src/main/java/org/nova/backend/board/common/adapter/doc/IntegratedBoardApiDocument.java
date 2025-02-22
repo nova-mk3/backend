@@ -56,14 +56,17 @@ public @interface IntegratedBoardApiDocument {
 
     @Operation(
             summary = "카테고리별 게시글 조회",
-            description = "특정 게시판 카테고리에 속한 게시글 목록을 가져옵니다. \n\n"
-                    + "**정렬 기준:**\n"
-                    + "- `createdTime` (생성일 기준 정렬)\n"
-                    + "- `modifiedTime` (수정일 기준 정렬)\n"
-                    + "- `viewCount` (조회수 기준 정렬)\n\n"
-                    + "**정렬 방식:**\n"
-                    + "- `desc` (내림차순, 높은 값부터)\n"
-                    + "- `asc` (오름차순, 낮은 값부터)"
+            description = """
+                    특정 게시판 카테고리에 속한 게시글 목록을 가져옵니다.\s
+                    
+                    **정렬 기준:**
+                    - `createdTime` (생성일 기준 정렬)
+                    - `modifiedTime` (수정일 기준 정렬)
+                    - `viewCount` (조회수 기준 정렬)
+                    
+                    **정렬 방식:**
+                    - `desc` (내림차순, 높은 값부터)
+                    - `asc` (오름차순, 낮은 값부터)"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
@@ -84,14 +87,17 @@ public @interface IntegratedBoardApiDocument {
 
     @Operation(
             summary = "모든 게시글 조회",
-            description = "카테고리 구분 없이 특정 게시판 내의 모든 게시글을 페이징하여 조회합니다. \n\n"
-                    + "**정렬 기준:**\n"
-                    + "- `createdTime` (생성일 기준 정렬)\n"
-                    + "- `modifiedTime` (수정일 기준 정렬)\n"
-                    + "- `viewCount` (조회수 기준 정렬)\n\n"
-                    + "**정렬 방식:**\n"
-                    + "- `desc` (내림차순, 높은 값부터)\n"
-                    + "- `asc` (오름차순, 낮은 값부터)"
+            description = """
+                    카테고리 구분 없이 특정 게시판 내의 모든 게시글을 페이징하여 조회합니다.\s
+                    
+                    **정렬 기준:**
+                    - `createdTime` (생성일 기준 정렬)
+                    - `modifiedTime` (수정일 기준 정렬)
+                    - `viewCount` (조회수 기준 정렬)
+                    
+                    **정렬 방식:**
+                    - `desc` (내림차순, 높은 값부터)
+                    - `asc` (오름차순, 낮은 값부터)"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
@@ -101,4 +107,30 @@ public @interface IntegratedBoardApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface GetAllPosts {}
 
+    @Operation(
+            summary = "카테고리별 게시글 검색",
+            description = """
+                    특정 게시판 카테고리에서 키워드를 기반으로 게시글을 검색합니다.
+                    
+                    **검색 기준:**
+                    - `TITLE` (제목에서 검색)
+                    - `CONTENT` (내용에서 검색)
+                    - `ALL` (제목 + 내용에서 검색)
+                    
+                    **정렬 기준:**
+                    - `createdTime` (생성일 기준 정렬)
+                    - `modifiedTime` (수정일 기준 정렬)
+                    - `viewCount` (조회수 기준 정렬)
+                    
+                    **정렬 방식:**
+                    - `desc` (내림차순, 높은 값부터)
+                    - `asc` (오름차순, 낮은 값부터)"""
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface SearchPostsByCategory {}
 }

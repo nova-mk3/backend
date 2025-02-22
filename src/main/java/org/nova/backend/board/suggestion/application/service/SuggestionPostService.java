@@ -1,6 +1,6 @@
 package org.nova.backend.board.suggestion.application.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +75,7 @@ public class SuggestionPostService implements SuggestionPostUseCase {
      * 모든 게시글 조회 (페이징)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<SuggestionPostSummaryResponse> getAllPosts(Pageable pageable, UUID currentUserId) {
         logger.info("건의 게시글 전체 조회 요청 - 사용자 ID: {}", currentUserId);
 
@@ -95,8 +95,11 @@ public class SuggestionPostService implements SuggestionPostUseCase {
                 });
     }
 
+    /**
+     * 상세 게시글 조회
+     */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public SuggestionPostDetailResponse getPostById(UUID postId, UUID memberId) {
         logger.info("건의 게시글 조회 요청 - 게시글 ID: {}, 사용자 ID: {}", postId, memberId);
 

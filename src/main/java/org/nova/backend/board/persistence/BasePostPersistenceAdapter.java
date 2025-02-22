@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.persistence.repository.PostRepository;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.domain.model.entity.Post;
@@ -13,12 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     private final PostRepository postRepository;
-
-    public BasePostPersistenceAdapter(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
 
     @Override
     public Page<Post> findAllByBoardAndCategory(UUID boardId, PostType postType, Pageable pageable) {
@@ -76,5 +74,20 @@ public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     @Override
     public List<Post> findLatestPostsByType(UUID boardId, PostType postType, int limit) {
         return postRepository.findTop6ByBoardIdAndPostTypeOrderByCreatedTimeDesc(boardId, postType);
+    }
+
+    @Override
+    public Page<Post> searchByTitle(UUID boardId, PostType postType, String keyword, Pageable pageable) {
+        return postRepository.searchByTitle(boardId, postType, keyword, pageable);
+    }
+
+    @Override
+    public Page<Post> searchByContent(UUID boardId, PostType postType, String keyword, Pageable pageable) {
+        return postRepository.searchByContent(boardId, postType, keyword, pageable);
+    }
+
+    @Override
+    public Page<Post> searchByTitleOrContent(UUID boardId, PostType postType, String keyword, Pageable pageable) {
+        return postRepository.searchByTitleOrContent(boardId, postType, keyword, pageable);
     }
 }

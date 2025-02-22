@@ -1,7 +1,7 @@
 package org.nova.backend.board.suggestion.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
-import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionFileResponse;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionFileUseCase;
 import org.nova.backend.board.suggestion.application.port.out.SuggestionFilePersistencePort;
@@ -94,6 +93,7 @@ public class SuggestionFileService implements SuggestionFileUseCase {
      * 파일 list로 조회
      */
     @Override
+    @Transactional(readOnly = true)
     public List<SuggestionFile> findFilesByIds(List<UUID> fileIds) {
         List<SuggestionFile> files = filePersistencePort.findFilesByIds(fileIds);
 

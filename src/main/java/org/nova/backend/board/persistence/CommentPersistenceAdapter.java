@@ -3,18 +3,16 @@ package org.nova.backend.board.persistence;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.persistence.repository.CommentRepository;
 import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.domain.model.entity.Comment;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CommentPersistenceAdapter implements CommentPersistencePort {
     private final CommentRepository commentRepository;
-
-    public CommentPersistenceAdapter(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
 
     @Override
     public Comment save(Comment comment) {

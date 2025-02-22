@@ -1,6 +1,6 @@
 package org.nova.backend.board.clubArchive.application.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,7 +193,7 @@ public class JokboPostService implements JokboPostUseCase {
      * 특정 족보 게시글 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public JokboPostDetailResponse getPostById(
             UUID boardId,
             UUID postId
@@ -215,7 +215,7 @@ public class JokboPostService implements JokboPostUseCase {
      * 족보 게시글 필터링 조회 (교수명, 학년, 학기)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<JokboPostSummaryResponse> getPostsByFilter(
             UUID boardId,
             String professorName,
