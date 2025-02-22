@@ -9,8 +9,8 @@ import org.nova.backend.board.suggestion.application.dto.request.SuggestionReply
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionPostDetailResponse;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionPostSummaryResponse;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionPostUseCase;
+import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
-import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class SuggestionBoardController {
     private final SuggestionPostUseCase suggestionPostUseCase;
     private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping
@@ -36,7 +37,7 @@ public class SuggestionBoardController {
     public ResponseEntity<ApiResponse<SuggestionPostDetailResponse>> createPost(
             @RequestBody SuggestionPostRequest request
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         var savedPost = suggestionPostUseCase.createPost(request, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(savedPost));
     }
@@ -68,7 +69,7 @@ public class SuggestionBoardController {
             @PathVariable UUID postId,
             @RequestBody SuggestionReplyRequest request
     ) {
-        UUID adminId = getCurrentMemberId();
+        UUID adminId = securityUtil.getCurrentMemberId();
         suggestionPostUseCase.addAdminReply(postId, request, adminId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
@@ -79,21 +80,9 @@ public class SuggestionBoardController {
     public ResponseEntity<ApiResponse<Void>> markAnswerAsRead(
             @PathVariable UUID postId
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         suggestionPostUseCase.markAnswerAsRead(postId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기
-     */
-    private UUID getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 
     /**

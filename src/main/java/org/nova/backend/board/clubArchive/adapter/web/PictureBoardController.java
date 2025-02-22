@@ -8,15 +8,11 @@ import org.nova.backend.board.clubArchive.application.dto.request.PicturePostReq
 import org.nova.backend.board.clubArchive.application.dto.request.UpdatePicturePostRequest;
 import org.nova.backend.board.clubArchive.application.dto.response.PicturePostDetailResponse;
 import org.nova.backend.board.clubArchive.application.port.in.PicturePostUseCase;
-import org.nova.backend.member.adapter.repository.MemberRepository;
-import org.nova.backend.member.domain.exception.MemberDomainException;
-import org.nova.backend.member.domain.model.entity.Member;
+import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Picture Board API", description = "사진 게시판 API")
@@ -25,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/boards/{boardId}/picture-posts")
 public class PictureBoardController {
     private final PicturePostUseCase picturePostUseCase;
-    private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
 
     /**
      * 사진 게시글 생성
@@ -37,7 +33,7 @@ public class PictureBoardController {
             @PathVariable UUID boardId,
             @RequestBody PicturePostRequest request
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         var savedPost = picturePostUseCase.createPost(boardId, request, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(savedPost));
     }
@@ -53,7 +49,7 @@ public class PictureBoardController {
             @PathVariable UUID postId,
             @RequestBody UpdatePicturePostRequest request
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         PicturePostDetailResponse updatedPost = picturePostUseCase.updatePost(boardId, postId, request, memberId);
         return ResponseEntity.ok(ApiResponse.success(updatedPost));
     }
@@ -68,7 +64,7 @@ public class PictureBoardController {
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         picturePostUseCase.deletePost(boardId, postId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
@@ -84,17 +80,5 @@ public class PictureBoardController {
     ) {
         var post = picturePostUseCase.getPostById(boardId, postId);
         return ResponseEntity.ok(ApiResponse.success(post));
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기
-     */
-    private UUID getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 }

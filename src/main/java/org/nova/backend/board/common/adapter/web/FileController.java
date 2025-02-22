@@ -9,16 +9,12 @@ import org.nova.backend.board.common.adapter.doc.FileApiDocument;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.member.adapter.repository.MemberRepository;
-import org.nova.backend.member.domain.exception.MemberDomainException;
-import org.nova.backend.member.domain.model.entity.Member;
+import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/files")
 public class FileController {
     private final FileUseCase fileUseCase;
-    private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -44,7 +40,7 @@ public class FileController {
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam("postType") PostType postType
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         List<FileResponse> fileResponses = fileUseCase.uploadFiles(files, memberId, postType);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(fileResponses));
     }
@@ -56,7 +52,7 @@ public class FileController {
             @PathVariable UUID fileId,
             HttpServletResponse response
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         fileUseCase.downloadFile(fileId, response, memberId);
     }
 
@@ -66,20 +62,8 @@ public class FileController {
     public ResponseEntity<ApiResponse<Void>> deleteFile(
             @PathVariable UUID fileId
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         fileUseCase.deleteFileById(fileId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기
-     */
-    private UUID getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 }
