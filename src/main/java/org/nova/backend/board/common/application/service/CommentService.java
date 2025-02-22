@@ -1,6 +1,6 @@
 package org.nova.backend.board.common.application.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -130,7 +130,7 @@ public class CommentService implements CommentUseCase {
      * 특정 게시글의 댓글 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<CommentResponse> getCommentsByPostId(UUID postId) {
         List<Comment> allComments = commentPersistencePort.findAllByPostId(postId);
         return commentMapper.toResponseList(allComments);
