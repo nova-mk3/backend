@@ -82,7 +82,6 @@ public class IntegratedBoardController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
-
     @GetMapping
     @IntegratedBoardApiDocument.GetPostsByCategory
     public ResponseEntity<ApiResponse<Page<?>>> getPostsByCategory(
@@ -98,6 +97,7 @@ public class IntegratedBoardController {
         var posts = basePostUseCase.getPostsByCategory(boardId, postType, sortedPageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
+
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(
