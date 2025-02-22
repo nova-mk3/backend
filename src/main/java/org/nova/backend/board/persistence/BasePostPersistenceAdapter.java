@@ -77,4 +77,19 @@ public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     public List<Post> findLatestPostsByType(UUID boardId, PostType postType, int limit) {
         return postRepository.findTop6ByBoardIdAndPostTypeOrderByCreatedTimeDesc(boardId, postType);
     }
+
+    @Override
+    public Page<Post> searchByTitle(UUID boardId, PostType postType, String keyword, Pageable pageable) {
+        return postRepository.searchByTitle(boardId, postType, keyword, pageable);
+    }
+
+    @Override
+    public Page<Post> searchByContent(UUID boardId, PostType postType, String keyword, Pageable pageable) {
+        return postRepository.searchByContent(boardId, postType, keyword, pageable);
+    }
+
+    @Override
+    public Page<Post> searchByTitleOrContent(UUID boardId, PostType postType, String keyword, Pageable pageable) {
+        return postRepository.searchByTitleOrContent(boardId, postType, keyword, pageable);
+    }
 }

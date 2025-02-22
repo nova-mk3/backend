@@ -39,4 +39,32 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Query("SELECT p.likeCount FROM Post p WHERE p.id = :postId")
     int getLikeCount(@Param("postId") UUID postId);
+
+    @Query("SELECT p FROM Post p WHERE p.board.id = :boardId AND p.postType = :postType " +
+            "AND LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Post> searchByTitle(
+            @Param("boardId") UUID boardId,
+            @Param("postType") PostType postType,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Post p WHERE p.board.id = :boardId AND p.postType = :postType " +
+            "AND LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Post> searchByContent(
+            @Param("boardId") UUID boardId,
+            @Param("postType") PostType postType,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Post p WHERE p.board.id = :boardId AND p.postType = :postType " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Post> searchByTitleOrContent(
+            @Param("boardId") UUID boardId,
+            @Param("postType") PostType postType,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }

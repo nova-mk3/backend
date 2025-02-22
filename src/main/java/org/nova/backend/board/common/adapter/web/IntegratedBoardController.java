@@ -98,6 +98,24 @@ public class IntegratedBoardController {
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
+    @GetMapping("/search")
+    @IntegratedBoardApiDocument.SearchPostsByCategory
+    public ResponseEntity<ApiResponse<Page<?>>> searchPostsByCategory(
+            @PathVariable UUID boardId,
+            @RequestParam PostType postType,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "ALL") String searchType,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+            @Parameter(hidden = true) Pageable pageable
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        var posts = basePostUseCase.searchPostsByCategory(boardId, postType, keyword, searchType, sortedPageable);
+        return ResponseEntity.ok(ApiResponse.success(posts));
+    }
+
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(

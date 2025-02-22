@@ -25,4 +25,8 @@ public interface BasePostPersistencePort {
     void increaseLikeCount(@Param("postId") UUID postId);
     void decreaseLikeCount(@Param("postId") UUID postId);
     int getLikeCount(@Param("postId") UUID postId);
+
+    Page<Post> searchByTitle(UUID boardId, PostType postType, String keyword, Pageable pageable);
+    Page<Post> searchByContent(UUID boardId, PostType postType, String keyword, Pageable pageable);
+    Page<Post> searchByTitleOrContent(UUID boardId, PostType postType, String keyword, Pageable pageable);
 }

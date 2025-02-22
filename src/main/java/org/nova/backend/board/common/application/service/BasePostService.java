@@ -1,6 +1,6 @@
 package org.nova.backend.board.common.application.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +92,7 @@ public class BasePostService implements BasePostUseCase {
      * 모든 게시글 조회 (페이징)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<BasePostSummaryResponse> getAllPosts(
             UUID boardId,
             Pageable pageable
@@ -105,7 +105,7 @@ public class BasePostService implements BasePostUseCase {
      * 특정 카테고리의 모든 게시글 조회 (페이징)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<?> getPostsByCategory(
             UUID boardId,
             PostType postType,
@@ -154,10 +154,74 @@ public class BasePostService implements BasePostUseCase {
     }
 
     /**
+     * 특정 카테고리의 모든 게시글 검색 (페이징)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<?> searchPostsByCategory(
+            UUID boardId,
+            PostType postType,
+            String keyword,
+            String searchType,
+            Pageable pageable
+    ) {
+        Page<Post> posts;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+
+            posts = basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable);
+        } else {
+            posts = switch (searchType.toUpperCase()) {
+                case "TITLE" -> basePostPersistencePort.searchByTitle(boardId, postType, keyword, pageable);
+                case "CONTENT" -> basePostPersistencePort.searchByContent(boardId, postType, keyword, pageable);
+                default -> basePostPersistencePort.searchByTitleOrContent(boardId, postType, keyword, pageable);
+            };
+        }
+        if (postType == PostType.EXAM_ARCHIVE) {
+            return posts.map(post -> new JokboPostSummaryResponse(
+                    post.getId(),
+                    post.getTitle(),
+                    post.getContent(),
+                    post.getViewCount(),
+                    post.getLikeCount(),
+                    post.getCreatedTime(),
+                    post.getModifiedTime(),
+                    post.getMember().getName(),
+                    post.getTotalDownloadCount(),
+                    post.getFiles().size()
+            ));
+        }
+        else if (postType == PostType.PICTURES) {
+            return posts.map(post -> {
+                List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();
+                ImageResponse thumbnail = imageFileService.getThumbnail(fileIds);
+
+                return new PicturePostSummaryResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getViewCount(),
+                        post.getLikeCount(),
+                        post.getCreatedTime(),
+                        post.getModifiedTime(),
+                        post.getMember().getName(),
+                        post.getFiles().size(),
+                        thumbnail != null ? thumbnail.getId() : null,
+                        thumbnail != null ? thumbnail.getDownloadUrl() : null,
+                        thumbnail != null ? thumbnail.getWidth() : 0,
+                        thumbnail != null ? thumbnail.getHeight() : 0
+                );
+            });
+        }
+        else {
+            return posts.map(postMapper::toSummaryResponse);
+        }
+    }
+
+    /**
      * 게시글 상세 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public BasePostDetailResponse getPostById(
             UUID boardId,
             UUID postId
@@ -323,7 +387,7 @@ public class BasePostService implements BasePostUseCase {
      * @return 긱 카테고리별 게시판 리스트
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<PostType, List<BasePostSummaryResponse>> getLatestPostsByType(UUID boardId) {
 
         List<PostType> allowedPostTypes = List.of(

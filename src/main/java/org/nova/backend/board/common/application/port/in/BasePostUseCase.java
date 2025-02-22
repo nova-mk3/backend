@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 public interface BasePostUseCase {
     BasePostDetailResponse createPost(UUID boardId, BasePostRequest request, UUID memberId);
     Page<?> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable);
+    Page<?> searchPostsByCategory(UUID boardId, PostType postType, String keyword, String searchType, Pageable pageable);
     Page<BasePostSummaryResponse> getAllPosts(UUID boardId, Pageable pageable);
 
     BasePostDetailResponse getPostById(UUID boardId, UUID postId);
