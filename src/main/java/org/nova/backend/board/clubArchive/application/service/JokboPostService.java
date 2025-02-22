@@ -202,10 +202,13 @@ public class JokboPostService implements JokboPostUseCase {
         Post post = postRepository.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("족보 게시글을 찾을 수 없습니다."));
 
+        JokboPost jokboPost = jokboPostPersistencePort.findByPostId(postId)
+                .orElseThrow(() -> new BoardDomainException("족보 게시글 정보를 찾을 수 없습니다."));
+
         UUID memberId = getCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
 
-        return jokboPostMapper.toDetailResponseFromPost(post, isLiked);
+        return jokboPostMapper.toDetailResponseFromPost(jokboPost, post, isLiked);
     }
 
     /**

@@ -151,25 +151,25 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts/{postId}/comments").authenticated();
     }
 
-//    private void configureAdministratorPermissions(
-//            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
-//    ) {
-//        auth.requestMatchers("/api/v1/admin").permitAll()
-//                //.hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
-//                .requestMatchers("/api/v1/pendingMembers/**").permitAll()
-//                .requestMatchers("/api/v1/executiveHistories/**")
-//                .permitAll();
-//    }
-
     private void configureAdministratorPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
-        auth.requestMatchers("/api/v1/admin")
-                .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
-                .requestMatchers("/api/v1/pendingMembers/**").hasRole(Role.ADMINISTRATOR.toString())
+        auth.requestMatchers("/api/v1/admin").permitAll()
+                //.hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+                .requestMatchers("/api/v1/pendingMembers/**").permitAll()
                 .requestMatchers("/api/v1/executiveHistories/**")
-                .hasRole(Role.ADMINISTRATOR.toString());
+                .permitAll();
     }
+
+//    private void configureAdministratorPermissions(
+//            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+//    ) {
+//        auth.requestMatchers("/api/v1/admin")
+//                .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+//                .requestMatchers("/api/v1/pendingMembers/**").hasRole(Role.ADMINISTRATOR.toString())
+//                .requestMatchers("/api/v1/executiveHistories/**")
+//                .hasRole(Role.ADMINISTRATOR.toString());
+//    }
 
     private void configureAuthPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
