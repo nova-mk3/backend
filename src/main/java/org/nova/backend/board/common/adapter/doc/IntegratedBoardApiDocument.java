@@ -113,8 +113,8 @@ public @interface IntegratedBoardApiDocument {
                     특정 게시판 카테고리에서 키워드를 기반으로 게시글을 검색합니다.
                     
                     **검색 기준:**
-                    - `title` (제목에서 검색)
-                    - `content` (내용에서 검색)
+                    - `TITLE` (제목에서 검색)
+                    - `CONTENT` (내용에서 검색)
                     - `ALL` (제목 + 내용에서 검색)
                     
                     **정렬 기준:**
