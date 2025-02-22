@@ -28,8 +28,9 @@ import org.nova.backend.member.domain.model.entity.Member;
 @AllArgsConstructor
 @Table(name = "post", indexes = {
         @Index(name = "idx_member_id", columnList = "member_id"),
-        @Index(name = "idx_post_id", columnList = "post_id"),
-        @Index(name = "idx_post_type", columnList = "post_type")
+        @Index(name = "idx_board_id", columnList = "board_id"),
+        @Index(name = "idx_board_type", columnList = "board_id, post_type"),
+        @Index(name = "idx_post_created", columnList = "post_type, created_time DESC")
 })
 public class Post {
     @Id

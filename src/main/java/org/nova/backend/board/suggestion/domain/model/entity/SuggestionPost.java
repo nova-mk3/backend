@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -22,7 +23,11 @@ import org.nova.backend.member.domain.model.entity.Member;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "suggestion_post")
+@Table(name = "suggestion_post", indexes = {
+        @Index(name = "idx_member_id", columnList = "member_id"),
+        @Index(name = "idx_created_time", columnList = "createdTime DESC"),
+        @Index(name = "idx_is_answered", columnList = "isAnswered, isAnswerRead")
+})
 public class SuggestionPost {
     @Id
     @Column

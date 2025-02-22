@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.FetchType;
@@ -20,7 +21,11 @@ import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "jokbo_post")
+@Table(name = "jokbo_post", indexes = {
+        @Index(name = "idx_post_id", columnList = "post_id"),
+        @Index(name = "idx_professor_year", columnList = "professorName, year"),
+        @Index(name = "idx_subject", columnList = "subject")
+})
 public class JokboPost {
     @Id
     @Column
@@ -43,7 +48,12 @@ public class JokboPost {
     @Column(nullable = false)
     private String subject;
 
-    public void updateJokbo(String professorName, int year, Semester semester, String subject) {
+    public void updateJokbo(
+            String professorName,
+            int year,
+            Semester semester,
+            String subject
+    ) {
         this.professorName = professorName;
         this.year = year;
         this.semester = semester;

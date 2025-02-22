@@ -13,6 +13,9 @@ import org.nova.backend.member.domain.model.entity.Member;
 @AllArgsConstructor
 @Table(name = "post_like", uniqueConstraints = {
         @UniqueConstraint(name = "unique_post_like", columnNames = {"post_id", "member_id"})
+}, indexes = {
+        @Index(name = "idx_post_id", columnList = "post_id"),
+        @Index(name = "idx_member_id", columnList = "member_id")
 })
 public class PostLike {
 
