@@ -1,10 +1,10 @@
 package org.nova.backend.board.clubArchive.application.service;
 
+import org.nova.backend.board.util.SecurityUtil;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,6 +50,7 @@ public class JokboPostService implements JokboPostUseCase {
     private final BoardUseCase boardUseCase;
     private final FileUseCase fileUseCase;
     private final JokboPostMapper jokboPostMapper;
+    private final SecurityUtil securityUtil;
 
     /**
      * 족보 게시글 생성
@@ -174,22 +173,6 @@ public class JokboPostService implements JokboPostUseCase {
     }
 
     /**
-     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
-     */
-    private Optional<UUID> getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return Optional.empty();
-        }
-
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId);
-    }
-
-    /**
      * 특정 족보 게시글 조회
      */
     @Override
@@ -205,7 +188,7 @@ public class JokboPostService implements JokboPostUseCase {
         JokboPost jokboPost = jokboPostPersistencePort.findByPostId(postId)
                 .orElseThrow(() -> new BoardDomainException("족보 게시글 정보를 찾을 수 없습니다."));
 
-        UUID memberId = getCurrentMemberId().orElse(null);
+        UUID memberId = securityUtil.getCurrentMemberIdOrNull();
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
 
         return jokboPostMapper.toDetailResponseFromPost(jokboPost, post, isLiked);
