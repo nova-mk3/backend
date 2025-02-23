@@ -3,6 +3,7 @@ package org.nova.backend.shared.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -66,6 +67,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = createAuthorizationToken(authentication);
 
+        //쿠키에 토큰 담기
+        Cookie cookie = new Cookie("AUTH_TOKEN", token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 10); // 10시간
+        response.addCookie(cookie);
+
+        // 헤더에 토큰 추가
         response.addHeader("Authorization", "Bearer " + token);
     }
 
