@@ -29,4 +29,9 @@ public class SuggestionPostPersistenceAdapter implements SuggestionPostPersisten
     public Optional<SuggestionPost> findById(UUID postId) {
         return postRepository.findById(postId);
     }
+
+    @Override
+    public Page<SuggestionPost> searchByTitle(String keyword, Pageable pageable) {
+        return postRepository.searchByTitle(keyword, pageable);
+    }
 }

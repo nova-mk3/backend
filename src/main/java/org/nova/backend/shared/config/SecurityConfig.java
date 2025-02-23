@@ -90,9 +90,12 @@ public class SecurityConfig {
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
         auth
-                // 건의 게시글 조회는 누구나 가능 (단, 비공개 게시글은 사용자 본인 또는 관리자만 볼 수 있음)
-                .requestMatchers(HttpMethod.GET, "/api/v1/suggestions").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/suggestions/{postId}").permitAll()
+                // 로그인 없이 접근 가능한 API
+                .requestMatchers(
+                        "/api/v1/suggestions",
+                        "/api/v1/suggestions/{postId}",
+                        "/api/v1/suggestions/search"
+                ).permitAll()
 
                 // 건의 게시글 작성 및 파일 업로드는 로그인한 사용자만 가능
                 .requestMatchers(HttpMethod.POST, "/api/v1/suggestions").authenticated()

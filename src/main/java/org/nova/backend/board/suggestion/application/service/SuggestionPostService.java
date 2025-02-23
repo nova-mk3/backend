@@ -183,4 +183,17 @@ public class SuggestionPostService implements SuggestionPostUseCase {
         suggestionPostPersistencePort.save(post);
         logger.info("건의 게시글 답변 읽음 처리 완료 - 게시글 ID: {}", postId);
     }
+
+    /**
+     * 건의게시판 검색
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SuggestionPostSummaryResponse> searchPostsByTitle(
+            String keyword,
+            Pageable pageable
+    ) {
+        Page<SuggestionPost> posts = suggestionPostPersistencePort.searchByTitle(keyword, pageable);
+        return posts.map(post -> postMapper.toSummaryResponse(post, null));
+    }
 }

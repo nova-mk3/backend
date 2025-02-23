@@ -10,4 +10,5 @@ public interface SuggestionPostPersistencePort {
     SuggestionPost save(SuggestionPost post);
     Page<SuggestionPost> findAll(Pageable pageable);
     Optional<SuggestionPost> findById(UUID postId);
+    Page<SuggestionPost> searchByTitle(String keyword, Pageable pageable);
 }

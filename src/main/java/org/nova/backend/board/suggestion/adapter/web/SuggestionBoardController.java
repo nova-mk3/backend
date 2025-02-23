@@ -1,5 +1,6 @@
 package org.nova.backend.board.suggestion.adapter.web;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,9 @@ import org.nova.backend.board.suggestion.application.port.in.SuggestionPostUseCa
 import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,5 +81,20 @@ public class SuggestionBoardController {
         UUID memberId = securityUtil.getCurrentMemberId();
         suggestionPostUseCase.markAnswerAsRead(postId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+    }
+
+    @GetMapping("/search")
+    @SuggestionBoardApiDocument.SearchPosts
+    public ResponseEntity<ApiResponse<Page<SuggestionPostSummaryResponse>>> searchPostsByTitle(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+            @Parameter(hidden = true) Pageable pageable
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        var posts = suggestionPostUseCase.searchPostsByTitle(keyword, sortedPageable);
+        return ResponseEntity.ok(ApiResponse.success(posts));
     }
 }
