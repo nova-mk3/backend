@@ -73,6 +73,15 @@ public class BasePostService implements BasePostUseCase {
         }
 
         Board board = boardUseCase.getBoardById(boardId);
+
+        if (!PostType.isValidPostType(board.getCategory(), request.getPostType())) {
+            throw new BoardDomainException(
+                    String.format("게시판 [%s]에는 [%s] 타입의 게시글을 저장할 수 없습니다.",
+                            board.getCategory().getDisplayName(),
+                            request.getPostType().getDisplayName())
+            );
+        }
+
         Post post = postMapper.toEntity(request, member, board);
         Post savedPost = basePostPersistencePort.save(post);
 
@@ -168,6 +177,21 @@ public class BasePostService implements BasePostUseCase {
             case PICTURES -> posts.map(picturePostMapper::toSummaryResponse);
             default -> posts.map(postMapper::toSummaryResponse);
         };
+    }
+
+    /**
+     * 통합 게시판(INTEGRATED)의 모든 게시글 검색 (제목, 내용, 제목+내용)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BasePostSummaryResponse> searchAllPosts(
+            UUID boardId,
+            String keyword,
+            String searchType,
+            Pageable pageable
+    ) {
+        Page<Post> posts = basePostPersistencePort.searchAllByBoardId(boardId, keyword, searchType, pageable);
+        return posts.map(postMapper::toSummaryResponse);
     }
 
     /**
