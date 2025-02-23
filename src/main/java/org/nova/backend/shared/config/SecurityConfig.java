@@ -1,5 +1,7 @@
 package org.nova.backend.shared.config;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.nova.backend.shared.jwt.JWTFilter;
@@ -15,7 +17,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -75,6 +79,9 @@ public class SecurityConfig {
                 });
 
         http
+                .logout(this::logOut);
+
+        http
                 .addFilterBefore(new CORSFilter(), LoginFilter.class);
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
@@ -88,6 +95,21 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
+    }
+
+    private void logOut(LogoutConfigurer<HttpSecurity> logout) {
+        logout.logoutUrl("/api/v1/members/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    SecurityContextHolder.clearContext();
+
+                    // auth token 담은 쿠키 제거
+                    Cookie cookie = new Cookie("AUTH_TOKEN", null);
+                    cookie.setHttpOnly(true);
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                });
     }
 
     private void configureSuggestionBoardPermissions(

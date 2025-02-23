@@ -16,16 +16,13 @@ public @interface AuthApiDocument {
 
     @Operation(summary = "회원가입", description = "새로운 회원 가입 요청을 생성합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "새로운 회원 가입 요청 생성 성공",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터",
-                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "새로운 회원 가입 요청 생성 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
             @ApiResponse(responseCode = "409", content = @Content(mediaType = "application/json",
                     examples = {@ExampleObject(name = "학번 or 이메일 중복",
                             value = "{\"code\": 409, \"message\": \"Member already exists. check student number or email 20202020 nova@chungbuk.ac.kr\"}")}
             )),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버 오류"),
     })
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
@@ -45,17 +42,24 @@ public @interface AuthApiDocument {
 
     @Operation(summary = "로그인", description = "회원가입된 정보로 본인 인증 로그인")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "401", description = "로그인 실패. 학번 또는 비밀번호를 다시 확인해주세요.",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(mediaType = "application/json"))
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "로그인 실패. 학번 또는 비밀번호를 다시 확인해주세요."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface LoginApiDoc {
+    }
+
+    @Operation(summary = "로그아웃", description = "로그인한 정보를 삭제합니다. securityContext 삭제, 쿠키 삭제")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface LogoutApiDoc {
     }
 }
