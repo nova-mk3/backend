@@ -112,6 +112,23 @@ public class IntegratedBoardController {
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
+    @GetMapping("/all/search")
+    @IntegratedBoardApiDocument.SearchAllPosts
+    public ResponseEntity<ApiResponse<Page<BasePostSummaryResponse>>> searchAllPosts(
+            @PathVariable UUID boardId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "ALL") String searchType,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+            @Parameter(hidden = true) Pageable pageable
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        var posts = basePostUseCase.searchAllPosts(boardId, keyword, searchType, sortedPageable);
+        return ResponseEntity.ok(ApiResponse.success(posts));
+    }
+
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(
@@ -137,7 +154,7 @@ public class IntegratedBoardController {
             @PathVariable UUID boardId,
             @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
             @RequestParam(required = false, defaultValue = "desc") String sortDirection,
-            Pageable pageable
+            @Parameter(hidden = true) Pageable pageable
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);

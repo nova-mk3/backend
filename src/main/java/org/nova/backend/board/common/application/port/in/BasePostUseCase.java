@@ -16,6 +16,7 @@ public interface BasePostUseCase {
     Page<?> getPostsByCategory(UUID boardId, PostType postType, Pageable pageable);
     Page<?> searchPostsByCategory(UUID boardId, PostType postType, String keyword, String searchType, Pageable pageable);
     Page<BasePostSummaryResponse> getAllPosts(UUID boardId, Pageable pageable);
+    Page<BasePostSummaryResponse> searchAllPosts(UUID boardId, String keyword, String searchType, Pageable pageable);
 
     BasePostDetailResponse getPostById(UUID boardId, UUID postId);
     Map<PostType, List<BasePostSummaryResponse>> getLatestPostsByType(UUID boardId);

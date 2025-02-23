@@ -1,4 +1,4 @@
-package org.nova.backend.board.persistence.repository;
+package org.nova.backend.board.common.adapter.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +64,31 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> searchByTitleOrContent(
             @Param("boardId") UUID boardId,
             @Param("postType") PostType postType,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Post p WHERE p.board.id = :boardId " +
+            "AND LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Post> searchByTitleInBoard(
+            @Param("boardId") UUID boardId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Post p WHERE p.board.id = :boardId " +
+            "AND LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Post> searchByContentInBoard(
+            @Param("boardId") UUID boardId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Post p WHERE p.board.id = :boardId " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Post> searchByTitleOrContentInBoard(
+            @Param("boardId") UUID boardId,
             @Param("keyword") String keyword,
             Pageable pageable
     );

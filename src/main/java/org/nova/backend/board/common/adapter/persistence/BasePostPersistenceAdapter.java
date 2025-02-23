@@ -1,11 +1,11 @@
-package org.nova.backend.board.persistence;
+package org.nova.backend.board.common.adapter.persistence;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.board.persistence.repository.PostRepository;
+import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
@@ -74,6 +74,15 @@ public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     @Override
     public List<Post> findLatestPostsByType(UUID boardId, PostType postType, int limit) {
         return postRepository.findTop6ByBoardIdAndPostTypeOrderByCreatedTimeDesc(boardId, postType);
+    }
+
+    @Override
+    public Page<Post> searchAllByBoardId(UUID boardId, String keyword, String searchType, Pageable pageable) {
+        return switch (searchType.toUpperCase()) {
+            case "TITLE" -> postRepository.searchByTitleInBoard(boardId, keyword, pageable);
+            case "CONTENT" -> postRepository.searchByContentInBoard(boardId, keyword, pageable);
+            default -> postRepository.searchByTitleOrContentInBoard(boardId, keyword, pageable);
+        };
     }
 
     @Override

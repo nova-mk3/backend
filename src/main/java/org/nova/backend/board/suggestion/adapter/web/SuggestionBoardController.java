@@ -1,5 +1,6 @@
 package org.nova.backend.board.suggestion.adapter.web;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -10,16 +11,14 @@ import org.nova.backend.board.suggestion.application.dto.response.SuggestionPost
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionPostSummaryResponse;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionPostUseCase;
 import org.nova.backend.board.util.SecurityUtil;
-import org.nova.backend.member.adapter.repository.MemberRepository;
-import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Suggestion Board API", description = "건의게시판 API")
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/suggestions")
 public class SuggestionBoardController {
     private final SuggestionPostUseCase suggestionPostUseCase;
-    private final MemberRepository memberRepository;
     private final SecurityUtil securityUtil;
 
     @PreAuthorize("isAuthenticated()")
@@ -47,7 +45,7 @@ public class SuggestionBoardController {
     public ResponseEntity<ApiResponse<Page<SuggestionPostSummaryResponse>>> getAllPosts(
             Pageable pageable
     ) {
-        UUID memberId = getCurrentMemberIdOrNull();
+        UUID memberId = securityUtil.getCurrentMemberIdOrNull();
         var posts = suggestionPostUseCase.getAllPosts(pageable, memberId);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
@@ -57,7 +55,7 @@ public class SuggestionBoardController {
     public ResponseEntity<ApiResponse<SuggestionPostDetailResponse>> getPostById(
             @PathVariable UUID postId
     ) {
-        UUID memberId = getCurrentMemberIdOrNull();
+        UUID memberId = securityUtil.getCurrentMemberIdOrNull();
         var post = suggestionPostUseCase.getPostById(postId, memberId);
         return ResponseEntity.ok(ApiResponse.success(post));
     }
@@ -85,19 +83,18 @@ public class SuggestionBoardController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기 (로그인 안 했을 경우 null 반환)
-     */
-    private UUID getCurrentMemberIdOrNull() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @GetMapping("/search")
+    @SuggestionBoardApiDocument.SearchPosts
+    public ResponseEntity<ApiResponse<Page<SuggestionPostSummaryResponse>>> searchPostsByTitle(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+            @Parameter(hidden = true) Pageable pageable
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return null;
-        }
-
-        String studentNumber = authentication.getName();
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId)
-                .orElse(null);
+        var posts = suggestionPostUseCase.searchPostsByTitle(keyword, sortedPageable);
+        return ResponseEntity.ok(ApiResponse.success(posts));
     }
 }

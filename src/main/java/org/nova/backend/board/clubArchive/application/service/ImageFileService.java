@@ -22,7 +22,7 @@ public class ImageFileService {
     /**
      * 이미지 파일 정보 변환 (width, height 포함)
      */
-    ImageResponse createImageResponse(File file) {
+    public ImageResponse createImageResponse(File file) {
         boolean isImage = isImageFile(file.getOriginalFilename());
         int width = 0, height = 0;
 

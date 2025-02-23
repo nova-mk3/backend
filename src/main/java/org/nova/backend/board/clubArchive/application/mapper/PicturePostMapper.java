@@ -5,6 +5,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.clubArchive.application.dto.response.ImageResponse;
 import org.nova.backend.board.clubArchive.application.dto.response.PicturePostSummaryResponse;
+import org.nova.backend.board.clubArchive.application.dto.response.PicturePostDetailResponse;
 import org.nova.backend.board.clubArchive.application.service.ImageFileService;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
@@ -32,6 +33,28 @@ public class PicturePostMapper {
                 thumbnail != null ? thumbnail.getDownloadUrl() : null,
                 thumbnail != null ? thumbnail.getWidth() : 0,
                 thumbnail != null ? thumbnail.getHeight() : 0
+        );
+    }
+
+    public PicturePostDetailResponse toDetailResponse(
+            Post post,
+            boolean isLiked
+    ) {
+        List<ImageResponse> images = post.getFiles().stream()
+                .map(imageFileService::createImageResponse)
+                .toList();
+
+        return new PicturePostDetailResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                post.getCreatedTime(),
+                post.getModifiedTime(),
+                post.getMember().getName(),
+                images,
+                isLiked
         );
     }
 }

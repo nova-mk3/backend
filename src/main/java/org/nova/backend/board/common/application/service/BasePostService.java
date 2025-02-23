@@ -1,12 +1,11 @@
 package org.nova.backend.board.common.application.service;
 
-import org.nova.backend.board.clubArchive.application.mapper.JokboPostMapper;
 import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
+import org.nova.backend.board.util.SecurityUtil;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
@@ -35,8 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,6 +47,7 @@ public class BasePostService implements BasePostUseCase {
     private final BoardSecurityChecker boardSecurityChecker;
     private final BoardUseCase boardUseCase;
     private final FileUseCase fileUseCase;
+    private final SecurityUtil securityUtil;
     private final BasePostMapper postMapper;
     private final PicturePostMapper picturePostMapper;
 
@@ -75,6 +73,15 @@ public class BasePostService implements BasePostUseCase {
         }
 
         Board board = boardUseCase.getBoardById(boardId);
+
+        if (!PostType.isValidPostType(board.getCategory(), request.getPostType())) {
+            throw new BoardDomainException(
+                    String.format("게시판 [%s]에는 [%s] 타입의 게시글을 저장할 수 없습니다.",
+                            board.getCategory().getDisplayName(),
+                            request.getPostType().getDisplayName())
+            );
+        }
+
         Post post = postMapper.toEntity(request, member, board);
         Post savedPost = basePostPersistencePort.save(post);
 
@@ -173,6 +180,21 @@ public class BasePostService implements BasePostUseCase {
     }
 
     /**
+     * 통합 게시판(INTEGRATED)의 모든 게시글 검색 (제목, 내용, 제목+내용)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BasePostSummaryResponse> searchAllPosts(
+            UUID boardId,
+            String keyword,
+            String searchType,
+            Pageable pageable
+    ) {
+        Page<Post> posts = basePostPersistencePort.searchAllByBoardId(boardId, keyword, searchType, pageable);
+        return posts.map(postMapper::toSummaryResponse);
+    }
+
+    /**
      * 게시글 상세 조회
      */
     @Override
@@ -186,26 +208,10 @@ public class BasePostService implements BasePostUseCase {
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
-        UUID memberId = getCurrentMemberId().orElse(null);
+        UUID memberId = securityUtil.getOptionalCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
 
         return postMapper.toDetailResponse(post, isLiked);
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
-     */
-    private Optional<UUID> getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return Optional.empty();
-        }
-
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId);
     }
 
     /**

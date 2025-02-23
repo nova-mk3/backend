@@ -61,4 +61,14 @@ public @interface SuggestionBoardApiDocument {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface MarkAnswerAsRead {}
+
+    @Operation(summary = "건의 게시글 검색", description = "건의 게시판에서 특정 키워드가 포함된 게시글을 제목에서 검색합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "검색 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 검색 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface SearchPosts {}
 }

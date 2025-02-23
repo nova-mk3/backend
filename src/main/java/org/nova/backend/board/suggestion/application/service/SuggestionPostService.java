@@ -76,23 +76,13 @@ public class SuggestionPostService implements SuggestionPostUseCase {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<SuggestionPostSummaryResponse> getAllPosts(Pageable pageable, UUID currentUserId) {
+    public Page<SuggestionPostSummaryResponse> getAllPosts(
+            Pageable pageable,
+            UUID currentUserId
+    ) {
         logger.info("건의 게시글 전체 조회 요청 - 사용자 ID: {}", currentUserId);
-
         return suggestionPostPersistencePort.findAll(pageable)
-                .map(post -> {
-                    boolean isAuthor = post.getMember().getId().equals(currentUserId);
-                    return new SuggestionPostSummaryResponse(
-                            post.getId(),
-                            post.getTitle(),
-                            post.getCreatedTime(),
-                            post.getModifiedTime(),
-                            post.isPrivate(),
-                            post.isAnswered(),
-                            post.isAnswerRead(),
-                            isAuthor
-                    );
-                });
+                .map(post -> postMapper.toSummaryResponse(post, currentUserId));
     }
 
     /**
@@ -100,7 +90,10 @@ public class SuggestionPostService implements SuggestionPostUseCase {
      */
     @Override
     @Transactional(readOnly = true)
-    public SuggestionPostDetailResponse getPostById(UUID postId, UUID memberId) {
+    public SuggestionPostDetailResponse getPostById(
+            UUID postId,
+            UUID memberId
+    ) {
         logger.info("건의 게시글 조회 요청 - 게시글 ID: {}, 사용자 ID: {}", postId, memberId);
 
         SuggestionPost post = suggestionPostPersistencePort.findById(postId)
@@ -115,7 +108,10 @@ public class SuggestionPostService implements SuggestionPostUseCase {
                 throw new SuggestionDomainException("비공개 게시글은 작성자 또는 관리자만 조회할 수 있습니다.", HttpStatus.FORBIDDEN);
             }
         } else {
-            if (post.isPrivate() && !post.getMember().getId().equals(memberId) && !isAdmin(memberId)) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+
+            if (post.isPrivate() && !post.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
                 logger.warn("비공개 게시글 조회 차단 - 게시글 ID: {}, 사용자 ID: {}", postId, memberId);
                 throw new SuggestionDomainException("비공개 게시글은 작성자 또는 관리자만 조회할 수 있습니다.", HttpStatus.FORBIDDEN);
             }
@@ -123,15 +119,6 @@ public class SuggestionPostService implements SuggestionPostUseCase {
 
         logger.info("건의 게시글 조회 성공 - 게시글 ID: {}", post.getId());
         return postMapper.toDetailResponse(post);
-    }
-
-    /**
-     * 현재 사용자가 관리자인지 확인하는 메서드
-     */
-    private boolean isAdmin(UUID userId) {
-        return memberRepository.findById(userId)
-                .map(member -> member.getRole().equals(Role.ADMINISTRATOR))
-                .orElse(false);
     }
 
     /**
@@ -170,7 +157,10 @@ public class SuggestionPostService implements SuggestionPostUseCase {
      */
     @Override
     @Transactional
-    public void markAnswerAsRead(UUID postId, UUID memberId) {
+    public void markAnswerAsRead(
+            UUID postId,
+            UUID memberId
+    ) {
         logger.info("건의 게시글 답변 읽음 처리 요청 - 게시글 ID: {}, 사용자 ID: {}", postId, memberId);
 
         SuggestionPost post = suggestionPostPersistencePort.findById(postId)
@@ -192,5 +182,18 @@ public class SuggestionPostService implements SuggestionPostUseCase {
         post.markAnswerAsRead();
         suggestionPostPersistencePort.save(post);
         logger.info("건의 게시글 답변 읽음 처리 완료 - 게시글 ID: {}", postId);
+    }
+
+    /**
+     * 건의게시판 검색
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SuggestionPostSummaryResponse> searchPostsByTitle(
+            String keyword,
+            Pageable pageable
+    ) {
+        Page<SuggestionPost> posts = suggestionPostPersistencePort.searchByTitle(keyword, pageable);
+        return posts.map(post -> postMapper.toSummaryResponse(post, null));
     }
 }

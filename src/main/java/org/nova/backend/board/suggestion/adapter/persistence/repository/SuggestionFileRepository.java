@@ -1,4 +1,4 @@
-package org.nova.backend.board.persistence.repository;
+package org.nova.backend.board.suggestion.adapter.persistence.repository;
 
 import java.util.List;
 import java.util.UUID;
@@ -8,5 +8,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SuggestionFileRepository extends JpaRepository<SuggestionFile, UUID> {
-    List<SuggestionFile> findBySuggestionPostId(UUID postId);
 }
