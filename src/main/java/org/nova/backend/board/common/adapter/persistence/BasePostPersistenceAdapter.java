@@ -77,6 +77,15 @@ public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     }
 
     @Override
+    public Page<Post> searchAllByBoardId(UUID boardId, String keyword, String searchType, Pageable pageable) {
+        return switch (searchType.toUpperCase()) {
+            case "TITLE" -> postRepository.searchByTitleInBoard(boardId, keyword, pageable);
+            case "CONTENT" -> postRepository.searchByContentInBoard(boardId, keyword, pageable);
+            default -> postRepository.searchByTitleOrContentInBoard(boardId, keyword, pageable);
+        };
+    }
+
+    @Override
     public Page<Post> searchByTitle(UUID boardId, PostType postType, String keyword, Pageable pageable) {
         return postRepository.searchByTitle(boardId, postType, keyword, pageable);
     }
