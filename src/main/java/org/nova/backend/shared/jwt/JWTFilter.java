@@ -28,14 +28,6 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // CORS 헤더 추가
-        response.setHeader("Access-Control-Allow-Origin",
-                "http://localhost:8080, http://localhost:3000, http://localhost:3001");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-        response.setHeader("Access-Control-Expose-Headers", "Authorization");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-
         String token = getTokenFromCookie(request);
 
         if (token == null) {
