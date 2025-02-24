@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 
 @Getter
 @NoArgsConstructor
@@ -16,6 +17,6 @@ public class CommentResponse {
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
     private String authorName;
-    private String authorProfilePhoto;
+    private ProfilePhotoResponse authorProfilePhoto;
     private List<CommentResponse> children;
 }

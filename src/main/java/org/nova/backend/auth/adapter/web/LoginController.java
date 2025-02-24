@@ -19,7 +19,13 @@ public class LoginController {
     @AuthApiDocument.LoginApiDoc
     public ApiResponse<String> login(@RequestBody LoginRequest loginRequest) {
 
-        return ApiResponse.success("로그인");
+        return ApiResponse.success("로그인 성공");
     }
 
+    @PostMapping("/logout")
+    @AuthApiDocument.LogoutApiDoc
+    public ApiResponse<String> logout() {
+
+        return ApiResponse.success("로그이웃 성공");
+    }
 }

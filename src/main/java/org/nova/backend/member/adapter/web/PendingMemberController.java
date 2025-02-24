@@ -8,7 +8,7 @@ import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberDetailResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberListResponse;
 import org.nova.backend.member.application.dto.response.PendingMemberResponse;
-import org.nova.backend.member.application.mapper.MemberMapper;
+import org.nova.backend.member.application.service.MemberService;
 import org.nova.backend.member.application.service.PendingMemberService;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PendingMemberController {
 
     private final PendingMemberService pendingMemberService;
-    private final MemberMapper memberMapper;
+    private final MemberService memberService;
 
     /**
      * 모든 회원가입 요청 리스트
@@ -70,7 +70,8 @@ public class PendingMemberController {
     @PendingMemberApiDocument.AcceptPendingMemberApiDoc
     public ApiResponse<MemberResponse> acceptPendingMember(@PathVariable("pendingMemberId") UUID pendingMemberId) {
         Member savedMember = pendingMemberService.acceptPendingMember(pendingMemberId);
-        MemberResponse response = memberMapper.toResponse(savedMember);
+
+        MemberResponse response = memberService.getMemberResponseFromMember(savedMember);
 
         return ApiResponse.success(response);
     }

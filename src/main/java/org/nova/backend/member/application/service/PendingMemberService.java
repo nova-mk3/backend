@@ -18,6 +18,7 @@ import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.PendingGraduation;
 import org.nova.backend.member.domain.model.entity.PendingMember;
+import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +33,23 @@ public class PendingMemberService {
     private final MemberRepository memberRepository;
     private final GraduationRepository graduationRepository;
 
+    private final ProfilePhotoFileService profilePhotoFileService;
+
     private final MemberMapper memberMapper;
     private final GraduationMapper graduationMapper;
     private final PendingMemberMapper pendingMemberMapper;
     private final PendingGraduationMapper pendingGraduationMapper;
+
+    /**
+     * 응답 객체 생성
+     *
+     * @param pendingMember
+     * @return PendingMemberResponse
+     */
+    public PendingMemberResponse getPendingMemberResponseFromPendingMember(PendingMember pendingMember) {
+        ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(pendingMember.getProfilePhoto());
+        return pendingMemberMapper.toResponse(pendingMember, profilePhoto);
+    }
 
     /**
      * 모든 회원가입 요청 개수
@@ -55,7 +69,7 @@ public class PendingMemberService {
         List<PendingMember> pendingMemberList = pendingMemberRepository.findAll();
 
         return pendingMemberList.stream()
-                .map(pendingMemberMapper::toResponse)
+                .map(this::getPendingMemberResponseFromPendingMember)
                 .toList();
 
     }
@@ -69,7 +83,8 @@ public class PendingMemberService {
 
         PendingMember pendingMember = findPendingMember(pendingMemberId);
 
-        PendingMemberResponse pendingMemberResponse = pendingMemberMapper.toResponse(pendingMember);
+        PendingMemberResponse pendingMemberResponse = getPendingMemberResponseFromPendingMember(pendingMember);
+
         PendingGraduationResponse pendingGraduationResponse = pendingGraduationMapper.toResponse(
                 pendingMember.getPendingGraduation());
 

@@ -3,8 +3,8 @@ package org.nova.backend.auth.application.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import java.util.UUID;
 import lombok.Getter;
-import org.nova.backend.member.domain.model.valueobject.Role;
 
 @Getter
 public class MemberSignUpRequest {
@@ -40,7 +40,7 @@ public class MemberSignUpRequest {
 
     private boolean absence;
 
-    private String profilePhoto;
+    private UUID profilePhoto;
 
     @Schema(description = "(-)없이 전화번호를 입력해주세요.", example = "01000000000")
     private String phone;

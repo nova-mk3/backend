@@ -17,7 +17,7 @@ public class MemberResponse {
     private int grade;
     private int semester;
     private boolean isAbsence;
-    private String profilePhoto;
+    private ProfilePhotoResponse profilePhoto;
     private String phone;
     private String introduction;
     private String birth;

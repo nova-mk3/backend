@@ -1,9 +1,12 @@
 package org.nova.backend.shared.config;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.nova.backend.shared.jwt.JWTFilter;
 import org.nova.backend.shared.jwt.JWTUtil;
+import org.nova.backend.shared.security.CORSFilter;
 import org.nova.backend.shared.security.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +17,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -69,9 +74,15 @@ public class SecurityConfig {
                     auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                             .requestMatchers("/", "/api/v1", "/service/**").permitAll()
                             .requestMatchers("/api/v1/comments/**").permitAll()
+                            .requestMatchers("/api/v1/files").permitAll()
                             .anyRequest().authenticated();
                 });
 
+        http
+                .logout(this::logOut);
+
+        http
+                .addFilterBefore(new CORSFilter(), LoginFilter.class);
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
@@ -84,6 +95,20 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
+    }
+
+    private void logOut(LogoutConfigurer<HttpSecurity> logout) {
+        logout.logoutUrl("/api/v1/members/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+
+                    // auth token 담은 쿠키 제거
+                    Cookie cookie = new Cookie("AUTH_TOKEN", null);
+                    cookie.setHttpOnly(true);
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                });
     }
 
     private void configureSuggestionBoardPermissions(
@@ -169,6 +194,11 @@ public class SecurityConfig {
     private void configureAdministratorPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
+//        auth.requestMatchers("/api/v1/admin")
+//                .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+//                .requestMatchers("/api/v1/pendingMembers/**").hasRole(Role.ADMINISTRATOR.toString())
+//                .requestMatchers("/api/v1/executiveHistories/**")
+//                .hasRole(Role.ADMINISTRATOR.toString());
         auth.requestMatchers("/api/v1/admin")
                 .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
                 .requestMatchers("/api/v1/pendingMembers/**").hasRole(Role.ADMINISTRATOR.toString())
@@ -181,7 +211,7 @@ public class SecurityConfig {
     ) {
         auth
                 // 회원가입, 로그인
-                .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll()
+                .requestMatchers("/api/v1/members/**", "/api/v1/members/login").permitAll()
                 // 회원가입 시 이메일 인증
                 .requestMatchers("/api/v1/email-auth/**").permitAll();
     }

@@ -2,17 +2,22 @@ package org.nova.backend.board.clubArchive.application.mapper;
 
 import java.util.List;
 import java.util.UUID;
-import org.nova.backend.board.common.application.dto.response.FileResponse;
+import lombok.AllArgsConstructor;
 import org.nova.backend.board.clubArchive.application.dto.request.JokboPostRequest;
 import org.nova.backend.board.clubArchive.application.dto.response.JokboPostDetailResponse;
 import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
 import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
+import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.domain.model.entity.Post;
-
+import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
+import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class JokboPostMapper {
+
+    private MemberProfilePhotoMapper profilePhotoMapper;
 
     public JokboPost toEntity(
             JokboPostRequest request,
@@ -41,6 +46,8 @@ public class JokboPostMapper {
                 ))
                 .toList();
 
+        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(post.getMember().getProfilePhoto());
+
         return new JokboPostDetailResponse(
                 post.getId(),
                 post.getTitle(),
@@ -55,7 +62,7 @@ public class JokboPostMapper {
                 post.getModifiedTime(),
                 fileResponses,
                 post.getMember().getName(),
-                post.getMember().getProfilePhoto(),
+                profilePhotoResponse,
                 isLiked
         );
     }
@@ -73,6 +80,10 @@ public class JokboPostMapper {
                         "/api/v1/files/" + file.getId() + "/download"
                 ))
                 .toList();
+
+        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(
+                post.getMember().getProfilePhoto());
+
         return new JokboPostDetailResponse(
                 post.getId(),
                 post.getTitle(),
@@ -87,7 +98,7 @@ public class JokboPostMapper {
                 post.getModifiedTime(),
                 fileResponses,
                 post.getMember().getName(),
-                post.getMember().getProfilePhoto(),
+                profilePhotoResponse,
                 isLiked
         );
     }
