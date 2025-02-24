@@ -10,4 +10,5 @@ public interface CommentPersistencePort {
     List<Comment> findAllByPostId(UUID postId);
     Optional<Comment> findById(UUID commentId);
     void deleteById(UUID commentId);
+    List<Comment> findAllByParentId(UUID parentId);
 }

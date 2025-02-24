@@ -14,4 +14,5 @@ public interface SuggestionPostUseCase {
     SuggestionPostDetailResponse getPostById(UUID postId, UUID memberId);
     void addAdminReply(UUID postId, SuggestionReplyRequest request, UUID adminId);
     void markAnswerAsRead(UUID postId, UUID memberId);
+    Page<SuggestionPostSummaryResponse> searchPostsByTitle(String keyword, Pageable pageable);
 }

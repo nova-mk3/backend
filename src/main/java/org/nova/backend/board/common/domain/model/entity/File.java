@@ -23,7 +23,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "file", indexes = {
-        @Index(name = "idx_post_id", columnList = "post_id")
+        @Index(name = "idx_post_id", columnList = "post_id"),
+        @Index(name = "idx_file_path", columnList = "filePath")
 })
 public class File {
     @Id

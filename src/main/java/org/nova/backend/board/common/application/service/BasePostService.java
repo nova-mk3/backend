@@ -1,16 +1,14 @@
 package org.nova.backend.board.common.application.service;
 
-import jakarta.transaction.Transactional;
+import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
+import org.nova.backend.board.util.SecurityUtil;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
-import org.nova.backend.board.clubArchive.application.dto.response.ImageResponse;
-import org.nova.backend.board.clubArchive.application.dto.response.PicturePostSummaryResponse;
-import org.nova.backend.board.clubArchive.application.service.ImageFileService;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
@@ -36,8 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -51,8 +47,9 @@ public class BasePostService implements BasePostUseCase {
     private final BoardSecurityChecker boardSecurityChecker;
     private final BoardUseCase boardUseCase;
     private final FileUseCase fileUseCase;
-    private final ImageFileService imageFileService;
+    private final SecurityUtil securityUtil;
     private final BasePostMapper postMapper;
+    private final PicturePostMapper picturePostMapper;
 
     /**
      * 새로운 게시글과 첨부파일 저장
@@ -76,6 +73,15 @@ public class BasePostService implements BasePostUseCase {
         }
 
         Board board = boardUseCase.getBoardById(boardId);
+
+        if (!PostType.isValidPostType(board.getCategory(), request.getPostType())) {
+            throw new BoardDomainException(
+                    String.format("게시판 [%s]에는 [%s] 타입의 게시글을 저장할 수 없습니다.",
+                            board.getCategory().getDisplayName(),
+                            request.getPostType().getDisplayName())
+            );
+        }
+
         Post post = postMapper.toEntity(request, member, board);
         Post savedPost = basePostPersistencePort.save(post);
 
@@ -92,7 +98,7 @@ public class BasePostService implements BasePostUseCase {
      * 모든 게시글 조회 (페이징)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<BasePostSummaryResponse> getAllPosts(
             UUID boardId,
             Pageable pageable
@@ -105,7 +111,7 @@ public class BasePostService implements BasePostUseCase {
      * 특정 카테고리의 모든 게시글 조회 (페이징)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<?> getPostsByCategory(
             UUID boardId,
             PostType postType,
@@ -113,8 +119,8 @@ public class BasePostService implements BasePostUseCase {
     ) {
         Page<Post> posts = basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable);
 
-        if (postType == PostType.EXAM_ARCHIVE) {
-            return posts.map(post -> new JokboPostSummaryResponse(
+        return switch (postType) {
+            case EXAM_ARCHIVE -> posts.map(post -> new JokboPostSummaryResponse(
                     post.getId(),
                     post.getTitle(),
                     post.getContent(),
@@ -126,38 +132,73 @@ public class BasePostService implements BasePostUseCase {
                     post.getTotalDownloadCount(),
                     post.getFiles().size()
             ));
-        }
-        else if (postType == PostType.PICTURES) {
-            return posts.map(post -> {
-                List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();
-                ImageResponse thumbnail = imageFileService.getThumbnail(fileIds);
+            case PICTURES -> posts.map(picturePostMapper::toSummaryResponse);
+            default -> posts.map(postMapper::toSummaryResponse);
+        };
+    }
 
-                return new PicturePostSummaryResponse(
-                        post.getId(),
-                        post.getTitle(),
-                        post.getViewCount(),
-                        post.getLikeCount(),
-                        post.getCreatedTime(),
-                        post.getModifiedTime(),
-                        post.getMember().getName(),
-                        post.getFiles().size(),
-                        thumbnail != null ? thumbnail.getId() : null,
-                        thumbnail != null ? thumbnail.getDownloadUrl() : null,
-                        thumbnail != null ? thumbnail.getWidth() : 0,
-                        thumbnail != null ? thumbnail.getHeight() : 0
-                );
-            });
+    /**
+     * 특정 카테고리의 모든 게시글 검색 (페이징)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<?> searchPostsByCategory(
+            UUID boardId,
+            PostType postType,
+            String keyword,
+            String searchType,
+            Pageable pageable
+    ) {
+        Page<Post> posts;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+
+            posts = basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable);
+        } else {
+            posts = switch (searchType.toUpperCase()) {
+                case "TITLE" -> basePostPersistencePort.searchByTitle(boardId, postType, keyword, pageable);
+                case "CONTENT" -> basePostPersistencePort.searchByContent(boardId, postType, keyword, pageable);
+                default -> basePostPersistencePort.searchByTitleOrContent(boardId, postType, keyword, pageable);
+            };
         }
-        else {
-            return posts.map(postMapper::toSummaryResponse);
-        }
+        return switch (postType) {
+            case EXAM_ARCHIVE -> posts.map(post -> new JokboPostSummaryResponse(
+                    post.getId(),
+                    post.getTitle(),
+                    post.getContent(),
+                    post.getViewCount(),
+                    post.getLikeCount(),
+                    post.getCreatedTime(),
+                    post.getModifiedTime(),
+                    post.getMember().getName(),
+                    post.getTotalDownloadCount(),
+                    post.getFiles().size()
+            ));
+            case PICTURES -> posts.map(picturePostMapper::toSummaryResponse);
+            default -> posts.map(postMapper::toSummaryResponse);
+        };
+    }
+
+    /**
+     * 통합 게시판(INTEGRATED)의 모든 게시글 검색 (제목, 내용, 제목+내용)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BasePostSummaryResponse> searchAllPosts(
+            UUID boardId,
+            String keyword,
+            String searchType,
+            Pageable pageable
+    ) {
+        Page<Post> posts = basePostPersistencePort.searchAllByBoardId(boardId, keyword, searchType, pageable);
+        return posts.map(postMapper::toSummaryResponse);
     }
 
     /**
      * 게시글 상세 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public BasePostDetailResponse getPostById(
             UUID boardId,
             UUID postId
@@ -167,26 +208,10 @@ public class BasePostService implements BasePostUseCase {
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
-        UUID memberId = getCurrentMemberId().orElse(null);
+        UUID memberId = securityUtil.getOptionalCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
 
         return postMapper.toDetailResponse(post, isLiked);
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
-     */
-    private Optional<UUID> getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return Optional.empty();
-        }
-
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId);
     }
 
     /**
@@ -194,7 +219,10 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public int likePost(UUID postId, UUID memberId) {
+    public int likePost(
+            UUID postId,
+            UUID memberId
+    ) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
 
@@ -216,7 +244,10 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public int unlikePost(UUID postId, UUID memberId) {
+    public int unlikePost(
+            UUID postId,
+            UUID memberId
+    ) {
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isEmpty()) {
             throw new BoardDomainException("좋아요를 누르지 않은 게시글입니다.");
         }
@@ -236,7 +267,7 @@ public class BasePostService implements BasePostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public BasePostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdateBasePostRequest request,
@@ -265,6 +296,9 @@ public class BasePostService implements BasePostUseCase {
         }
         post.updatePost(request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return postMapper.toDetailResponse(post, isLiked);
     }
 
     /**
@@ -314,7 +348,7 @@ public class BasePostService implements BasePostUseCase {
      * @return 긱 카테고리별 게시판 리스트
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<PostType, List<BasePostSummaryResponse>> getLatestPostsByType(UUID boardId) {
 
         List<PostType> allowedPostTypes = List.of(

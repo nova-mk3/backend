@@ -1,5 +1,6 @@
 package org.nova.backend.board.common.adapter.web;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,7 @@ import org.nova.backend.board.common.application.dto.response.BasePostDetailResp
 import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
 import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.member.adapter.repository.MemberRepository;
-import org.nova.backend.member.domain.exception.MemberDomainException;
-import org.nova.backend.member.domain.model.entity.Member;
+import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,8 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/boards/{boardId}/posts")
 public class IntegratedBoardController {
     private final BasePostUseCase basePostUseCase;
-    private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
 
 
     @PreAuthorize("isAuthenticated()")
@@ -51,7 +48,7 @@ public class IntegratedBoardController {
             @PathVariable UUID boardId,
             @RequestBody BasePostRequest request
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         var savedPost = basePostUseCase.createPost(boardId, request, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(savedPost));
     }
@@ -64,9 +61,9 @@ public class IntegratedBoardController {
             @PathVariable UUID postId,
             @RequestBody UpdateBasePostRequest request
     ) {
-        UUID memberId = getCurrentMemberId();
-        basePostUseCase.updatePost(boardId, postId, request, memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+        UUID memberId = securityUtil.getCurrentMemberId();
+        BasePostDetailResponse updatedPost = basePostUseCase.updatePost(boardId, postId, request, memberId);
+        return ResponseEntity.ok(ApiResponse.success(updatedPost));
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -76,11 +73,10 @@ public class IntegratedBoardController {
             @PathVariable UUID boardId,
             @PathVariable UUID postId
     ) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         basePostUseCase.deletePost(boardId, postId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
-
 
     @GetMapping
     @IntegratedBoardApiDocument.GetPostsByCategory
@@ -89,7 +85,7 @@ public class IntegratedBoardController {
             @RequestParam PostType postType,
             @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
             @RequestParam(required = false, defaultValue = "desc") String sortDirection,
-            Pageable pageable
+            @Parameter(hidden = true) Pageable pageable
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -97,6 +93,42 @@ public class IntegratedBoardController {
         var posts = basePostUseCase.getPostsByCategory(boardId, postType, sortedPageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
+
+    @GetMapping("/search")
+    @IntegratedBoardApiDocument.SearchPostsByCategory
+    public ResponseEntity<ApiResponse<Page<?>>> searchPostsByCategory(
+            @PathVariable UUID boardId,
+            @RequestParam PostType postType,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "ALL") String searchType,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+            @Parameter(hidden = true) Pageable pageable
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        var posts = basePostUseCase.searchPostsByCategory(boardId, postType, keyword, searchType, sortedPageable);
+        return ResponseEntity.ok(ApiResponse.success(posts));
+    }
+
+    @GetMapping("/all/search")
+    @IntegratedBoardApiDocument.SearchAllPosts
+    public ResponseEntity<ApiResponse<Page<BasePostSummaryResponse>>> searchAllPosts(
+            @PathVariable UUID boardId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "ALL") String searchType,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+            @Parameter(hidden = true) Pageable pageable
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        var posts = basePostUseCase.searchAllPosts(boardId, keyword, searchType, sortedPageable);
+        return ResponseEntity.ok(ApiResponse.success(posts));
+    }
+
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(
@@ -122,24 +154,12 @@ public class IntegratedBoardController {
             @PathVariable UUID boardId,
             @RequestParam(required = false, defaultValue = "createdTime") String sortBy,
             @RequestParam(required = false, defaultValue = "desc") String sortDirection,
-            Pageable pageable
+            @Parameter(hidden = true) Pageable pageable
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         var posts = basePostUseCase.getAllPosts(boardId, sortedPageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기
-     */
-    private UUID getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 }

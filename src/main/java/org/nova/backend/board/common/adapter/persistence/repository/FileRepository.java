@@ -1,4 +1,4 @@
-package org.nova.backend.board.persistence.repository;
+package org.nova.backend.board.common.adapter.persistence.repository;
 
 import java.util.UUID;
 import org.nova.backend.board.common.domain.model.entity.File;

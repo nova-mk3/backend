@@ -1,7 +1,8 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.nova.backend.board.util.FileStorageUtil;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +22,7 @@ import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
+import org.nova.backend.board.util.FileStorageUtil;
 import org.nova.backend.board.util.FileUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.slf4j.Logger;
@@ -51,15 +53,8 @@ public class FileService implements FileUseCase {
     @Override
     public void deleteFiles(List<UUID> fileIds) {
         List<File> filesToDelete = filePersistencePort.findFilesByIds(fileIds);
-
         for (File file : filesToDelete) {
-            Path filePath = Paths.get(file.getFilePath());
-            try {
-                Files.deleteIfExists(filePath);
-                logger.info("파일 삭제 성공: {}", file.getFilePath());
-            } catch (IOException e) {
-                logger.error("파일 삭제 실패: {}", file.getFilePath(), e);
-            }
+            FileStorageUtil.deleteFile(file.getFilePath());
         }
         filePersistencePort.deleteFilesByIds(fileIds);
     }
@@ -68,6 +63,7 @@ public class FileService implements FileUseCase {
      * 파일 list로 조회
      */
     @Override
+    @Transactional(readOnly = true)
     public List<File> findFilesByIds(List<UUID> fileIds) {
         List<File> files = filePersistencePort.findFilesByIds(fileIds);
 
@@ -84,6 +80,7 @@ public class FileService implements FileUseCase {
      * 특정 파일 조회
      */
     @Override
+    @Transactional(readOnly = true)
     public Optional<File> findFileById(UUID fileId) {
         return filePersistencePort.findFileById(fileId);
     }
@@ -98,12 +95,8 @@ public class FileService implements FileUseCase {
             UUID memberId,
             PostType postType
     ) {
-        if (files == null || files.isEmpty()) {
-            throw new FileDomainException("업로드할 파일이 없습니다.");
-        }
-        if (files.size() > 10) {
-            throw new FileDomainException("첨부파일은 최대 10개까지 가능합니다.");
-        }
+        FileUtil.validateFileList(files);
+
         for (MultipartFile file : files) {
             if (postType == PostType.PICTURES) {
                 FileUtil.validateImageFile(file);
@@ -127,7 +120,7 @@ public class FileService implements FileUseCase {
             MultipartFile file,
             String storagePath
     ) {
-        String savedFilePath = saveFileToLocal(file, storagePath);
+        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath);
         File savedFile = new File(null, file.getOriginalFilename(), savedFilePath, null, 0);
         savedFile = filePersistencePort.save(savedFile);
 
@@ -229,35 +222,5 @@ public class FileService implements FileUseCase {
             basePostPersistencePort.save(file.getPost());
         }
         filePersistencePort.save(file);
-    }
-
-    /**
-     * 로컬에 파일 저장
-     */
-    public String saveFileToLocal(
-            MultipartFile file,
-            String storagePath
-    ) {
-        try {
-            Path fileDir = Paths.get(storagePath);
-            if (!Files.exists(fileDir)) {
-                Files.createDirectories(fileDir);
-                logger.info("파일 저장 디렉토리가 생성되었습니다: {}", fileDir.toAbsolutePath());
-            }
-
-            String originalFileName = file.getOriginalFilename();
-            String safeFileName = UUID.randomUUID() + "_" + originalFileName;
-            Path targetPath = fileDir.resolve(safeFileName);
-
-            if (!targetPath.toAbsolutePath().startsWith(fileDir.toAbsolutePath())) {
-                throw new FileDomainException("잘못된 파일 경로가 탐지되었습니다.");
-            }
-
-            file.transferTo(targetPath.toFile());
-            return targetPath.toString();
-        } catch (IOException e) {
-            logger.error("파일 저장 중 오류 발생: {}", file.getOriginalFilename(), e);
-            throw new FileDomainException("파일 저장 중 오류 발생", e);
-        }
     }
 }

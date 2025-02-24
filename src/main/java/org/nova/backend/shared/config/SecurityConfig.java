@@ -115,9 +115,12 @@ public class SecurityConfig {
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
         auth
-                // 건의 게시글 조회는 누구나 가능 (단, 비공개 게시글은 사용자 본인 또는 관리자만 볼 수 있음)
-                .requestMatchers(HttpMethod.GET, "/api/v1/suggestions").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/suggestions/{postId}").permitAll()
+                // 로그인 없이 접근 가능한 API
+                .requestMatchers(
+                        "/api/v1/suggestions",
+                        "/api/v1/suggestions/{postId}",
+                        "/api/v1/suggestions/search"
+                ).permitAll()
 
                 // 건의 게시글 작성 및 파일 업로드는 로그인한 사용자만 가능
                 .requestMatchers(HttpMethod.POST, "/api/v1/suggestions").authenticated()
@@ -138,7 +141,9 @@ public class SecurityConfig {
                         "/api/v1/boards/{boardId}/posts",
                         "/api/v1/boards/{boardId}/posts/{postId}",
                         "/api/v1/boards/{boardId}/posts/latest",
-                        "/api/v1/boards/{boardId}/posts/all"
+                        "/api/v1/boards/{boardId}/posts/all",
+                        "/api/v1/boards/{boardId}/posts/search",
+                        "/api/v1/boards/{boardId}/posts/all/search"
                 ).permitAll()
 
                 // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
@@ -206,7 +211,7 @@ public class SecurityConfig {
     ) {
         auth
                 // 회원가입, 로그인
-                .requestMatchers("/api/v1/members", "/api/v1/members/login").permitAll()
+                .requestMatchers("/api/v1/members/**", "/api/v1/members/login").permitAll()
                 // 회원가입 시 이메일 인증
                 .requestMatchers("/api/v1/email-auth/**").permitAll();
     }

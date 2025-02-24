@@ -1,6 +1,6 @@
 package org.nova.backend.board.common.application.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +75,20 @@ public class CommentService implements CommentUseCase {
             throw new CommentDomainException("댓글 삭제 권한이 없습니다.");
         }
 
+        Post post = comment.getPost();
+
+        int deletedCommentCount = 1;
+        List<Comment> childComments = commentPersistencePort.findAllByParentId(commentId);
+        deletedCommentCount += childComments.size();
+
+        for (Comment childComment : childComments) {
+            commentPersistencePort.deleteById(childComment.getId());
+        }
+
         commentPersistencePort.deleteById(commentId);
+
+        post.decrementCommentCount(deletedCommentCount);
+        basePostPersistencePort.save(post);
     }
 
 
@@ -117,7 +130,7 @@ public class CommentService implements CommentUseCase {
      * 특정 게시글의 댓글 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<CommentResponse> getCommentsByPostId(UUID postId) {
         List<Comment> allComments = commentPersistencePort.findAllByPostId(postId);
         return commentMapper.toResponseList(allComments);

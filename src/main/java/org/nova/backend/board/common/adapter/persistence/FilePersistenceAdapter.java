@@ -1,20 +1,18 @@
-package org.nova.backend.board.persistence;
+package org.nova.backend.board.common.adapter.persistence;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.nova.backend.board.persistence.repository.FileRepository;
+import lombok.RequiredArgsConstructor;
+import org.nova.backend.board.common.adapter.persistence.repository.FileRepository;
 import org.nova.backend.board.common.application.port.out.FilePersistencePort;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class FilePersistenceAdapter implements FilePersistencePort {
     private final FileRepository fileRepository;
-
-    public FilePersistenceAdapter(FileRepository fileRepository) {
-        this.fileRepository = fileRepository;
-    }
 
     @Override
     public void deleteFilesByIds(List<UUID> fileIds) {

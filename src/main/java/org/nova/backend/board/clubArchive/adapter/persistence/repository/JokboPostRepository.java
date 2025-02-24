@@ -1,4 +1,4 @@
-package org.nova.backend.board.persistence.repository;
+package org.nova.backend.board.clubArchive.adapter.persistence.repository;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +17,7 @@ public interface JokboPostRepository extends JpaRepository<JokboPost, UUID> {
     Optional<JokboPost> findById(UUID id);
     void deleteByPost(Post post);
 
-    @Query("SELECT jp FROM JokboPost jp WHERE jp.post.id = :postId")
+    @Query("SELECT jp FROM JokboPost jp JOIN FETCH jp.post WHERE jp.post.id = :postId")
     Optional<JokboPost> findByPostId(@Param("postId") UUID postId);
 
     @Query("SELECT jp FROM JokboPost jp " +

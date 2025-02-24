@@ -28,8 +28,10 @@ import org.nova.backend.member.domain.model.entity.Member;
 @AllArgsConstructor
 @Table(name = "post", indexes = {
         @Index(name = "idx_member_id", columnList = "member_id"),
-        @Index(name = "idx_post_id", columnList = "post_id"),
-        @Index(name = "idx_post_type", columnList = "post_type")
+        @Index(name = "idx_board_id", columnList = "board_id"),
+        @Index(name = "idx_board_type", columnList = "board_id, post_type"),
+        @Index(name = "idx_board_type_created", columnList = "board_id, post_type, created_time DESC"),
+        @Index(name = "idx_fulltext_title_content", columnList = "title, content", unique = false)
 })
 public class Post {
     @Id
@@ -93,6 +95,11 @@ public class Post {
     public void incrementCommentCount() {
         this.commentCount += 1;
     }
+
+    public void decrementCommentCount(int count) {
+        this.commentCount = Math.max(0, this.commentCount - count);
+    }
+
     public void incrementTotalDownloadCount() {
         this.totalDownloadCount += 1;
     }

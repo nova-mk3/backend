@@ -5,15 +5,11 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.doc.PostLikeApiDocument;
 import org.nova.backend.board.common.application.port.in.BasePostUseCase;
-import org.nova.backend.member.adapter.repository.MemberRepository;
-import org.nova.backend.member.domain.exception.MemberDomainException;
-import org.nova.backend.member.domain.model.entity.Member;
+import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Post Like API", description = "게시글 좋아요 및 좋아요 취소 API")
@@ -23,13 +19,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/posts/{postId}")
 public class PostLikeController {
     private final BasePostUseCase postUseCase;
-    private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/like")
     @PostLikeApiDocument.LikePost
     public ResponseEntity<ApiResponse<Integer>> likePost(@PathVariable UUID postId) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         int likeCount = postUseCase.likePost(postId, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(likeCount));
     }
@@ -38,20 +34,8 @@ public class PostLikeController {
     @PostMapping("/unlike")
     @PostLikeApiDocument.UnlikePost
     public ResponseEntity<ApiResponse<Integer>> unlikePost(@PathVariable UUID postId) {
-        UUID memberId = getCurrentMemberId();
+        UUID memberId = securityUtil.getCurrentMemberId();
         int likeCount = postUseCase.unlikePost(postId, memberId);
         return ResponseEntity.ok(ApiResponse.success(likeCount));
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기
-     */
-    private UUID getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 }

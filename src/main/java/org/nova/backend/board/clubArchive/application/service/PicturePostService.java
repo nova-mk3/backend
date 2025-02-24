@@ -3,14 +3,13 @@ package org.nova.backend.board.clubArchive.application.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.clubArchive.application.dto.request.PicturePostRequest;
 import org.nova.backend.board.clubArchive.application.dto.request.UpdatePicturePostRequest;
-import org.nova.backend.board.clubArchive.application.dto.response.ImageResponse;
 import org.nova.backend.board.clubArchive.application.dto.response.PicturePostDetailResponse;
+import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
 import org.nova.backend.board.clubArchive.application.port.in.PicturePostUseCase;
 import org.nova.backend.board.clubArchive.domain.exception.PictureDomainException;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
@@ -22,13 +21,12 @@ import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
+import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,8 +37,9 @@ public class PicturePostService implements PicturePostUseCase {
     private final PostLikePersistencePort postLikePersistencePort;
     private final FileUseCase fileUseCase;
     private final BoardUseCase boardUseCase;
-    private final ImageFileService imageFileService;
     private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
+    private final PicturePostMapper picturePostMapper;
 
     /**
      * 사진 게시글 생성
@@ -83,7 +82,7 @@ public class PicturePostService implements PicturePostUseCase {
         }
 
         basePostPersistencePort.save(savedPost);
-        return toDetailResponse(savedPost, false);
+        return picturePostMapper.toDetailResponse(savedPost, false);
     }
 
     /**
@@ -91,7 +90,7 @@ public class PicturePostService implements PicturePostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public PicturePostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdatePicturePostRequest request,
@@ -121,6 +120,9 @@ public class PicturePostService implements PicturePostUseCase {
 
         post.updatePost(request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return picturePostMapper.toDetailResponse(post, isLiked);
     }
 
     /**
@@ -128,7 +130,11 @@ public class PicturePostService implements PicturePostUseCase {
      */
     @Override
     @Transactional
-    public void deletePost(UUID boardId, UUID postId, UUID memberId) {
+    public void deletePost(
+            UUID boardId,
+            UUID postId,
+            UUID memberId
+    ) {
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
 
@@ -153,7 +159,7 @@ public class PicturePostService implements PicturePostUseCase {
      * 사진 게시글 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public PicturePostDetailResponse getPostById(
             UUID boardId,
             UUID postId
@@ -162,47 +168,9 @@ public class PicturePostService implements PicturePostUseCase {
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
-        UUID memberId = getCurrentMemberId().orElse(null);
+        UUID memberId = securityUtil.getOptionalCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
 
-        return toDetailResponse(post, isLiked);
-    }
-
-    /**
-     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
-     */
-    private Optional<UUID> getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return Optional.empty();
-        }
-
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId);
-    }
-
-    /**
-     * 사진 게시글 상세 응답 변환
-     */
-    private PicturePostDetailResponse toDetailResponse(Post post, boolean isLiked) {
-        List<ImageResponse> images = post.getFiles().stream()
-                .map(imageFileService::createImageResponse)
-                .toList();
-
-        return new PicturePostDetailResponse(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getViewCount(),
-                post.getLikeCount(),
-                post.getCreatedTime(),
-                post.getModifiedTime(),
-                post.getMember().getName(),
-                images,
-                isLiked
-        );
+        return picturePostMapper.toDetailResponse(post, isLiked);
     }
 }

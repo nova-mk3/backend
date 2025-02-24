@@ -1,10 +1,10 @@
 package org.nova.backend.board.clubArchive.application.service;
 
-import jakarta.transaction.Transactional;
+import org.nova.backend.board.util.SecurityUtil;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
@@ -25,7 +25,7 @@ import org.nova.backend.board.clubArchive.application.port.in.JokboPostUseCase;
 import org.nova.backend.board.clubArchive.application.port.out.JokboPostPersistencePort;
 import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
 import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
-import org.nova.backend.board.persistence.repository.PostRepository;
+import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,6 +50,7 @@ public class JokboPostService implements JokboPostUseCase {
     private final BoardUseCase boardUseCase;
     private final FileUseCase fileUseCase;
     private final JokboPostMapper jokboPostMapper;
+    private final SecurityUtil securityUtil;
 
     /**
      * 족보 게시글 생성
@@ -104,7 +103,7 @@ public class JokboPostService implements JokboPostUseCase {
      */
     @Override
     @Transactional
-    public void updatePost(
+    public JokboPostDetailResponse updatePost(
             UUID boardId,
             UUID postId,
             UpdateJokboPostRequest request,
@@ -136,6 +135,9 @@ public class JokboPostService implements JokboPostUseCase {
 
         jokboPost.updateJokbo(request.getProfessorName(), request.getYear(), request.getSemester(), request.getSubject());
         jokboPostPersistencePort.save(jokboPost);
+
+        boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
+        return jokboPostMapper.toDetailResponse(jokboPost, isLiked);
     }
 
     /**
@@ -171,26 +173,10 @@ public class JokboPostService implements JokboPostUseCase {
     }
 
     /**
-     * 현재 로그인한 사용자의 UUID 가져오기 (비로그인 사용자는 Optional.empty() 반환)
-     */
-    private Optional<UUID> getCurrentMemberId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return Optional.empty();
-        }
-
-        String studentNumber = authentication.getName();
-
-        return memberRepository.findByStudentNumber(studentNumber)
-                .map(Member::getId);
-    }
-
-    /**
      * 특정 족보 게시글 조회
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public JokboPostDetailResponse getPostById(
             UUID boardId,
             UUID postId
@@ -199,17 +185,20 @@ public class JokboPostService implements JokboPostUseCase {
         Post post = postRepository.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("족보 게시글을 찾을 수 없습니다."));
 
-        UUID memberId = getCurrentMemberId().orElse(null);
+        JokboPost jokboPost = jokboPostPersistencePort.findByPostId(postId)
+                .orElseThrow(() -> new BoardDomainException("족보 게시글 정보를 찾을 수 없습니다."));
+
+        UUID memberId = securityUtil.getCurrentMemberIdOrNull();
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
 
-        return jokboPostMapper.toDetailResponseFromPost(post, isLiked);
+        return jokboPostMapper.toDetailResponseFromPost(jokboPost, post, isLiked);
     }
 
     /**
      * 족보 게시글 필터링 조회 (교수명, 학년, 학기)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<JokboPostSummaryResponse> getPostsByFilter(
             UUID boardId,
             String professorName,

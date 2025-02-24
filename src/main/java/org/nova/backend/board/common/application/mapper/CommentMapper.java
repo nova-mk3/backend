@@ -39,7 +39,10 @@ public class CommentMapper {
     /**
      * 특정 댓글을 CommentResponse로 변환
      */
-    public CommentResponse toResponse(Comment comment, List<Comment> allComments) {
+    public CommentResponse toResponse(
+            Comment comment,
+            List<Comment> allComments
+    ) {
 
         List<CommentResponse> childComment = allComments.stream()
                 .filter(c -> c.getParentComment() != null && c.getParentComment().getId().equals(comment.getId()))

@@ -8,6 +8,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.service.FileService;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
+import org.nova.backend.board.util.FileStorageUtil;
 import org.nova.backend.board.util.FileUtil;
 import org.nova.backend.member.adapter.repository.ProfilePhotoFileRepository;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
@@ -28,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProfilePhotoFileService {
     private static final Logger logger = LoggerFactory.getLogger(ProfilePhotoFileService.class);
 
-    private final FileService fileService;
     private final ProfilePhotoFileRepository profilePhotoFileRepository;
     private final MemberProfilePhotoMapper memberProfilePhotoMapper;
 
@@ -91,7 +91,7 @@ public class ProfilePhotoFileService {
             MultipartFile file,
             String storagePath
     ) {
-        String savedFilePath = fileService.saveFileToLocal(file, storagePath);
+        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath);
         ProfilePhoto savedProfilePhoto = new ProfilePhoto(null, file.getOriginalFilename(), savedFilePath);
         savedProfilePhoto = profilePhotoFileRepository.save(savedProfilePhoto);
 
