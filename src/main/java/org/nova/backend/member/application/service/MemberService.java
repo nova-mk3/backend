@@ -45,6 +45,7 @@ public class MemberService {
 
     /**
      * Member 응답 객체 생성
+     *
      * @param member
      * @return MemberResponse
      */
@@ -52,4 +53,25 @@ public class MemberService {
         ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
         return memberMapper.toResponse(member, profilePhoto);
     }
+
+    /**
+     * 회원 탈퇴
+     *
+     * @param studentNumber 학번
+     */
+    @Transactional
+    public void deleteMember(String studentNumber) {
+        Member member = getCurrentMember(studentNumber);
+
+        member.setDeleted();
+    }
+
+    /**
+     * 현재 로그인한 사용자 가져오기
+     */
+    private Member getCurrentMember(String studentNumber) {
+        return memberRepository.findByStudentNumber(studentNumber)
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+    }
+
 }

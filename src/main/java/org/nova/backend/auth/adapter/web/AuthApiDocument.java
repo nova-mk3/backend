@@ -62,4 +62,15 @@ public @interface AuthApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface LogoutApiDoc {
     }
+
+    @Operation(summary = "회원 탈퇴", description = "Member의 isDeleted 필드를 true로 변경")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface WithdrawalApiDoc {
+    }
 }
