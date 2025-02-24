@@ -30,7 +30,7 @@ public class CORSFilter implements Filter, jakarta.servlet.Filter {
         response.setHeader("Access-Control-Allow-Origin",
                 "http://localhost:8080, http://localhost:3000, http://localhost:3001");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
         // pre-flight (OPTIONS) 요청일 경우, 여기서 바로 응답 처리
