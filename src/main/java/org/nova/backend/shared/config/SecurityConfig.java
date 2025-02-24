@@ -100,7 +100,6 @@ public class SecurityConfig {
     private void logOut(LogoutConfigurer<HttpSecurity> logout) {
         logout.logoutUrl("/api/v1/members/logout")
                 .logoutSuccessHandler((request, response, authentication) -> {
-                    SecurityContextHolder.clearContext();
 
                     // auth token 담은 쿠키 제거
                     Cookie cookie = new Cookie("AUTH_TOKEN", null);

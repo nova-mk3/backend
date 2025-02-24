@@ -52,7 +52,7 @@ public @interface AuthApiDocument {
     @interface LoginApiDoc {
     }
 
-    @Operation(summary = "로그아웃", description = "로그인한 정보를 삭제합니다. securityContext 삭제, 쿠키 삭제")
+    @Operation(summary = "로그아웃", description = "로그인한 정보를 삭제합니다. AUTH_TOKEN 담긴 쿠키 삭제")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
