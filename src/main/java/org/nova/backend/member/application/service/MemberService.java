@@ -30,7 +30,7 @@ public class MemberService {
      * @return List<MemberResponse>
      */
     public List<MemberResponse> getAllMembers() {
-        List<Member> memberList = memberRepository.findAll();
+        List<Member> memberList = memberRepository.findAllMembers();
 
         return memberList.stream().map(this::getMemberResponseFromMember).toList();
     }
@@ -39,7 +39,7 @@ public class MemberService {
      * id로 회원 찾기
      */
     public Member findByMemberId(UUID memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new MemberDomainException("member not found.", HttpStatus.NOT_FOUND));
     }
 
