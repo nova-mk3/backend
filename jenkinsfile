@@ -53,9 +53,11 @@ pipeline {
             steps {
                 echo "Building and testing for branch: ${env.BRANCH_NAME}"
                 sh '''
-                docker-compose down || true
-                docker-compose up --build --no-cache -d
-                docker-compose down
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app -w /app docker/compose:1.29.2 down || true
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app -w /app docker/compose:1.29.2 up --build --no-cache -d
+                sleep 10
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app -w /app docker/compose:1.29.2 logs
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app -w /app docker/compose:1.29.2 down
                 '''
             }
         }
@@ -72,8 +74,8 @@ pipeline {
             steps {
                 echo "Deploying development environment on host PC..."
                 sh '''
-                docker-compose down || true
-                docker-compose up -d
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app -w /app docker/compose:1.29.2 down || true
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app -w /app docker/compose:1.29.2 up -d
                 '''
             }
         }
@@ -82,7 +84,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                echo "Main branch detected. Deployment to AWS will be implemented later."
+                echo "Main branch detected. Deploying to production (AWS will be implemented later)."
             }
         }
     }
