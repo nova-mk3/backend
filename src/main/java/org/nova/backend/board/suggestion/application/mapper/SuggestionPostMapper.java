@@ -29,7 +29,7 @@ public class SuggestionPostMapper {
                 false,
                 null,
                 LocalDateTime.now(),
-                LocalDateTime.now(),
+                null,
                 new ArrayList<>()
         );
     }
@@ -47,9 +47,9 @@ public class SuggestionPostMapper {
                 post.getTitle(),
                 post.getContent(),
                 post.getCreatedTime(),
-                post.getModifiedTime(),
                 post.isPrivate(),
                 post.getAdminReply(),
+                post.getAdminReplyTime(),
                 fileResponses,
                 post.getMember().getName()
         );
@@ -64,10 +64,9 @@ public class SuggestionPostMapper {
                 post.getId(),
                 post.getTitle(),
                 post.getCreatedTime(),
-                post.getModifiedTime(),
                 post.isPrivate(),
                 post.isAnswered(),
-                post.isAnswerRead(),
+                post.isAdminRead(),
                 isAuthor
         );
     }
