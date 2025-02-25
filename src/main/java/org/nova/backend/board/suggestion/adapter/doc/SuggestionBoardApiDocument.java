@@ -29,7 +29,11 @@ public @interface SuggestionBoardApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface GetAllPosts {}
 
-    @Operation(summary = "건의 게시글 조회", description = "특정 건의 게시글을 ID를 기반으로 조회합니다.")
+    @Operation(
+            summary = "건의 게시글 조회",
+            description = "특정 건의 게시글을 ID를 기반으로 조회합니다.\n\n"
+                    + "**주의:** 관리자가 조회할 경우, 자동으로 '읽음 처리'됩니다."
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "게시글 조회 성공"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
@@ -49,18 +53,6 @@ public @interface SuggestionBoardApiDocument {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface AddAdminReply {}
-
-    @Operation(summary = "게시글 답변 읽음 처리", description = "게시글 작성자가 관리자의 답변을 읽었음을 표시합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "답변 읽음 처리 성공"),
-            @ApiResponse(responseCode = "400", description = "아직 답변이 등록되지 않음"),
-            @ApiResponse(responseCode = "403", description = "자신의 게시글이 아니므로 읽음 처리 불가"),
-            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 에러")
-    })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface MarkAnswerAsRead {}
 
     @Operation(summary = "건의 게시글 검색", description = "건의 게시판에서 특정 키워드가 포함된 게시글을 제목에서 검색합니다.")
     @ApiResponses(value = {
