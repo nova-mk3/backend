@@ -3,8 +3,6 @@ package org.nova.backend.member.domain.model.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -13,7 +11,6 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.nova.backend.member.domain.model.valueobject.Role;
 
 @Entity
 @AllArgsConstructor
@@ -43,7 +40,9 @@ public class PendingMember {
 
     private boolean isAbsence;
 
-    private String profilePhoto;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name="profile_photo_id")
+    private ProfilePhoto profilePhoto;
 
     private String phone;
 

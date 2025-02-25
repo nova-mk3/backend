@@ -4,17 +4,23 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
-import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
 import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
+import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.Post;
+import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
+import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class BasePostMapper {
+
+    private MemberProfilePhotoMapper profilePhotoMapper;
 
     public Post toEntity(
             BasePostRequest request,
@@ -47,6 +53,10 @@ public class BasePostMapper {
                         "/api/v1/files/" + file.getId() + "/download"
                 ))
                 .toList();
+
+        ProfilePhotoResponse memberProfilePhotoResponse = profilePhotoMapper.toResponse(
+                post.getMember().getProfilePhoto());
+
         return new BasePostDetailResponse(
                 post.getId(),
                 post.getTitle(),
@@ -58,12 +68,16 @@ public class BasePostMapper {
                 post.getModifiedTime(),
                 fileResponses,
                 post.getMember().getName(),
-                post.getMember().getProfilePhoto(),
+                memberProfilePhotoResponse,
                 isLiked
         );
     }
 
     public BasePostSummaryResponse toSummaryResponse(Post post) {
+
+        ProfilePhotoResponse memberProfilePhotoResponse = profilePhotoMapper.toResponse(
+                post.getMember().getProfilePhoto());
+
         return new BasePostSummaryResponse(
                 post.getId(),
                 post.getPostType(),
@@ -75,7 +89,7 @@ public class BasePostMapper {
                 post.getCreatedTime(),
                 post.getModifiedTime(),
                 post.getMember().getName(),
-                post.getMember().getProfilePhoto()
+                memberProfilePhotoResponse
         );
     }
 }

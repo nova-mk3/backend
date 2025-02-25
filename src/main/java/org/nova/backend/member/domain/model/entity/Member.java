@@ -43,7 +43,9 @@ public class Member {
 
     private boolean isAbsence;
 
-    private String profilePhoto;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_photo_id")
+    private ProfilePhoto profilePhoto;
 
     private String phone;
 
@@ -56,13 +58,18 @@ public class Member {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "graduation_id")
-    private Graduation graduation;
+    private Graduation graduation;  //졸업 정보 저장
 
-    private boolean isDeleted;
+    private boolean isDeleted;  //회원 탈퇴 여부
 
     // 로그인 세션 생성 용 임시 객체
     public Member(String studentNumber, Role role) {
         this.name = studentNumber;
         this.role = role;
+    }
+
+    //회원 탈퇴
+    public void setDeleted() {
+        this.isDeleted = true;
     }
 }

@@ -2,6 +2,7 @@ package org.nova.backend.shared.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,54 +28,41 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // CORS 헤더 추가
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080, http://localhost:3000, http://localhost:3001");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-        response.setHeader("Access-Control-Expose-Headers", "Authorization");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
+        String token = getTokenFromCookie(request);
 
-        String authorization = request.getHeader("Authorization");
-
-        if(!checkAuthorizationHeader(authorization)){
+        if (token == null) {
+            log.info("token null");
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorization.split(" ")[1];
-
-        if(checkExpiredToken(token)){
+        if (jwtUtil.isExpired(token)) {  //토큰 소멸 시간 검증
+            log.info("token expired");
             filterChain.doFilter(request, response);
             return;
         }
 
         UsernamePasswordAuthenticationToken authToken = createAuthToken(token);
-
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
     }
 
-    // Authorization 헤더 검증
-    private boolean checkAuthorizationHeader(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            log.info("token null");
-            return false;
+    // 쿠키에서 JWT 토큰 추출
+    private String getTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return null;
         }
-        return true;
-    }
-
-    //토큰 소멸 시간 검증
-    private boolean checkExpiredToken(String token) {
-        if (jwtUtil.isExpired(token)) {
-            log.info("token expired");
-            return true;
+        for (Cookie cookie : request.getCookies()) {
+            if ("AUTH_TOKEN".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
         }
-        return false;
+        return null;
     }
 
     //auth token에 로그인한 회원의 학번, role 정보 저장
-    private UsernamePasswordAuthenticationToken createAuthToken(String token){
+    private UsernamePasswordAuthenticationToken createAuthToken(String token) {
         String studentNumber = jwtUtil.getStudentNumber(token);
         String role = jwtUtil.getRole(token);
 

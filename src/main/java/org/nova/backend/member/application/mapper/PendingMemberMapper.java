@@ -1,16 +1,21 @@
 package org.nova.backend.member.application.mapper;
 
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import org.nova.backend.auth.application.dto.request.MemberSignUpRequest;
 import org.nova.backend.member.application.dto.response.PendingMemberResponse;
 import org.nova.backend.member.domain.model.entity.PendingGraduation;
 import org.nova.backend.member.domain.model.entity.PendingMember;
+import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class PendingMemberMapper {
 
-    public PendingMember toEntity(MemberSignUpRequest request, String encryptedPassword,
+    private MemberProfilePhotoMapper profilePhotoMapper;
+
+    public PendingMember toEntity(MemberSignUpRequest request, String encryptedPassword, ProfilePhoto profilePhoto,
                                   PendingGraduation pendingGraduation) {
         return new PendingMember(
                 UUID.randomUUID(),
@@ -22,7 +27,7 @@ public class PendingMemberMapper {
                 request.getGrade(),
                 request.getSemester(),
                 request.isAbsence(),
-                request.getProfilePhoto(),
+                profilePhoto,
                 request.getPhone(),
                 "안녕하세요^-^",
                 request.getBirth(),
@@ -31,7 +36,8 @@ public class PendingMemberMapper {
         );
     }
 
-    public PendingMemberResponse toResponse(PendingMember pendingMember) {
+    public PendingMemberResponse toResponse(PendingMember pendingMember, ProfilePhoto profilePhoto) {
+
         return new PendingMemberResponse(
                 pendingMember.getId(),
                 pendingMember.getStudentNumber(),
@@ -41,7 +47,7 @@ public class PendingMemberMapper {
                 pendingMember.getGrade(),
                 pendingMember.getSemester(),
                 pendingMember.isAbsence(),
-                pendingMember.getProfilePhoto(),
+                profilePhotoMapper.toResponse(profilePhoto),
                 pendingMember.getPhone(),
                 pendingMember.getIntroduction(),
                 pendingMember.getBirth(),
