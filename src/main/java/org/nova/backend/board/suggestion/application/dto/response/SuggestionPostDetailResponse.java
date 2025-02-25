@@ -15,9 +15,9 @@ public class SuggestionPostDetailResponse {
     private String title;
     private String content;
     private LocalDateTime createdTime;
-    private LocalDateTime modifiedTime;
     private boolean isPrivate;
     private String adminReply;
+    private LocalDateTime adminReplyTime;
     private List<SuggestionFileResponse> files;
     private String authorName;
 }

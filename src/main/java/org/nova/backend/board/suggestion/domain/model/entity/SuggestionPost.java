@@ -49,8 +49,8 @@ public class SuggestionPost {
     @Column(nullable = false)
     private boolean isAnswered; // 관리자가 답변했는지 여부
 
-    @Column(nullable = false)
-    private boolean isAnswerRead; // 사용자가 답변을 읽었는지 여부
+    @Column
+    private boolean isAdminRead; // 관리자가 게시글 읽음 여부
 
     @Column(length = 5000)
     private String adminReply; // 관리자의 답변
@@ -58,8 +58,8 @@ public class SuggestionPost {
     @Column(nullable = false)
     private LocalDateTime createdTime;
 
-    @Column(nullable = false)
-    private LocalDateTime modifiedTime;
+    @Column
+    private LocalDateTime adminReplyTime;
 
     @OneToMany(mappedBy = "suggestionPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SuggestionFile> files = new ArrayList<>();
@@ -71,12 +71,10 @@ public class SuggestionPost {
     public void addAdminReply(String reply) {
         this.adminReply = reply;
         this.isAnswered = true;
-        this.isAnswerRead = false;
-        this.modifiedTime = LocalDateTime.now();
+        this.adminReplyTime = LocalDateTime.now();
     }
 
-    public void markAnswerAsRead() {
-        this.isAnswerRead = true;
-        this.modifiedTime = LocalDateTime.now();
+    public void setAdminRead(boolean isAdminRead) {
+        this.isAdminRead = isAdminRead;
     }
 }

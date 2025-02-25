@@ -9,6 +9,7 @@ import org.nova.backend.board.suggestion.application.dto.request.SuggestionPostR
 import org.nova.backend.board.suggestion.application.dto.request.SuggestionReplyRequest;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionPostDetailResponse;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionPostSummaryResponse;
+import org.nova.backend.board.suggestion.application.dto.response.SuggestionReplyResponse;
 import org.nova.backend.board.suggestion.application.mapper.SuggestionPostMapper;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionFileUseCase;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionPostUseCase;
@@ -89,7 +90,7 @@ public class SuggestionPostService implements SuggestionPostUseCase {
      * 상세 게시글 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public SuggestionPostDetailResponse getPostById(
             UUID postId,
             UUID memberId
@@ -111,6 +112,12 @@ public class SuggestionPostService implements SuggestionPostUseCase {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
 
+            if (member.getRole() == Role.ADMINISTRATOR && !post.isAdminRead()) {
+                logger.info("관리자가 게시글을 읽음 - 게시글 ID: {}", postId);
+                post.setAdminRead(true);
+                suggestionPostPersistencePort.save(post);
+            }
+
             if (post.isPrivate() && !post.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
                 logger.warn("비공개 게시글 조회 차단 - 게시글 ID: {}, 사용자 ID: {}", postId, memberId);
                 throw new SuggestionDomainException("비공개 게시글은 작성자 또는 관리자만 조회할 수 있습니다.", HttpStatus.FORBIDDEN);
@@ -126,7 +133,7 @@ public class SuggestionPostService implements SuggestionPostUseCase {
      */
     @Override
     @Transactional
-    public void addAdminReply(
+    public SuggestionReplyResponse addAdminReply(
             UUID postId,
             SuggestionReplyRequest request,
             UUID adminId
@@ -150,38 +157,8 @@ public class SuggestionPostService implements SuggestionPostUseCase {
         post.addAdminReply(request.getReply());
         suggestionPostPersistencePort.save(post);
         logger.info("건의 게시글 답변 추가 완료 - 게시글 ID: {}", postId);
-    }
 
-    /**
-     * 게시글 작성자 답변 읽음 처리
-     */
-    @Override
-    @Transactional
-    public void markAnswerAsRead(
-            UUID postId,
-            UUID memberId
-    ) {
-        logger.info("건의 게시글 답변 읽음 처리 요청 - 게시글 ID: {}, 사용자 ID: {}", postId, memberId);
-
-        SuggestionPost post = suggestionPostPersistencePort.findById(postId)
-                .orElseThrow(() -> {
-                    logger.error("건의 게시글 조회 실패 - 게시글 없음 ID: {}", postId);
-                    return new SuggestionDomainException("게시글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
-                });
-
-        if (!post.getMember().getId().equals(memberId)) {
-            logger.warn("사용자 {}가 자신의 게시글이 아닌 게시글 {}의 답변을 읽음 처리하려 했음", memberId, postId);
-            throw new SuggestionDomainException("자신의 게시글에 대해서만 답변 읽음 처리가 가능합니다.", HttpStatus.FORBIDDEN);
-        }
-
-        if (!post.isAnswered()) {
-            logger.warn("게시글 {}에는 아직 답변이 없음", postId);
-            throw new SuggestionDomainException("아직 답변이 등록되지 않았습니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        post.markAnswerAsRead();
-        suggestionPostPersistencePort.save(post);
-        logger.info("건의 게시글 답변 읽음 처리 완료 - 게시글 ID: {}", postId);
+        return new SuggestionReplyResponse(post.getAdminReply(),post.getAdminReplyTime());
     }
 
     /**

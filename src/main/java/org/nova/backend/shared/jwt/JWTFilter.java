@@ -28,25 +28,45 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = getTokenFromCookie(request);
+        String requestURI = request.getRequestURI();
 
-        if (token == null) {
-            log.info("token null");
+        // Authorization 헤더에서 JWT 가져오기
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // "Bearer " 제거
+        } else {
+            token = getTokenFromCookie(request); // 없으면 쿠키에서 가져오기
+        }
+
+        if (token == null || token.isEmpty()) {
+            log.debug("JWT 없음 - 요청 URL: {}", requestURI);
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (jwtUtil.isExpired(token)) {  //토큰 소멸 시간 검증
-            log.info("token expired");
-            filterChain.doFilter(request, response);
-            return;
-        }
+        try {
+            if (jwtUtil.isExpired(token)) { //토큰 소멸 시간 검증
+                log.debug("JWT 만료됨 - 요청 URL: {}", requestURI);
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        UsernamePasswordAuthenticationToken authToken = createAuthToken(token);
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+            UsernamePasswordAuthenticationToken authToken = createAuthToken(token);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            if (log.isDebugEnabled()) {
+                log.debug("JWT 인증 성공 - 사용자 ID: {}", ((CustomUserDetails) authToken.getPrincipal()).getUsername());
+            }
+
+        } catch (Exception e) {
+            log.error("JWT 처리 중 예외 발생 - 요청 URL: {}", requestURI, e);
+            SecurityContextHolder.clearContext();
+        }
 
         filterChain.doFilter(request, response);
     }
+
 
     // 쿠키에서 JWT 토큰 추출
     private String getTokenFromCookie(HttpServletRequest request) {
@@ -55,7 +75,8 @@ public class JWTFilter extends OncePerRequestFilter {
         }
         for (Cookie cookie : request.getCookies()) {
             if ("AUTH_TOKEN".equals(cookie.getName())) {
-                return cookie.getValue();
+                String token = cookie.getValue();
+                return (token != null && !token.trim().isEmpty()) ? token : null;
             }
         }
         return null;

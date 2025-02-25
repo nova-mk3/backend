@@ -9,6 +9,7 @@ import org.nova.backend.board.suggestion.application.dto.request.SuggestionPostR
 import org.nova.backend.board.suggestion.application.dto.request.SuggestionReplyRequest;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionPostDetailResponse;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionPostSummaryResponse;
+import org.nova.backend.board.suggestion.application.dto.response.SuggestionReplyResponse;
 import org.nova.backend.board.suggestion.application.port.in.SuggestionPostUseCase;
 import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.shared.model.ApiResponse;
@@ -63,24 +64,13 @@ public class SuggestionBoardController {
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{postId}/reply")
     @SuggestionBoardApiDocument.AddAdminReply
-    public ResponseEntity<ApiResponse<Void>> addAdminReply(
+    public ResponseEntity<ApiResponse<SuggestionReplyResponse>> addAdminReply(
             @PathVariable UUID postId,
             @RequestBody SuggestionReplyRequest request
     ) {
         UUID adminId = securityUtil.getCurrentMemberId();
-        suggestionPostUseCase.addAdminReply(postId, request, adminId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @PutMapping("/{postId}/read")
-    @SuggestionBoardApiDocument.MarkAnswerAsRead
-    public ResponseEntity<ApiResponse<Void>> markAnswerAsRead(
-            @PathVariable UUID postId
-    ) {
-        UUID memberId = securityUtil.getCurrentMemberId();
-        suggestionPostUseCase.markAnswerAsRead(postId, memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+        var replyResponse = suggestionPostUseCase.addAdminReply(postId, request, adminId);
+        return ResponseEntity.ok(ApiResponse.success(replyResponse));
     }
 
     @GetMapping("/search")

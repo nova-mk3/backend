@@ -13,9 +13,8 @@ public class SuggestionPostSummaryResponse {
     private UUID id;
     private String title;
     private LocalDateTime createdTime;
-    private LocalDateTime modifiedTime;
     private boolean isPrivate;
     private boolean isAnswered;
-    private boolean isAnswerRead;
+    private boolean isAdminRead;
     private boolean isAuthor;
 }
