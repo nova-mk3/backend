@@ -22,6 +22,7 @@ import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
+import org.nova.backend.board.util.FileStorageUtil;
 import org.nova.backend.board.util.FileUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.slf4j.Logger;
