@@ -20,8 +20,8 @@ spring:
   mail:
     host: smtp.naver.com
     port: 465
-    username: nova_cbnu@naver.com
-    password: rnjswk123@
+    username: ${EMAIL_ADDRESS}
+    password: ${EMAIL_PASSWORD}
     properties:
       mail.smtp.auth: true        # SMTP 서버와의 인증
       mail.smtp.ssl.enable: true  # SSL 보안 연결(필수)
