@@ -8,7 +8,7 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock  # Docker 데몬 공유
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     environment:
       - JENKINS_PORT=${JENKINS_PORT}
