@@ -19,7 +19,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -70,7 +69,8 @@ public class SecurityConfig {
                     configureAuthPermissions(auth);
                     //관리자 관련 권한
                     configureAdministratorPermissions(auth);
-                    auth.requestMatchers("/actuator/health","/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                    auth.requestMatchers("/actuator/health", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
+                            .permitAll()
                             .requestMatchers("/", "/api/v1", "/service/**").permitAll()
                             .anyRequest().authenticated();
                 });
