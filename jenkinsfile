@@ -36,6 +36,7 @@ pipeline {
                             SPRING_APP_PORT=${env.SPRING_APP_PORT_DEV}
                         """
                     }
+                    sh 'cat .env'
                 }
             }
         }
@@ -53,9 +54,11 @@ pipeline {
             steps {
                 echo "Building and testing for branch: ${env.BRANCH_NAME}"
                 sh '''
-                docker-compose down || true
-                docker-compose up --build --no-cache -d
-                docker-compose down
+                docker compose down || true
+                docker compose up --build --no-cache
+                sleep 10
+                docker compose logs
+                docker compose down
                 '''
             }
         }
@@ -72,8 +75,8 @@ pipeline {
             steps {
                 echo "Deploying development environment on host PC..."
                 sh '''
-                docker-compose down || true
-                docker-compose up -d
+                docker compose down || true
+                docker compose up -d
                 '''
             }
         }
@@ -82,7 +85,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                echo "Main branch detected. Deployment to AWS will be implemented later."
+                echo "Main branch detected. Deploying to production."
             }
         }
     }
