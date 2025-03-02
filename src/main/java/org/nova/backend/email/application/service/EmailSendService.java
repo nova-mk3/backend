@@ -21,7 +21,7 @@ public class EmailSendService {
 
     private final JavaMailSender javaMailSender;
 
-    @Value("${EMAIL_ADDRESS}")
+    @Value("${email.address}")
     private String hostAddress;
 
 
