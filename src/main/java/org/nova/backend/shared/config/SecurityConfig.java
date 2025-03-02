@@ -70,8 +70,7 @@ public class SecurityConfig {
                     configureAuthPermissions(auth);
                     //관리자 관련 권한
                     configureAdministratorPermissions(auth);
-
-                    auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                    auth.requestMatchers("/actuator/health","/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                             .requestMatchers("/", "/api/v1", "/service/**").permitAll()
                             .anyRequest().authenticated();
                 });
