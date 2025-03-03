@@ -35,7 +35,7 @@ public class ProfilePhotoFileService {
     @Value("${file.storage.path}")
     private String baseFileStoragePath;
 
-    @Value("base_profile_image.png")
+    @Value("${base.profile.image.name}")
     private String baseProfilePhotoName;
 
     /**
