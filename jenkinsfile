@@ -36,7 +36,6 @@ pipeline {
                             SPRING_APP_PORT=${env.SPRING_APP_PORT_DEV}
                         """
                     }
-                    sh 'cat .env'
                 }
             }
         }
