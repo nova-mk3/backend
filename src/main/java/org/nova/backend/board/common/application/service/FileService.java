@@ -1,6 +1,7 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.nova.backend.board.util.FileStorageUtil;
 import java.io.FileInputStream;
@@ -81,7 +82,8 @@ public class FileService implements FileUseCase {
     @Override
     @Transactional(readOnly = true)
     public Optional<File> findFileById(UUID fileId) {
-        return filePersistencePort.findFileById(fileId);
+        return Optional.ofNullable(filePersistencePort.findFileById(fileId)
+                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다. ID: " + fileId)));
     }
 
     /**
