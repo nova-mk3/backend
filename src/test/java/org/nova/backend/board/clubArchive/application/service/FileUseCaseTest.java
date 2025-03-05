@@ -13,6 +13,7 @@ import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.member.adapter.repository.MemberRepository;
+import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.helper.MemberFixture;
 import org.nova.backend.annotation.SlowTest;
@@ -57,10 +58,13 @@ public class FileUseCaseTest {
 
     @Test
     void 파일_업로드_성공() {
+        UUID memberId = testMember.getId();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
         when(filePersistencePort.save(any(File.class))).thenReturn(testFile);
 
         List<FileResponse> uploadedFiles = fileService.uploadFiles(
-                List.of(mockFile), testMember.getId(), PostType.FREE
+                List.of(mockFile), memberId, PostType.FREE
         );
 
         assertThat(uploadedFiles).hasSize(1);
@@ -109,12 +113,35 @@ public class FileUseCaseTest {
 
     @Test
     void 파일_다운로드_예외_발생() {
+        when(memberRepository.findById(any(UUID.class))).thenReturn(Optional.of(testMember));
+
         UUID nonExistentFileId = UUID.randomUUID();
         when(filePersistencePort.findFileById(nonExistentFileId)).thenReturn(Optional.empty());
-        when(memberRepository.findById(testMember.getId())).thenReturn(Optional.of(testMember));
 
         assertThatThrownBy(() -> fileService.downloadFile(nonExistentFileId, null, testMember.getId()))
                 .isInstanceOf(FileDomainException.class)
                 .hasMessage("파일을 찾을 수 없습니다.");
+
+        verify(filePersistencePort, never()).save(any(File.class));
+    }
+
+    @Test
+    void 로그인_안한_사용자의_파일_업로드_예외발생() {
+        UUID nonExistentUserId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> fileService.uploadFiles(
+                List.of(mockFile), nonExistentUserId, PostType.FREE
+        )).isInstanceOf(MemberDomainException.class)
+                .hasMessage("사용자를 찾을 수 없습니다.");
+    }
+
+    @Test
+    void 로그인_안한_사용자의_파일_다운로드_예외발생() {
+        UUID nonExistentUserId = UUID.randomUUID();
+        UUID fileId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> fileService.downloadFile(fileId, null, nonExistentUserId))
+                .isInstanceOf(MemberDomainException.class)
+                .hasMessage("사용자를 찾을 수 없습니다.");
     }
 }
