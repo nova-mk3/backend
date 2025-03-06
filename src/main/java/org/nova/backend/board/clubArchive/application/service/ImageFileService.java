@@ -2,6 +2,8 @@ package org.nova.backend.board.clubArchive.application.service;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import javax.imageio.ImageIO;
@@ -9,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.clubArchive.application.dto.response.ImageResponse;
 import org.nova.backend.board.clubArchive.domain.exception.PictureDomainException;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
-import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.common.domain.model.entity.File;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ImageFileService {
     private final FileUseCase fileUseCase;
+
+    @Value("${file.storage.path}")
+    private String baseFileStoragePath;
 
     /**
      * 이미지 파일 정보 변환 (width, height 포함)
@@ -34,13 +39,16 @@ public class ImageFileService {
                     height = image.getHeight();
                 }
             } catch (IOException e) {
-                throw new FileDomainException("이미지 크기 정보를 불러올 수 없습니다.");
+                throw new PictureDomainException("이미지 크기 정보를 불러올 수 없습니다.",HttpStatus.BAD_REQUEST);
             }
         }
 
+        String imageUrl = convertFilePathToUrl(file.getFilePath());
+
         return new ImageResponse(
                 file.getId(),
-                file.getFilePath(),
+                file.getOriginalFilename(),
+                imageUrl,
                 width,
                 height
         );
@@ -66,5 +74,18 @@ public class ImageFileService {
                 .orElseThrow(() -> new PictureDomainException("대표 썸네일 이미지를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         return createImageResponse(firstImageFile);
+    }
+
+    /**
+     * 파일 시스템 경로를 웹 URL로 변환
+     */
+    private String convertFilePathToUrl(String filePath) {
+        Path basePath = Paths.get(baseFileStoragePath);
+        Path absolutePath = Paths.get(filePath);
+
+        if (absolutePath.startsWith(basePath)) {
+            return "/file/" + basePath.relativize(absolutePath).toString().replace("\\", "/");
+        }
+        return "/file/" + absolutePath.toString().replace("\\", "/");
     }
 }
