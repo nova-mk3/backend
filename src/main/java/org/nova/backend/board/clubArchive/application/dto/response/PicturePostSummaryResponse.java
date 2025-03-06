@@ -19,6 +19,7 @@ public class PicturePostSummaryResponse {
     private String authorName;
     private int totalFileDownloadCount;
     private UUID thumbnailId;
+    private String thumbnailOriginalFileName;
     private String thumbnailUrl;
     private int thumbnailWidth;
     private int thumbnailHeight;

@@ -30,7 +30,8 @@ public class PicturePostMapper {
                 post.getMember().getName(),
                 post.getFiles().size(),
                 thumbnail != null ? thumbnail.getId() : null,
-                thumbnail != null ? thumbnail.getDownloadUrl() : null,
+                thumbnail != null ? thumbnail.getOriginalFileName() : null,
+                thumbnail != null ? thumbnail.getImageUrl() : null,
                 thumbnail != null ? thumbnail.getWidth() : 0,
                 thumbnail != null ? thumbnail.getHeight() : 0
         );

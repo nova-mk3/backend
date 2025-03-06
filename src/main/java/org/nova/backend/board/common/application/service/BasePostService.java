@@ -198,7 +198,7 @@ public class BasePostService implements BasePostUseCase {
      * 게시글 상세 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public BasePostDetailResponse getPostById(
             UUID boardId,
             UUID postId

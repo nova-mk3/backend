@@ -176,7 +176,7 @@ public class JokboPostService implements JokboPostUseCase {
      * 특정 족보 게시글 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public JokboPostDetailResponse getPostById(
             UUID boardId,
             UUID postId

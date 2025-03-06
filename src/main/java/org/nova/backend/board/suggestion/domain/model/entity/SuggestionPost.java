@@ -65,7 +65,11 @@ public class SuggestionPost {
     private List<SuggestionFile> files = new ArrayList<>();
 
     public void addFiles(List<SuggestionFile> files) {
-        this.files.addAll(files);
+        for (SuggestionFile file : files) {
+            if (!this.files.contains(file)) {
+                this.files.add(file);
+            }
+        }
     }
 
     public void addAdminReply(String reply) {
