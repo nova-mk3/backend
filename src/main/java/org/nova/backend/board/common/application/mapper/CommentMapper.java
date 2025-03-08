@@ -11,6 +11,7 @@ import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.model.entity.Member;
+import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -50,8 +51,8 @@ public class CommentMapper {
                 .map(c -> toResponse(c, allComments))
                 .toList();
 
-        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(
-                comment.getMember().getProfilePhoto());
+        ProfilePhoto profilePhoto = comment.getMember().getProfilePhoto();
+        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
 
         return new CommentResponse(
                 comment.getId(),
