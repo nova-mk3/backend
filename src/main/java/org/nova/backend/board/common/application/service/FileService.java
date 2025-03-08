@@ -1,6 +1,8 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.nova.backend.member.domain.exception.MemberDomainException;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.nova.backend.board.util.FileStorageUtil;
 import java.io.FileInputStream;
@@ -18,7 +20,6 @@ import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.application.port.out.FilePersistencePort;
-import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
@@ -81,7 +82,8 @@ public class FileService implements FileUseCase {
     @Override
     @Transactional(readOnly = true)
     public Optional<File> findFileById(UUID fileId) {
-        return filePersistencePort.findFileById(fileId);
+        return Optional.ofNullable(filePersistencePort.findFileById(fileId)
+                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다. ID: " + fileId)));
     }
 
     /**
@@ -94,6 +96,10 @@ public class FileService implements FileUseCase {
             UUID memberId,
             PostType postType
     ) {
+
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
+
         FileUtil.validateFileList(files);
 
         for (MultipartFile file : files) {
@@ -179,7 +185,7 @@ public class FileService implements FileUseCase {
             UUID memberId
     ) {
         memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         File file = filePersistencePort.findFileById(fileId)
                 .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다."));

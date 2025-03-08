@@ -152,15 +152,15 @@ public class BasePostService implements BasePostUseCase {
         Page<Post> posts;
 
         if (keyword == null || keyword.trim().isEmpty()) {
-
-            posts = basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable);
-        } else {
-            posts = switch (searchType.toUpperCase()) {
-                case "TITLE" -> basePostPersistencePort.searchByTitle(boardId, postType, keyword, pageable);
-                case "CONTENT" -> basePostPersistencePort.searchByContent(boardId, postType, keyword, pageable);
-                default -> basePostPersistencePort.searchByTitleOrContent(boardId, postType, keyword, pageable);
-            };
+            return getPostsByCategory(boardId, postType, pageable);
         }
+
+        posts = switch (searchType.toUpperCase()) {
+            case "TITLE" -> basePostPersistencePort.searchByTitle(boardId, postType, keyword, pageable);
+            case "CONTENT" -> basePostPersistencePort.searchByContent(boardId, postType, keyword, pageable);
+            default -> basePostPersistencePort.searchByTitleOrContent(boardId, postType, keyword, pageable);
+        };
+
         return switch (postType) {
             case EXAM_ARCHIVE -> posts.map(post -> new JokboPostSummaryResponse(
                     post.getId(),
@@ -198,7 +198,7 @@ public class BasePostService implements BasePostUseCase {
      * 게시글 상세 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public BasePostDetailResponse getPostById(
             UUID boardId,
             UUID postId

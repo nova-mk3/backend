@@ -87,7 +87,11 @@ public class Post {
     }
 
     public void addFiles(List<File> files) {
-        this.files.addAll(files);
+        for (File file : files) {
+            if (!this.files.contains(file)) {
+                this.files.add(file);
+            }
+        }
     }
     public void removeFilesByIds(List<UUID> fileIds) {
         this.files.removeIf(file -> fileIds.contains(file.getId()));

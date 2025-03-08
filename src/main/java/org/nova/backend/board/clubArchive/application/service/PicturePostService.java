@@ -20,6 +20,7 @@ import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
+import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -55,6 +56,10 @@ public class PicturePostService implements PicturePostUseCase {
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         Board board = boardUseCase.getBoardById(boardId);
+
+        if (board.getCategory() != BoardCategory.CLUB_ARCHIVE) {
+            throw new BoardDomainException("사진 게시글은 'CLUB_ARCHIVE' 게시판에서만 작성할 수 있습니다.");
+        }
 
         Post post = new Post(
                 UUID.randomUUID(),
@@ -159,7 +164,7 @@ public class PicturePostService implements PicturePostUseCase {
      * 사진 게시글 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public PicturePostDetailResponse getPostById(
             UUID boardId,
             UUID postId

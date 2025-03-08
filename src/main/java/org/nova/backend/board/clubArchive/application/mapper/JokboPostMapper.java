@@ -11,6 +11,7 @@ import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
+import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -46,7 +47,8 @@ public class JokboPostMapper {
                 ))
                 .toList();
 
-        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(post.getMember().getProfilePhoto());
+        ProfilePhoto profilePhoto = post.getMember().getProfilePhoto();
+        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
 
         return new JokboPostDetailResponse(
                 post.getId(),
@@ -58,6 +60,7 @@ public class JokboPostMapper {
                 jokboPost.getProfessorName(),
                 post.getViewCount(),
                 post.getLikeCount(),
+                post.getCommentCount(),
                 post.getCreatedTime(),
                 post.getModifiedTime(),
                 fileResponses,
@@ -81,8 +84,8 @@ public class JokboPostMapper {
                 ))
                 .toList();
 
-        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(
-                post.getMember().getProfilePhoto());
+        ProfilePhoto profilePhoto = post.getMember().getProfilePhoto();
+        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
 
         return new JokboPostDetailResponse(
                 post.getId(),
@@ -94,6 +97,7 @@ public class JokboPostMapper {
                 jokboPost.getProfessorName(),
                 post.getViewCount(),
                 post.getLikeCount(),
+                post.getCommentCount(),
                 post.getCreatedTime(),
                 post.getModifiedTime(),
                 fileResponses,

@@ -88,16 +88,28 @@ public @interface IntegratedBoardApiDocument {
     @Operation(
             summary = "모든 게시글 조회",
             description = """
-                    카테고리 구분 없이 특정 게시판 내의 모든 게시글을 페이징하여 조회합니다.\s
+                    특정 게시판에서 **카테고리 구분 없이 모든 게시글을 페이징하여 조회**합니다.
+        
+                    **기본 동작 (default)**
+                    - 검색 없이 전체 게시글을 최신순(`createdTime DESC`)으로 조회  
+                    - 정렬 기준이 없으면 `createdTime`(생성일 기준)으로 정렬  
+                    - 정렬 방식이 없으면 `desc`(최신순)으로 정렬  
+        
+                    **정렬 기준 (`sortBy`)**  
+                    - `createdTime` (기본값) → 생성일 기준 정렬  
+                    - `modifiedTime` → 수정일 기준 정렬  
+                    - `viewCount` → 조회수 기준 정렬  
+        
+                    **정렬 방식 (`sortDirection`)**  
+                    - `desc` (기본값) → 내림차순 (최신, 높은 값 먼저)  
+                    - `asc` → 오름차순 (오래된, 낮은 값 먼저)  
+        
+                    **예제 요청**  
+                    **최신순으로 모든 게시글 조회 (default)**  
+                        `/api/v1/boards/{boardId}/posts/all`
                     
-                    **정렬 기준:**
-                    - `createdTime` (생성일 기준 정렬)
-                    - `modifiedTime` (수정일 기준 정렬)
-                    - `viewCount` (조회수 기준 정렬)
-                    
-                    **정렬 방식:**
-                    - `desc` (내림차순, 높은 값부터)
-                    - `asc` (오름차순, 낮은 값부터)"""
+                    **조회수 높은 순으로 정렬**  
+                        `/api/v1/boards/{boardId}/posts/all?sortBy=viewCount&sortDirection=desc`"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
@@ -111,20 +123,33 @@ public @interface IntegratedBoardApiDocument {
             summary = "카테고리별 게시글 검색",
             description = """
                     특정 게시판 카테고리에서 키워드를 기반으로 게시글을 검색합니다.
-                    
-                    **검색 기준:**
-                    - `TITLE` (제목에서 검색)
-                    - `CONTENT` (내용에서 검색)
-                    - `ALL` (제목 + 내용에서 검색)
-                    
-                    **정렬 기준:**
-                    - `createdTime` (생성일 기준 정렬)
-                    - `modifiedTime` (수정일 기준 정렬)
-                    - `viewCount` (조회수 기준 정렬)
-                    
-                    **정렬 방식:**
-                    - `desc` (내림차순, 높은 값부터)
-                    - `asc` (오름차순, 낮은 값부터)"""
+        
+                    **기본 동작 (default)**
+                    - 검색어(keyword)가 없으면 전체 게시글을 최신순(`createdTime DESC`)으로 조회
+                    - 검색 기준이 없으면 `ALL`(제목 + 내용)로 검색
+                    - 정렬 기준이 없으면 `createdTime`(생성일 기준)으로 정렬
+                    - 정렬 방식이 없으면 `desc`(최신순)으로 정렬
+        
+                    **검색 기준 (`searchType`)**
+                    - `TITLE` → 제목에서 검색
+                    - `CONTENT` → 내용에서 검색
+                    - `ALL` (기본값) → 제목 + 내용에서 검색
+        
+                    **정렬 기준 (`sortBy`)**
+                    - `createdTime` (기본값) → 생성일 기준 정렬
+                    - `modifiedTime` → 수정일 기준 정렬
+                    - `viewCount` → 조회수 기준 정렬
+        
+                    **정렬 방식 (`sortDirection`)**
+                    - `desc` (기본값) → 내림차순 (최신, 높은 값 먼저)
+                    - `asc` → 오름차순 (오래된, 낮은 값 먼저)
+            
+                    **예제 요청**
+                    **기본 조회 (검색어 없이 최신순 조회)**
+                        `/api/v1/boards/{boardId}/posts/search`
+            
+                    **제목에서 "Spring" 포함된 게시글 검색 (조회수 높은 순)**
+                        `/api/v1/boards/{boardId}/posts/search?keyword=Spring&searchType=TITLE&sortBy=viewCount&sortDirection=desc`"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
@@ -137,21 +162,34 @@ public @interface IntegratedBoardApiDocument {
     @Operation(
             summary = "모든 게시글 검색",
             description = """
-                    카테고리 구분 없이 특정 게시판 내의 모든 게시글을 검색합니다.\s
+                    특정 게시판 내에서 **카테고리 구분 없이** 모든 게시글을 검색합니다.
+        
+                    **기본 동작 (default)**
+                    - 검색어(keyword)가 없으면 전체 게시글을 최신순(`createdTime DESC`)으로 조회  
+                    - 검색 기준이 없으면 `ALL`(제목 + 내용)로 검색  
+                    - 정렬 기준이 없으면 `createdTime`(생성일 기준)으로 정렬  
+                    - 정렬 방식이 없으면 `desc`(최신순)으로 정렬  
+        
+                    **검색 기준 (`searchType`)**  
+                    - `TITLE` → 제목에서 검색  
+                    - `CONTENT` → 내용에서 검색  
+                    - `ALL` (기본값) → 제목 + 내용에서 검색  
+        
+                    **정렬 기준 (`sortBy`)**  
+                    - `createdTime` (기본값) → 생성일 기준 정렬  
+                    - `modifiedTime` → 수정일 기준 정렬  
+                    - `viewCount` → 조회수 기준 정렬  
+        
+                    **정렬 방식 (`sortDirection`)**  
+                    - `desc` (기본값) → 내림차순 (최신, 높은 값 먼저)  
+                    - `asc` → 오름차순 (오래된, 낮은 값 먼저)  
+        
+                    **예제 요청**  
+                    **검색어 없이 최신순 조회 (default)**  
+                        `/api/v1/boards/{boardId}/posts/all/search`
                     
-                    **검색 기준:**
-                    - `TITLE` (제목에서 검색)
-                    - `CONTENT` (내용에서 검색)
-                    - `ALL` (제목 + 내용에서 검색)
-                    
-                    **정렬 기준:**
-                    - `createdTime` (생성일 기준 정렬)
-                    - `modifiedTime` (수정일 기준 정렬)
-                    - `viewCount` (조회수 기준 정렬)
-                    
-                    **정렬 방식:**
-                    - `desc` (내림차순, 높은 값부터)
-                    - `asc` (오름차순, 낮은 값부터)"""
+                    **제목에서 "Spring" 포함된 게시글 검색 (조회수 높은 순)**  
+                        `/api/v1/boards/{boardId}/posts/all/search?keyword=Spring&searchType=TITLE&sortBy=viewCount&sortDirection=desc`"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 검색 성공"),

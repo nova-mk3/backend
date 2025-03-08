@@ -1,5 +1,6 @@
 package org.nova.backend.board.clubArchive.application.service;
 
+import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.util.SecurityUtil;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -66,6 +67,10 @@ public class JokboPostService implements JokboPostUseCase {
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         Board board = boardUseCase.getBoardById(boardId);
+
+        if (board.getCategory() != BoardCategory.CLUB_ARCHIVE) {
+            throw new BoardDomainException("족보 게시글은 'CLUB_ARCHIVE' 게시판에서만 작성할 수 있습니다.");
+        }
 
         Post post =  new Post(
                 UUID.randomUUID(),
@@ -176,7 +181,7 @@ public class JokboPostService implements JokboPostUseCase {
      * 특정 족보 게시글 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public JokboPostDetailResponse getPostById(
             UUID boardId,
             UUID postId
