@@ -16,6 +16,7 @@ public class PicturePostDetailResponse {
     private String content;
     private int viewCount;
     private int likeCount;
+    private int commentCount;
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
     private String authorName;
