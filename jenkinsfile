@@ -31,7 +31,6 @@ pipeline {
                                 MYSQL_HOST=${MYSQL_HOST_PROD}
                                 MYSQL_IN_PORT=${MYSQL_IN_PORT_PROD}
                                 MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}
-
                                 SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}
                                 SPRING_APP_PORT=${SPRING_APP_PORT_PROD}
                             """
@@ -112,7 +111,7 @@ pipeline {
                     sh '''
                     docker compose --env-file .env down || true
                     docker compose --env-file .env build --no-cache
-                    docker compose --env-file .env up -d
+                    docker compose up -d --no-deps spring-app mysql nginx
                     '''
                 }
             }
@@ -133,7 +132,7 @@ pipeline {
                     sh '''
                     docker compose --env-file .env down || true
                     docker compose --env-file .env build --no-cache
-                    docker compose --env-file .env up -d
+                    docker compose up -d --no-deps spring-app mysql nginx
                     '''
                 }
             }
