@@ -109,7 +109,7 @@ public @interface IntegratedBoardApiDocument {
                         `/api/v1/boards/{boardId}/posts/all`
                     
                     **조회수 높은 순으로 정렬**  
-                        `/api/v1/boards/{boardId}/posts/all?sortBy=viewCount&sortDirection=desc`"""
+                        `/api/v1/boards/{boardId}/posts/all?sortBy=viewCount&sortDirection=desc&page=3&size=5`"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
@@ -149,7 +149,7 @@ public @interface IntegratedBoardApiDocument {
                         `/api/v1/boards/{boardId}/posts/search`
             
                     **제목에서 "Spring" 포함된 게시글 검색 (조회수 높은 순)**
-                        `/api/v1/boards/{boardId}/posts/search?keyword=Spring&searchType=TITLE&sortBy=viewCount&sortDirection=desc`"""
+                        `/api/v1/boards/{boardId}/posts/search?keyword=Spring&searchType=TITLE&sortBy=viewCount&sortDirection=desc&&page=3&size=5`"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
@@ -189,7 +189,7 @@ public @interface IntegratedBoardApiDocument {
                         `/api/v1/boards/{boardId}/posts/all/search`
                     
                     **제목에서 "Spring" 포함된 게시글 검색 (조회수 높은 순)**  
-                        `/api/v1/boards/{boardId}/posts/all/search?keyword=Spring&searchType=TITLE&sortBy=viewCount&sortDirection=desc`"""
+                        `/api/v1/boards/{boardId}/posts/all/search?keyword=Spring&searchType=TITLE&sortBy=viewCount&sortDirection=desc&&page=3&size=5`"""
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
