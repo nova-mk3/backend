@@ -110,9 +110,9 @@ pipeline {
                 script {
                     echo "Deploying to development server for testing..."
                     sh '''
-                    docker compose down || true
-                    docker compose build --no-cache
-                    docker compose up -d --env-file .env
+                    docker compose --env-file .env down || true
+                    docker compose --env-file .env build --no-cache
+                    docker compose --env-file .env up -d
                     '''
                 }
             }
@@ -131,9 +131,9 @@ pipeline {
 
                     echo "Running new container..."
                     sh '''
-                    docker compose down || true
-                    docker compose build --no-cache
-                    docker compose up -d --env-file .env
+                    docker compose --env-file .env down || true
+                    docker compose --env-file .env build --no-cache
+                    docker compose --env-file .env up -d
                     '''
                 }
             }
