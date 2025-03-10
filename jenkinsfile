@@ -67,7 +67,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("myapp:${env.BRANCH_NAME}")
+                    def imageTag = env.BRANCH_NAME ? env.BRANCH_NAME : "latest"
+                    def dockerImage = docker.build("myapp:${imageTag}")
                 }
             }
         }
