@@ -16,10 +16,8 @@ public @interface EmailAuthApiDocument {
 
     @Operation(summary = "이메일 인증 코드 전송", description = "사용자 이메일로 인증 코드를 전송합니다. EmailAuth 를 생성합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "이메일 인증코드 전송 성공",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터",
-                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "이메일 인증코드 전송 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
             @ApiResponse(responseCode = "500", content = @Content(mediaType = "application/json",
                     examples = {@ExampleObject(name = "이메일 전송 실패",
                             value = "{\"code\": 500, \"message\": \"email send failed. nova@chungbuk.ac.kr\"}"),
@@ -35,10 +33,8 @@ public @interface EmailAuthApiDocument {
 
     @Operation(summary = "인증 코드 확인", description = "이메일로 전송된 인증 코드를 확인합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "인증 코드 확인 완료.",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터",
-                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "인증 코드 확인 완료."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
             @ApiResponse(responseCode = "401", content = @Content(mediaType = "application/json",
                     examples = {@ExampleObject(name = "인증 코드 확인 실패",
                             value = "{\"code\": 401, \"message\": \"email verification failed. nova@chungbuk.ac.kr\"}"),
