@@ -13,6 +13,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.nova.backend.member.application.dto.request.UpdateMemberProfileRequest;
 import org.nova.backend.member.domain.model.valueobject.Role;
 
 @Entity
@@ -72,4 +73,37 @@ public class Member {
     public void setDeleted() {
         this.isDeleted = true;
     }
+
+    // 비밀번호 변경
+    public void updatePassword(String encryptedPassword) {
+        this.password = encryptedPassword;
+    }
+
+    // 이메일 변경
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    // 프로필 사진 변경
+    public void updateProfilePhoto(ProfilePhoto profilePhoto) {
+        this.profilePhoto = profilePhoto;
+    }
+
+    // 프로필 수정
+    public void updateProfileInfo(UpdateMemberProfileRequest updateMemberProfileRequest) {
+        this.name = updateMemberProfileRequest.getName();
+        this.grade = updateMemberProfileRequest.getGrade();
+        this.semester = updateMemberProfileRequest.getSemester();
+        this.isAbsence = updateMemberProfileRequest.isAbsence();
+        this.birth = updateMemberProfileRequest.getBirth();
+        this.phone = updateMemberProfileRequest.getPhone();
+        this.introduction = updateMemberProfileRequest.getIntroduction();
+    }
+
+    // 졸업 여부 변경
+    public void updateGraduationInfo(Graduation graduation) {
+        this.graduation = graduation;
+    }
+
+
 }

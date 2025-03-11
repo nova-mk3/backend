@@ -56,6 +56,7 @@ public @interface AuthApiDocument {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @Target(ElementType.METHOD)
@@ -67,6 +68,7 @@ public @interface AuthApiDocument {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @Target(ElementType.METHOD)

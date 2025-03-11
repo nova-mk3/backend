@@ -7,6 +7,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.nova.backend.member.application.dto.request.UpdateGraduationRequest;
 
 @Entity
 @Getter
@@ -29,4 +30,14 @@ public class Graduation {
     private String contactInfo;
 
     private String contactDescription;
+
+    // 졸업생 프로필 수정
+    public void updateProfile(UpdateGraduationRequest updateGraduationRequest) {
+        this.year = updateGraduationRequest.getYear();
+        this.isWork = updateGraduationRequest.isWork();
+        this.job = updateGraduationRequest.getJob();
+        this.isContact = updateGraduationRequest.isContact();
+        this.contactInfo = updateGraduationRequest.getContactInfo();
+        this.contactDescription = updateGraduationRequest.getContactDescription();
+    }
 }
