@@ -8,6 +8,7 @@ import org.nova.backend.member.adapter.repository.GraduationRepository;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.application.dto.request.AuthCodeEmailRequest;
 import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
+import org.nova.backend.member.application.dto.request.UpdateGraduationRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.MemberResponse;
@@ -127,21 +128,37 @@ public class MemberService {
         validateMemberAuthorize(profileMemberId, loginMemberId);
         Member member = findByMemberId(loginMemberId);
 
-        // 졸업생 정보 수정
-        if (updateMemberRequest.getUpdateMemberProfileRequest().isGraduation()) {
-            if (member.isGraduation()) {  // 졸업생 정보 수정 : 기존에 졸업생 정보가 있음.
-                member.getGraduation().updateProfile(updateMemberRequest.getUpdateGraduationRequest());
-            } else {  //졸업생 정보 생성
-                Graduation newGraduation = graduationMapper.toEntity(updateMemberRequest.getUpdateGraduationRequest());
-                graduationRepository.save(newGraduation);
-                member.updateGraduationInfo(newGraduation);
-            }
+        boolean hasGraduationRequest = updateMemberRequest.getUpdateMemberProfileRequest().isGraduation();
+        if (hasGraduationRequest) {
+            updateGraduation(member, updateMemberRequest.getUpdateGraduationRequest());
+        }
+
+        if (!hasGraduationRequest && member.isGraduation()) {
+            deleteGraduation(member);
         }
 
         // 기본 회원 정보 수정
         member.updateProfileInfo(updateMemberRequest.getUpdateMemberProfileRequest());
 
         return new MyPageMemberResponse(true, getMemberResponseFromMember(member));
+    }
+
+    //졸업생 정보 반영
+    private void updateGraduation(Member member, UpdateGraduationRequest updateGraduationRequest) {
+        if (member.isGraduation()) {  // 졸업생 정보 수정 : 기존에 졸업생 정보가 있음.
+            member.getGraduation().updateProfile(updateGraduationRequest);
+        } else {  //졸업생 정보 생성
+            Graduation newGraduation = graduationMapper.toEntity(updateGraduationRequest);
+            graduationRepository.save(newGraduation);
+            member.updateGraduationInfo(newGraduation);
+        }
+    }
+
+    //졸업생 정보 삭제
+    private void deleteGraduation(Member member) {
+        Graduation graduation = member.getGraduation();
+        member.updateGraduationInfo(null);
+        graduationRepository.delete(graduation);
     }
 
     /**
