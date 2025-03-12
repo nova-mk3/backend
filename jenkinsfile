@@ -135,7 +135,13 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    sh "docker image prune -f"
+                    def isPruneRunning = sh(script: "ps aux | grep 'docker image prune' | grep -v grep || true", returnStdout: true).trim()
+
+                    if (isPruneRunning) {
+                        echo "Docker prune is already running. Skipping this step."
+                    } else {
+                        sh "docker image prune -f"
+                    }
                 }
             }
         }
