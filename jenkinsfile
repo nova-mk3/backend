@@ -8,6 +8,8 @@ pipeline {
             steps {
                 script {
                     echo "Debug: Current BRANCH_NAME = '${env.BRANCH_NAME}'"
+
+                    def envVars = ""
                     if (env.BRANCH_NAME == 'main') {
                         echo "Setting environment for main (production) branch..."
                         withCredentials([
@@ -21,22 +23,22 @@ pipeline {
                             string(credentialsId: 'SPRING_PROFILE_ACTIVE_PROD', variable: 'SPRING_PROFILE_ACTIVE_PROD'),
                             string(credentialsId: 'SPRING_APP_PORT_PROD', variable: 'SPRING_APP_PORT_PROD')
                         ]) {
-                            sh """
-                            echo "MYSQL_DATABASE=${MYSQL_DATABASE_PROD}" > ${ENV_FILE}
-                            echo "MYSQL_USER=${MYSQL_USER_PROD}" >> ${ENV_FILE}
-                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD_PROD}" >> ${ENV_FILE}
-                            echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_PROD}" >> ${ENV_FILE}
-                            echo "MYSQL_HOST=${MYSQL_HOST_PROD}" >> ${ENV_FILE}
-                            echo "MYSQL_IN_PORT=${MYSQL_IN_PORT_PROD}" >> ${ENV_FILE}
-                            echo "MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}" >> ${ENV_FILE}
-                            echo "SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}" >> ${ENV_FILE}
-                            echo "SPRING_APP_PORT=${SPRING_APP_PORT_PROD}" >> ${ENV_FILE}
+                            envVars = """
+                                MYSQL_DATABASE=${MYSQL_DATABASE_PROD}
+                                MYSQL_USER=${MYSQL_USER_PROD}
+                                MYSQL_PASSWORD=${MYSQL_PASSWORD_PROD}
+                                MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_PROD}
+                                MYSQL_HOST=${MYSQL_HOST_PROD}
+                                MYSQL_IN_PORT=${MYSQL_IN_PORT_PROD}
+                                MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}
+                                SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}
+                                SPRING_APP_PORT=${SPRING_APP_PORT_PROD}
                             """
+                            writeFile file: ENV_FILE, text: envVars
                             echo ".env file created successfully (Production)"
                         }
                     } else if (env.BRANCH_NAME == 'dev') {
                         echo "Setting environment for dev branch..."
-
                         withCredentials([
                             string(credentialsId: 'MYSQL_DATABASE_DEV', variable: 'MYSQL_DATABASE_DEV'),
                             string(credentialsId: 'MYSQL_USER_DEV', variable: 'MYSQL_USER_DEV'),
@@ -48,17 +50,18 @@ pipeline {
                             string(credentialsId: 'SPRING_PROFILE_ACTIVE_DEV', variable: 'SPRING_PROFILE_ACTIVE_DEV'),
                             string(credentialsId: 'SPRING_APP_PORT_DEV', variable: 'SPRING_APP_PORT_DEV')
                         ]) {
-                            sh """
-                            echo "MYSQL_DATABASE=${MYSQL_DATABASE_DEV}" > ${ENV_FILE}
-                            echo "MYSQL_USER=${MYSQL_USER_DEV}" >> ${ENV_FILE}
-                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD_DEV}" >> ${ENV_FILE}
-                            echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_DEV}" >> ${ENV_FILE}
-                            echo "MYSQL_HOST=${MYSQL_HOST_DEV}" >> ${ENV_FILE}
-                            echo "MYSQL_IN_PORT=${MYSQL_IN_PORT_DEV}" >> ${ENV_FILE}
-                            echo "MYSQL_EX_PORT=${MYSQL_EX_PORT_DEV}" >> ${ENV_FILE}
-                            echo "SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_DEV}" >> ${ENV_FILE}
-                            echo "SPRING_APP_PORT=${SPRING_APP_PORT_DEV}" >> ${ENV_FILE}
+                            envVars = """
+                                MYSQL_DATABASE=${MYSQL_DATABASE_DEV}
+                                MYSQL_USER=${MYSQL_USER_DEV}
+                                MYSQL_PASSWORD=${MYSQL_PASSWORD_DEV}
+                                MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_DEV}
+                                MYSQL_HOST=${MYSQL_HOST_DEV}
+                                MYSQL_IN_PORT=${MYSQL_IN_PORT_DEV}
+                                MYSQL_EX_PORT=${MYSQL_EX_PORT_DEV}
+                                SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_DEV}
+                                SPRING_APP_PORT=${SPRING_APP_PORT_DEV}
                             """
+                            writeFile file: ENV_FILE, text: envVars
                             echo ".env file created successfully (Development)"
                         }
                     }
