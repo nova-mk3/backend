@@ -15,7 +15,7 @@ services:
     environment:
       - JENKINS_PORT=${JENKINS_PORT}
     networks:
-      - 'jenkins_network'
+      - 'backend_network'
 
   mysql:
     image: 'mysql:latest'
@@ -27,14 +27,14 @@ services:
     ports:
       - '${MYSQL_EX_PORT}:${MYSQL_IN_PORT}'
     volumes:
-      - mysql_data:/var/lib/mysql
+      - '${MYSQL_VOLUME_PATH}:/var/lib/mysql'
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - 'jenkins_network'
+      - 'backend_network'
 
   spring-app:
     build: .
@@ -57,7 +57,7 @@ services:
       mysql:
         condition: service_healthy
     networks:
-      - 'jenkins_network'
+      - 'backend_network'
 
   nginx:
     image: 'nginx'
@@ -69,11 +69,11 @@ services:
 #      spring-app:
 #        condition: service_healthy
     networks:
-      - 'jenkins_network'
+      - 'backend_network'
 
 volumes:
   jenkins_home:
   mysql_data:
 
 networks:
-  jenkins_network:
+  backend_network:
