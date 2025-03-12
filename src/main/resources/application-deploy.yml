@@ -4,8 +4,7 @@ spring:
       ddl-auto: update
     show-sql: false
     database-platform: org.hibernate.dialect.MySQL8Dialect
-  server:
-    port: 8080
+    open-in-view: false
   devtools:
     restart:
       enabled: false

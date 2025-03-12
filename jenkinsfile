@@ -1,24 +1,69 @@
 pipeline {
     agent any
     environment {
-        ENV_FILE = '' // 브랜치별 환경 파일 경로
+        ENV_FILE = '.env'
     }
     stages {
         stage('Set Environment Variables') {
             steps {
                 script {
+                    echo "Debug: Current BRANCH_NAME = '${env.BRANCH_NAME}'"
+
+                    def envVars = ""
                     if (env.BRANCH_NAME == 'main') {
-                        echo "Using production environment file"
-                        withCredentials([file(credentialsId: 'prod-env-file', variable: 'ENV_FILE_PATH')]) {
-                            env.ENV_FILE = ENV_FILE_PATH
+                        echo "Setting environment for main (production) branch..."
+                        withCredentials([
+                            string(credentialsId: 'MYSQL_DATABASE_PROD', variable: 'MYSQL_DATABASE_PROD'),
+                            string(credentialsId: 'MYSQL_USER_PROD', variable: 'MYSQL_USER_PROD'),
+                            string(credentialsId: 'MYSQL_PASSWORD_PROD', variable: 'MYSQL_PASSWORD_PROD'),
+                            string(credentialsId: 'MYSQL_ROOT_PASSWORD_PROD', variable: 'MYSQL_ROOT_PASSWORD_PROD'),
+                            string(credentialsId: 'MYSQL_HOST_PROD', variable: 'MYSQL_HOST_PROD'),
+                            string(credentialsId: 'MYSQL_IN_PORT_PROD', variable: 'MYSQL_IN_PORT_PROD'),
+                            string(credentialsId: 'MYSQL_EX_PORT_PROD', variable: 'MYSQL_EX_PORT_PROD'),
+                            string(credentialsId: 'SPRING_PROFILE_ACTIVE_PROD', variable: 'SPRING_PROFILE_ACTIVE_PROD'),
+                            string(credentialsId: 'SPRING_APP_PORT_PROD', variable: 'SPRING_APP_PORT_PROD')
+                        ]) {
+                            envVars = """
+                                MYSQL_DATABASE=${MYSQL_DATABASE_PROD}
+                                MYSQL_USER=${MYSQL_USER_PROD}
+                                MYSQL_PASSWORD=${MYSQL_PASSWORD_PROD}
+                                MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_PROD}
+                                MYSQL_HOST=${MYSQL_HOST_PROD}
+                                MYSQL_IN_PORT=${MYSQL_IN_PORT_PROD}
+                                MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}
+                                SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}
+                                SPRING_APP_PORT=${SPRING_APP_PORT_PROD}
+                            """
+                            writeFile file: ENV_FILE, text: envVars
+                            echo ".env file created successfully (Production)"
                         }
                     } else if (env.BRANCH_NAME == 'dev') {
-                        echo "Using development environment file"
-                        withCredentials([file(credentialsId: 'dev-env-file', variable: 'ENV_FILE_PATH')]) {
-                            env.ENV_FILE = ENV_FILE_PATH
+                        echo "Setting environment for dev branch..."
+                        withCredentials([
+                            string(credentialsId: 'MYSQL_DATABASE_DEV', variable: 'MYSQL_DATABASE_DEV'),
+                            string(credentialsId: 'MYSQL_USER_DEV', variable: 'MYSQL_USER_DEV'),
+                            string(credentialsId: 'MYSQL_PASSWORD_DEV', variable: 'MYSQL_PASSWORD_DEV'),
+                            string(credentialsId: 'MYSQL_ROOT_PASSWORD_DEV', variable: 'MYSQL_ROOT_PASSWORD_DEV'),
+                            string(credentialsId: 'MYSQL_HOST_DEV', variable: 'MYSQL_HOST_DEV'),
+                            string(credentialsId: 'MYSQL_IN_PORT_DEV', variable: 'MYSQL_IN_PORT_DEV'),
+                            string(credentialsId: 'MYSQL_EX_PORT_DEV', variable: 'MYSQL_EX_PORT_DEV'),
+                            string(credentialsId: 'SPRING_PROFILE_ACTIVE_DEV', variable: 'SPRING_PROFILE_ACTIVE_DEV'),
+                            string(credentialsId: 'SPRING_APP_PORT_DEV', variable: 'SPRING_APP_PORT_DEV')
+                        ]) {
+                            envVars = """
+                                MYSQL_DATABASE=${MYSQL_DATABASE_DEV}
+                                MYSQL_USER=${MYSQL_USER_DEV}
+                                MYSQL_PASSWORD=${MYSQL_PASSWORD_DEV}
+                                MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_DEV}
+                                MYSQL_HOST=${MYSQL_HOST_DEV}
+                                MYSQL_IN_PORT=${MYSQL_IN_PORT_DEV}
+                                MYSQL_EX_PORT=${MYSQL_EX_PORT_DEV}
+                                SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_DEV}
+                                SPRING_APP_PORT=${SPRING_APP_PORT_DEV}
+                            """
+                            writeFile file: ENV_FILE, text: envVars
+                            echo ".env file created successfully (Development)"
                         }
-                    } else {
-                        error("Unsupported branch: ${env.BRANCH_NAME}")
                     }
                 }
             }
@@ -28,48 +73,92 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build and Test') {
+        stage('Grant Permissions') {
             steps {
-                echo "Building and testing for branch: ${env.BRANCH_NAME}"
-                sh '''
-                docker-compose --env-file $ENV_FILE down || true
-                docker-compose --env-file $ENV_FILE up --build -d
-                docker-compose --env-file $ENV_FILE exec spring-app ./gradlew test
-                docker-compose --env-file $ENV_FILE down
-                '''
+                sh 'chmod +x ./gradlew'
             }
         }
-        stage('Deploy (Dev)') {
-            when {
-                branch 'dev'
-            }
+        stage('Build JAR') {
             steps {
-                echo "Deploying development environment on host PC..."
-                sh '''
-                docker-compose --env-file $ENV_FILE down || true
-                docker-compose --env-file $ENV_FILE up --build -d
-                '''
+                sh "./gradlew clean build"
             }
         }
-        stage('Deploy (Main)') {
+        stage('Run Tests') {
+            steps {
+                script {
+                    echo "Running tests..."
+                    sh "./gradlew test"
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def imageTag = env.BRANCH_NAME ? env.BRANCH_NAME : "latest"
+                    def dockerImage = docker.build("myapp:${imageTag}")
+                }
+            }
+        }
+//         stage('Deploy to Dev (Only for dev branch)') {
+//             when {
+//                 branch 'dev'
+//             }
+//             steps {
+//                 script {
+//                     echo "Deploying to development server for testing..."
+//                     sh '''
+//                     docker compose --env-file .env down || true
+//                     docker compose --env-file .env build --no-cache
+//                     docker compose up -d --no-deps spring-app
+//                     '''
+//                 }
+//             }
+//         }
+        stage('Deploy to Production (Only for main branch)') {
             when {
                 branch 'main'
             }
             steps {
-                echo "Main branch detected. Deployment to AWS will be implemented later."
+                script {
+                    echo "Stopping old container..."
+                    sh '''
+                    docker stop myapp || true
+                    docker rm myapp || true
+                    '''
+
+                    echo "Running new container..."
+                    sh '''
+                    docker compose --env-file .env down || true
+                    docker compose --env-file .env build --no-cache
+                    docker compose up -d --no-deps spring-app
+                    '''
+                }
+            }
+        }
+        stage('Cleanup') {
+            steps {
+                script {
+                    def isPruneRunning = sh(script: "ps aux | grep 'docker image prune' | grep -v grep || true", returnStdout: true).trim()
+
+                    if (isPruneRunning) {
+                        echo "Docker prune is already running. Skipping this step."
+                    } else {
+                        sh "docker image prune -f"
+                    }
+                }
             }
         }
     }
     post {
         always {
             echo "Cleaning up resources"
-            sh 'docker-compose --env-file $ENV_FILE down || true'
         }
         success {
             echo "Pipeline completed successfully."
         }
         failure {
             echo "Pipeline failed. Check the logs."
+            error("Pipeline failed! Fix the issue before merging to main.")
         }
     }
 }
