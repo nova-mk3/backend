@@ -54,7 +54,7 @@ public class SignUpController {
     @RequestMapping(value = "/profile-photo", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @AuthApiDocument.UploadProfilePhotoApiDoc
     public ResponseEntity<ApiResponse<ProfilePhotoResponse>> uploadProfilePhoto(
-            @RequestParam("profilePhoto") MultipartFile profilePhoto) {
+            @RequestParam("profile-photo") MultipartFile profilePhoto) {
 
         ProfilePhotoResponse profilePhotoResponse = profilePhotoFileService.uploadProfilePhoto(profilePhoto);
 
