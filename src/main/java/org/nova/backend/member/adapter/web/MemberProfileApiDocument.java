@@ -118,6 +118,20 @@ public @interface MemberProfileApiDocument {
     @interface UpdateEmail {
     }
 
+    @Operation(summary = "회원 이메일 조회", description = "회원의 이메일 정보를 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "이메일 조회 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
+            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface GetEmail {
+    }
+
     @Operation(summary = "회원 프로필 사진 업로드", description = "프로필 사진을 DB에 업로드합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "회원 프로필 사진 업로드 성공"),
@@ -145,4 +159,20 @@ public @interface MemberProfileApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface UpdateProfilePhoto {
     }
+
+    @Operation(summary = "회원 프로필 사진 삭제", description = "회원의 프로필 사진을 삭제합니다. 기본 이미지를 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 프로필 사진 삭제 성공. 기본 이미지를 반환합니다."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
+            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "404", description = "기본 프로필 사진을 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류"),
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface DeleteProfilePhoto {
+    }
+
 }

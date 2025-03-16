@@ -146,6 +146,19 @@ public class MemberController {
     }
 
     /**
+     * 회원 이메일 조회
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{profileMemberId}/email")
+    @MemberProfileApiDocument.GetEmail
+    public ResponseEntity<ApiResponse<String>> getEmail(@PathVariable UUID profileMemberId) {
+        UUID loginMemberId = securityUtil.getCurrentMemberId();
+        String email = memberService.getEmail(profileMemberId, loginMemberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(email));
+    }
+
+    /**
      * 회원 이메일 인증 코드 확인
      */
     @PreAuthorize("isAuthenticated()")
@@ -173,36 +186,44 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("이메일 변경 완료"));
     }
 
-
-    /**
-     * 회원 프로필 사진 변경
-     */
-    @PreAuthorize("isAuthenticated()")
-    @PutMapping("/{profileMemberId}/profilePhoto")
-    @MemberProfileApiDocument.UpdateProfilePhoto
-    public ResponseEntity<ApiResponse<String>> updateProfilePhoto(@PathVariable UUID profileMemberId,
-                                                                  @RequestBody UUID profilePhoto) {
-        UUID loginMemberId = securityUtil.getCurrentMemberId();
-        memberService.updateProfilePhoto(profileMemberId, loginMemberId, profilePhoto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("프로필 사진 변경 완료"));
-    }
-
-    /**
-     * 회원 프로필 사진 삭제
-     */
-
     /**
      * 회원 프로필 사진 업로드
      */
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/{profileMemberId}/profilePhoto", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RequestMapping(value = "/{profileMemberId}/profile-photo", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @MemberProfileApiDocument.UploadProfilePhoto
     public ResponseEntity<ApiResponse<ProfilePhotoResponse>> uploadProfilePhoto(@PathVariable UUID profileMemberId,
                                                                                 @RequestParam("profilePhoto") MultipartFile profilePhoto) {
         ProfilePhotoResponse profilePhotoResponse = profilePhotoFileService.uploadProfilePhoto(profilePhoto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(profilePhotoResponse));
+    }
+
+    /**
+     * 회원 프로필 사진 변경
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/{profileMemberId}/profile-photo")
+    @MemberProfileApiDocument.UpdateProfilePhoto
+    public ResponseEntity<ApiResponse<ProfilePhotoResponse>> updateProfilePhoto(@PathVariable UUID profileMemberId,
+                                                                                @RequestBody UUID profilePhoto) {
+        UUID loginMemberId = securityUtil.getCurrentMemberId();
+        ProfilePhotoResponse response = memberService.updateProfilePhoto(profileMemberId, loginMemberId, profilePhoto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
+    }
+
+    /**
+     * 회원 프로필 사진 삭제
+     */
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{profileMemberId}/profile-photo")
+    @MemberProfileApiDocument.DeleteProfilePhoto
+    public ResponseEntity<ApiResponse<ProfilePhotoResponse>> deleteProfilePhoto(@PathVariable UUID profileMemberId) {
+        UUID loginMemberId = securityUtil.getCurrentMemberId();
+        ProfilePhotoResponse profilePhotoResponse = memberService.deleteProfilePhoto(profileMemberId, loginMemberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(profilePhotoResponse));
     }
 
 }
