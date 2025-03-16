@@ -11,6 +11,7 @@ import org.nova.backend.member.application.dto.request.AuthCodeEmailRequest;
 import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
+import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.service.MemberService;
@@ -54,6 +55,20 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(memberId));
     }
+
+    /**
+     * 현재 로그인한 회원의 간단 프로필 조회
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/simple-profile")
+    @MemberProfileApiDocument.GetMemberSimpleProfileApiDoc
+    public ResponseEntity<ApiResponse<MemberSimpleProfileResponse>> getSimpleProfile() {
+        UUID memberId = securityUtil.getCurrentMemberId();
+        MemberSimpleProfileResponse response =  memberService.getSimpleProfile(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
+    }
+
 
     /**
      * 회원 정보 조회

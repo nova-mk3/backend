@@ -13,6 +13,7 @@ import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.GraduationResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.mapper.GraduationMapper;
@@ -95,6 +96,20 @@ public class MemberService {
         if (!isLoginMember(profileMemberId, loginMemberId)) {
             throw new MemberDomainException("회원 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
+    }
+
+    /**
+     * 회원 간단 프로필 조회
+     * @param memberId 현재 로그인한 사용자
+     * @return 간단 프로필 응답 객체
+     */
+    public MemberSimpleProfileResponse getSimpleProfile(UUID memberId) {
+        Member profileMember = findByMemberId(memberId);
+
+        ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(profileMember.getProfilePhoto());
+        ProfilePhotoResponse profilePhotoResponse = memberProfilePhotoMapper.toResponse(profilePhoto);
+
+        return new MemberSimpleProfileResponse(profileMember.getId(), profileMember.getName(), profilePhotoResponse);
     }
 
     /**
@@ -319,4 +334,5 @@ public class MemberService {
 
         return memberProfilePhotoMapper.toResponse(baseProfilePhoto);
     }
+
 }
