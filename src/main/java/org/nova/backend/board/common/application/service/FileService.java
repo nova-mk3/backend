@@ -1,6 +1,8 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,9 +70,9 @@ public class FileService implements FileUseCase {
         List<File> files = filePersistencePort.findFilesByIds(fileIds);
 
         if (files.isEmpty()) {
-            logger.warn("삭제할 파일이 존재하지 않습니다. ID 목록: {}", fileIds);
+            logger.warn("파일이 존재하지 않습니다. ID 목록: {}", fileIds);
         } else {
-            logger.info("삭제할 파일 조회 완료: {}", files);
+            logger.info("파일 조회 완료: {}", files);
         }
 
         return files;
@@ -197,17 +199,18 @@ public class FileService implements FileUseCase {
     /**
      * 파일 다운로드 처리
      */
-    private void processFileDownload(
-            File file,
-            HttpServletResponse response
-    ) {
+    private void processFileDownload(File file, HttpServletResponse response) {
         Path filePath = Paths.get(file.getFilePath());
         if (!Files.exists(filePath)) {
             throw new FileDomainException("파일이 존재하지 않습니다.");
         }
 
+        String encodedFileName = URLEncoder.encode(file.getOriginalFilename(), StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20"); // 공백 문제 해결
+
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getOriginalFilename() + "\"");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename*=UTF-8''" + encodedFileName);
 
         try (InputStream inputStream = new FileInputStream(filePath.toFile())) {
             StreamUtils.copy(inputStream, response.getOutputStream());
