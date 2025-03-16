@@ -43,7 +43,7 @@ public class EmailAuthService {
     /**
      * 인증 코드 확인
      *
-     * @param email
+     * @param email 요청 이메일
      */
     @Transactional
     public void checkAuthCode(String email, String authCode) {

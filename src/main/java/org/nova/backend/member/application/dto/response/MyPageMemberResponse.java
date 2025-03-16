@@ -10,5 +10,6 @@ public class MyPageMemberResponse {
     private boolean isLoginMember;
 
     private MemberResponse memberResponse;
+    private GraduationResponse graduationResponse;
 
 }

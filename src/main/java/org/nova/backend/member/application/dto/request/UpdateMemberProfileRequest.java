@@ -16,7 +16,7 @@ public class UpdateMemberProfileRequest {
     @NotBlank(message = "학번을 입력해주세요.")
     private String studentNumber;
 
-    @Schema(description = "소속")
+    @Schema(description = "졸업 여부")
     private boolean graduation;
 
     @Schema(description = "학년", example = "1")
@@ -38,6 +38,5 @@ public class UpdateMemberProfileRequest {
 
     @Schema(example = "안녕하세요 ^O^")
     private String introduction;
-
 
 }

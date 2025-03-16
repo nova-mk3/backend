@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "회원가입 요청 처리 API", description = "관리자가 회원가입 요청을 처리합니다.")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/pendingMembers")
+@RequestMapping("/api/v1/pending-members")
 public class PendingMemberController {
 
     private final PendingMemberService pendingMemberService;

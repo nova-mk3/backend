@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.board.common.application.service.FileService;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.util.FileStorageUtil;
 import org.nova.backend.board.util.FileUtil;
@@ -113,7 +112,7 @@ public class ProfilePhotoFileService {
      *
      * @return 기본 프로필 사진
      */
-    private ProfilePhoto findBaseProfilePhoto() {
+    public ProfilePhoto findBaseProfilePhoto() {
         return profilePhotoFileRepository.findProfilePhotoByOriginalFilename(baseProfilePhotoName)
                 .orElseThrow(() -> new ProfilePhotoFileDomainException("기본 이미지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
     }
