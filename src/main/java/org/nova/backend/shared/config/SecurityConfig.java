@@ -63,6 +63,8 @@ public class SecurityConfig {
                     configureBoardPermissions(auth);
                     //족보 게시판 관련 권한
                     configureJokboBoardPermissions(auth);
+                    //사진 게시판 관련 권한
+                    configurePictureBoardPermissions(auth);
                     //댓글 관련 권한
                     configureCommentPermissions(auth);
                     //로그인 회원가입 관련 권한
@@ -164,6 +166,21 @@ public class SecurityConfig {
 
                 // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
                 .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/exam-posts/posts")
+                .authenticated();
+    }
+
+    private void configurePictureBoardPermissions(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
+    ) {
+        auth
+                // 로그인 없이 접근 가능한 API
+                .requestMatchers(
+                        "/api/v1/boards/{boardId}/picture-posts",
+                        "/api/v1/boards/{boardId}/picture-posts/{postId}"
+                ).permitAll()
+
+                // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
+                .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/picture-posts/posts")
                 .authenticated();
     }
 
