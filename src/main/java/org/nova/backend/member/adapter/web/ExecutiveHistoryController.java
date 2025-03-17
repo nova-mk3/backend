@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "임원 관리 API", description = "관리자가 임원을 관리합니다.")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/executiveHistories")
+@RequestMapping("/api/v1/executive-histories")
 public class ExecutiveHistoryController {
 
     private final ExecutiveHistoryService executiveHistoryService;

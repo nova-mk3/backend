@@ -11,10 +11,14 @@ import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
 import org.nova.backend.member.application.dto.request.UpdateGraduationRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
+import org.nova.backend.member.application.dto.response.GraduationResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
+import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.mapper.GraduationMapper;
 import org.nova.backend.member.application.mapper.MemberMapper;
+import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -37,6 +41,7 @@ public class MemberService {
 
     private final MemberMapper memberMapper;
     private final GraduationMapper graduationMapper;
+    private final MemberProfilePhotoMapper memberProfilePhotoMapper;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -71,6 +76,13 @@ public class MemberService {
     }
 
     /**
+     * Graduation 응답 객체 생성
+     */
+    public GraduationResponse getGraduationFromMember(Graduation graduation) {
+        return graduationMapper.toResponse(graduation);
+    }
+
+    /**
      * 로그인한 Member가 본인의 프로필을 조회하는지 로그인한 Member가 본인의 프로필을 조회하지 않는 경우 loginMember의 유효성 검증.
      */
     private boolean isLoginMember(UUID profileMemberId, UUID loginMemberId) {
@@ -87,6 +99,20 @@ public class MemberService {
     }
 
     /**
+     * 회원 간단 프로필 조회
+     * @param memberId 현재 로그인한 사용자
+     * @return 간단 프로필 응답 객체
+     */
+    public MemberSimpleProfileResponse getSimpleProfile(UUID memberId) {
+        Member profileMember = findByMemberId(memberId);
+
+        ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(profileMember.getProfilePhoto());
+        ProfilePhotoResponse profilePhotoResponse = memberProfilePhotoMapper.toResponse(profilePhoto);
+
+        return new MemberSimpleProfileResponse(profileMember.getId(), profileMember.getName(), profilePhotoResponse);
+    }
+
+    /**
      * 회원 프로필 정보 조회
      *
      * @param profileMemberId 조회할 프로필 Member id
@@ -99,7 +125,8 @@ public class MemberService {
             findByMemberId(loginMemberId);
         }
 
-        return new MyPageMemberResponse(isLoginMember, getMemberResponseFromMember(profileMember));
+        return new MyPageMemberResponse(isLoginMember, getMemberResponseFromMember(profileMember),
+                getGraduationFromMember(profileMember.getGraduation()));
     }
 
     /**
@@ -121,6 +148,7 @@ public class MemberService {
      *
      * @param profileMemberId 조회할 프로필 Member id
      * @param loginMemberId   현재 로그인한 Member id
+     * @param updateMemberRequest 회원 정보 수정 요청 객체
      */
     @Transactional
     public MyPageMemberResponse updateMember(UUID profileMemberId, UUID loginMemberId,
@@ -128,19 +156,27 @@ public class MemberService {
         validateMemberAuthorize(profileMemberId, loginMemberId);
         Member member = findByMemberId(loginMemberId);
 
-        boolean hasGraduationRequest = updateMemberRequest.getUpdateMemberProfileRequest().isGraduation();
-        if (hasGraduationRequest) {
-            updateGraduation(member, updateMemberRequest.getUpdateGraduationRequest());
-        }
-
-        if (!hasGraduationRequest && member.isGraduation()) {
-            deleteGraduation(member);
-        }
-
+        //졸업생 정보 수정
+        handleGraduation(member, updateMemberRequest);
         // 기본 회원 정보 수정
         member.updateProfileInfo(updateMemberRequest.getUpdateMemberProfileRequest());
 
-        return new MyPageMemberResponse(true, getMemberResponseFromMember(member));
+        return new MyPageMemberResponse(true, getMemberResponseFromMember(member),
+                getGraduationFromMember(member.getGraduation()));
+    }
+
+    //졸업생 정보 수정
+    private void handleGraduation(Member member, UpdateMemberRequest updateMemberRequest) {
+        boolean isGraduationMember = updateMemberRequest.getUpdateMemberProfileRequest().isGraduation();
+
+        if (isGraduationMember) {
+            updateGraduation(member, updateMemberRequest.getUpdateGraduationRequest());
+            return;
+        }
+
+        if (!isGraduationMember && member.isGraduation()) {
+            deleteGraduation(member);
+        }
     }
 
     //졸업생 정보 반영
@@ -156,9 +192,10 @@ public class MemberService {
 
     //졸업생 정보 삭제
     private void deleteGraduation(Member member) {
-        Graduation graduation = member.getGraduation();
-        member.updateGraduationInfo(null);
+        Graduation graduation = graduationRepository.findById(member.getGraduation().getId())
+                .orElseThrow(() -> new MemberDomainException("졸업생 정보 not found", HttpStatus.NOT_FOUND));
         graduationRepository.delete(graduation);
+        member.updateGraduationInfo(null);
     }
 
     /**
@@ -191,6 +228,7 @@ public class MemberService {
         currendMember.updatePassword(bCryptPasswordEncoder.encode(updatePasswordRequest.getNewPassword()));
     }
 
+
     /**
      * 회원 이메일로 이메일 변경을 위한 인증코드 전송
      *
@@ -198,7 +236,6 @@ public class MemberService {
      * @param loginMemberId        현재 로그인한 Member id
      * @param authCodeEmailRequest 이메일 인증코드 요청 객체
      */
-    //@Transactional이 필요한가?
     public void sendEmailAuthCode(UUID profileMemberId, UUID loginMemberId, AuthCodeEmailRequest authCodeEmailRequest) {
         validateMemberAuthorize(profileMemberId, loginMemberId);
         findByMemberId(loginMemberId);
@@ -238,6 +275,19 @@ public class MemberService {
     }
 
     /**
+     * 회원 이메일 조회
+     *
+     * @param profileMemberId 조회할 프로필 Member id
+     * @param loginMemberId   현재 로그인한 Member id
+     */
+    public String getEmail(UUID profileMemberId, UUID loginMemberId) {
+        validateMemberAuthorize(profileMemberId, loginMemberId);
+        Member currentMember = findByMemberId(loginMemberId);
+
+        return currentMember.getEmail();
+    }
+
+    /**
      * 회원 프로필 사진 변경
      *
      * @param profileMemberId   조회할 프로필 Member id
@@ -245,15 +295,44 @@ public class MemberService {
      * @param newProfilePhotoId 바꿀 프로필 사진 pk
      */
     @Transactional
-    public void updateProfilePhoto(UUID profileMemberId, UUID loginMemberId, UUID newProfilePhotoId) {
+    public ProfilePhotoResponse updateProfilePhoto(UUID profileMemberId, UUID loginMemberId, UUID newProfilePhotoId) {
+        validateMemberAuthorize(profileMemberId, loginMemberId);
+
+        Member currentMember = findByMemberId(loginMemberId);
+        if(currentMember.getProfilePhoto()!=null){  // 기존에 프로필 사진이 있었으면 삭제
+            ProfilePhoto currentProfilePhoto = currentMember.getProfilePhoto();
+            profilePhotoFileService.deleteProfilePhotoById(currentProfilePhoto.getId());
+        }
+
+        ProfilePhoto newProfilePhoto = profilePhotoFileService.findProfilePhotoById(newProfilePhotoId);
+        currentMember.updateProfilePhoto(newProfilePhoto);
+
+        ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(currentMember.getProfilePhoto());
+
+        return memberProfilePhotoMapper.toResponse(profilePhoto);
+    }
+
+    /**
+     * 회원 프로필 사진 삭제
+     *
+     * @param profileMemberId   조회할 프로필 Member id
+     * @param loginMemberId     현재 로그인한 Member id
+     */
+    @Transactional
+    public ProfilePhotoResponse deleteProfilePhoto(UUID profileMemberId, UUID loginMemberId){
         validateMemberAuthorize(profileMemberId, loginMemberId);
 
         Member currentMember = findByMemberId(loginMemberId);
         ProfilePhoto currentProfilePhoto = currentMember.getProfilePhoto();
 
-        ProfilePhoto newProfilePhoto = profilePhotoFileService.findProfilePhotoById(newProfilePhotoId);
-        currentMember.updateProfilePhoto(newProfilePhoto);
+        if(currentProfilePhoto!=null){  //프로필 사진 삭제
+            profilePhotoFileService.deleteProfilePhotoById(currentProfilePhoto.getId());
+        }
+        currentMember.updateProfilePhoto(null);
 
-        profilePhotoFileService.deleteProfilePhotoById(currentProfilePhoto.getId());
+        ProfilePhoto baseProfilePhoto = profilePhotoFileService.findBaseProfilePhoto();
+
+        return memberProfilePhotoMapper.toResponse(baseProfilePhoto);
     }
+
 }

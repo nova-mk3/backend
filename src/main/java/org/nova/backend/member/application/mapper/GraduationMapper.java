@@ -2,6 +2,7 @@ package org.nova.backend.member.application.mapper;
 
 import java.util.UUID;
 import org.nova.backend.member.application.dto.request.UpdateGraduationRequest;
+import org.nova.backend.member.application.dto.response.GraduationResponse;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.PendingGraduation;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,34 @@ public class GraduationMapper {
                 graduationRequest.getJob(),
                 graduationRequest.getContactInfo(),
                 graduationRequest.getContactDescription()
+        );
+    }
+
+    public GraduationResponse toResponse(Graduation graduation){
+        if (graduation==null) {
+            return toBlankResponse();
+        }else{
+            return new GraduationResponse(
+                    graduation.getId(),
+                    graduation.getYear(),
+                    graduation.isContact(),
+                    graduation.isWork(),
+                    graduation.getJob(),
+                    graduation.getContactInfo(),
+                    graduation.getContactDescription()
+            );
+        }
+    }
+
+    private GraduationResponse toBlankResponse(){
+        return new GraduationResponse(
+                null,
+                0,
+                false,
+                false,
+                "",
+                "",
+                ""
         );
     }
 

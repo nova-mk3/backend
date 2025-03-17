@@ -40,6 +40,18 @@ public @interface AuthApiDocument {
     @interface UploadProfilePhotoApiDoc {
     }
 
+    @Operation(summary = "access token 만료 여부 확인", description = "사용자의 access token 만료 여부를 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "만료되지 않은 access token"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "만료된 access token"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface VerifyAccessTokenApiDoc {
+    }
+
     @Operation(summary = "로그인", description = "회원가입된 정보로 본인 인증 로그인")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
