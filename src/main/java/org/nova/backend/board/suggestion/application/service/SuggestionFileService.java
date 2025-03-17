@@ -85,9 +85,9 @@ public class SuggestionFileService implements SuggestionFileUseCase {
         List<SuggestionFile> files = filePersistencePort.findFilesByIds(fileIds);
 
         if (files.isEmpty()) {
-            logger.warn("삭제할 파일이 존재하지 않습니다. ID 목록: {}", fileIds);
+            logger.warn("파일이 존재하지 않습니다. ID 목록: {}", fileIds);
         } else {
-            logger.info("삭제할 파일 조회 완료: {}", files);
+            logger.info("파일 조회 완료: {}", files);
         }
 
         return files;

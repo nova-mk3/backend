@@ -37,83 +37,54 @@ pipeline {
                             writeFile file: ENV_FILE, text: envVars
                             echo ".env file created successfully (Production)"
                         }
-                    } else if (env.BRANCH_NAME == 'dev') {
-                        echo "Setting environment for dev branch..."
-                        withCredentials([
-                            string(credentialsId: 'MYSQL_DATABASE_DEV', variable: 'MYSQL_DATABASE_DEV'),
-                            string(credentialsId: 'MYSQL_USER_DEV', variable: 'MYSQL_USER_DEV'),
-                            string(credentialsId: 'MYSQL_PASSWORD_DEV', variable: 'MYSQL_PASSWORD_DEV'),
-                            string(credentialsId: 'MYSQL_ROOT_PASSWORD_DEV', variable: 'MYSQL_ROOT_PASSWORD_DEV'),
-                            string(credentialsId: 'MYSQL_HOST_DEV', variable: 'MYSQL_HOST_DEV'),
-                            string(credentialsId: 'MYSQL_IN_PORT_DEV', variable: 'MYSQL_IN_PORT_DEV'),
-                            string(credentialsId: 'MYSQL_EX_PORT_DEV', variable: 'MYSQL_EX_PORT_DEV'),
-                            string(credentialsId: 'SPRING_PROFILE_ACTIVE_DEV', variable: 'SPRING_PROFILE_ACTIVE_DEV'),
-                            string(credentialsId: 'SPRING_APP_PORT_DEV', variable: 'SPRING_APP_PORT_DEV')
-                        ]) {
-                            envVars = """
-                                MYSQL_DATABASE=${MYSQL_DATABASE_DEV}
-                                MYSQL_USER=${MYSQL_USER_DEV}
-                                MYSQL_PASSWORD=${MYSQL_PASSWORD_DEV}
-                                MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_DEV}
-                                MYSQL_HOST=${MYSQL_HOST_DEV}
-                                MYSQL_IN_PORT=${MYSQL_IN_PORT_DEV}
-                                MYSQL_EX_PORT=${MYSQL_EX_PORT_DEV}
-                                SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_DEV}
-                                SPRING_APP_PORT=${SPRING_APP_PORT_DEV}
-                            """
-                            writeFile file: ENV_FILE, text: envVars
-                            echo ".env file created successfully (Development)"
-                        }
                     }
                 }
             }
         }
+
         stage('Checkout Code') {
             steps {
                 checkout scm
             }
         }
+
         stage('Grant Permissions') {
             steps {
                 sh 'chmod +x ./gradlew'
             }
         }
+
         stage('Build JAR') {
             steps {
                 sh "./gradlew clean build"
             }
         }
+
         stage('Run Tests') {
+            when {
+                branch 'dev'
+            }
             steps {
                 script {
-                    echo "Running tests..."
+                    echo "Running tests on dev branch..."
                     sh "./gradlew test"
                 }
             }
         }
+
         stage('Build Docker Image') {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
-                    def imageTag = env.BRANCH_NAME ? env.BRANCH_NAME : "latest"
-                    def dockerImage = docker.build("myapp:${imageTag}")
+                    def imageTag = "latest"
+                    docker.build("myapp:${imageTag}")
                 }
             }
         }
-//         stage('Deploy to Dev (Only for dev branch)') {
-//             when {
-//                 branch 'dev'
-//             }
-//             steps {
-//                 script {
-//                     echo "Deploying to development server for testing..."
-//                     sh '''
-//                     docker compose --env-file .env down || true
-//                     docker compose --env-file .env build --no-cache
-//                     docker compose up -d --no-deps spring-app
-//                     '''
-//                 }
-//             }
-//         }
+
+
         stage('Deploy to Production (Only for main branch)') {
             when {
                 branch 'main'
@@ -135,6 +106,7 @@ pipeline {
                 }
             }
         }
+
         stage('Cleanup') {
             steps {
                 script {
@@ -149,6 +121,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             echo "Cleaning up resources"
