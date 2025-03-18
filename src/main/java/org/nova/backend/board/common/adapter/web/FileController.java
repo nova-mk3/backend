@@ -35,7 +35,6 @@ public class FileController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @FileApiDocument.UploadFiles
-    @GetMapping("/upload")
     public ResponseEntity<ApiResponse<List<FileResponse>>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam("postType") PostType postType
