@@ -33,7 +33,6 @@ public class SuggestionFileController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SuggestionFileApiDocument.UploadFiles
-    @GetMapping("/upload")
     public ResponseEntity<ApiResponse<List<SuggestionFileResponse>>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files
     ) {

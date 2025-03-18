@@ -21,9 +21,8 @@ public class EmailSendService {
 
     private final JavaMailSender javaMailSender;
 
-    @Value("${email.address}")
+    @Value("${spring.mail.sender}")
     private String hostAddress;
-
 
     /**
      * 인증 코드 이메일 전송

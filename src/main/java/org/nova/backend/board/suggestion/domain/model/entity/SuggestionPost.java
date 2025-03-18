@@ -26,7 +26,7 @@ import org.nova.backend.member.domain.model.entity.Member;
 @Table(name = "suggestion_post", indexes = {
         @Index(name = "idx_member_id", columnList = "member_id"),
         @Index(name = "idx_created_time", columnList = "createdTime DESC"),
-        @Index(name = "idx_is_answered", columnList = "isAnswered, isAnswerRead")
+        @Index(name = "idx_is_answered", columnList = "isAnswered, isAdminRead")
 })
 public class SuggestionPost {
     @Id

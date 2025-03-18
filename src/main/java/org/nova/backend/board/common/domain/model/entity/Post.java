@@ -31,7 +31,6 @@ import org.nova.backend.member.domain.model.entity.Member;
         @Index(name = "idx_board_id", columnList = "board_id"),
         @Index(name = "idx_board_type", columnList = "board_id, post_type"),
         @Index(name = "idx_board_type_created", columnList = "board_id, post_type, created_time DESC"),
-        @Index(name = "idx_fulltext_title_content", columnList = "title, content", unique = false)
 })
 public class Post {
     @Id
