@@ -16,6 +16,12 @@ services:
       - JENKINS_PORT=${JENKINS_PORT}
     networks:
       - 'backend_network'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/login" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   mysql:
     image: 'mysql:latest'
@@ -26,8 +32,6 @@ services:
       - 'MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}'
     ports:
       - '${MYSQL_EX_PORT}:${MYSQL_IN_PORT}'
-    volumes:
-      - '${MYSQL_VOLUME_PATH}:/var/lib/mysql'
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
@@ -38,24 +42,32 @@ services:
 
   spring-app:
     build: .
-    volumes:
-      - .env:/app/.env
     environment:
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://${MYSQL_HOST}:${MYSQL_IN_PORT}/${MYSQL_DATABASE}'
       - 'SPRING_DATASOURCE_USERNAME=${MYSQL_USER}'
       - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
       - 'SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE}'
+      - 'JWT_SECRET_KEY=${JWT_SECRET_KEY}'
+      - 'FILE_STORAGE_PATH=${FILE_STORAGE_PATH}'
+      - 'EMAIL_ADDRESS=${EMAIL_ADDRESS}'
+      - 'EMAIL_PASSWORD=${EMAIL_PASSWORD}'
+      - 'BASE_PROFILE_IMAGE_NAME=${BASE_PROFILE_IMAGE_NAME}'
+      - 'ADMIN_STUDENT_NUMBER=${ADMIN_STUDENT_NUMBER}'
+      - 'ADMIN_PASSWORD=${ADMIN_PASSWORD}'
     ports:
       - '${SPRING_APP_PORT}:8080'
-#    healthcheck:
-#      test: ["CMD", "curl","-f","https://0.0.0.0:8080/actuator/health"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 10
-#      start_period: 500s
+    healthcheck:
+      test: ["CMD", "curl","-f","http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 500s
     depends_on:
       mysql:
         condition: service_healthy
+      jenkins:
+        condition: service_healthy
+        
     networks:
       - 'backend_network'
 
