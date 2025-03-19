@@ -40,7 +40,7 @@ public class PendingMember {
 
     private boolean isAbsence;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_photo_id")
     private ProfilePhoto profilePhoto;
 
