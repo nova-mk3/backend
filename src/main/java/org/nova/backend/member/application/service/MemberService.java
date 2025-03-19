@@ -1,5 +1,6 @@
 package org.nova.backend.member.application.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.nova.backend.member.application.mapper.GraduationMapper;
 import org.nova.backend.member.application.mapper.MemberMapper;
 import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.exception.MemberDomainException;
+import org.nova.backend.member.domain.exception.ProfilePhotoFileDomainException;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.ProfilePhoto;
@@ -100,6 +102,7 @@ public class MemberService {
 
     /**
      * 회원 간단 프로필 조회
+     *
      * @param memberId 현재 로그인한 사용자
      * @return 간단 프로필 응답 객체
      */
@@ -146,8 +149,8 @@ public class MemberService {
     /**
      * 회원 정보 수정
      *
-     * @param profileMemberId 조회할 프로필 Member id
-     * @param loginMemberId   현재 로그인한 Member id
+     * @param profileMemberId     조회할 프로필 Member id
+     * @param loginMemberId       현재 로그인한 Member id
      * @param updateMemberRequest 회원 정보 수정 요청 객체
      */
     @Transactional
@@ -299,7 +302,7 @@ public class MemberService {
         validateMemberAuthorize(profileMemberId, loginMemberId);
 
         Member currentMember = findByMemberId(loginMemberId);
-        if(currentMember.getProfilePhoto()!=null){  // 기존에 프로필 사진이 있었으면 삭제
+        if (currentMember.getProfilePhoto() != null) {  // 기존에 프로필 사진이 있었으면 삭제
             ProfilePhoto currentProfilePhoto = currentMember.getProfilePhoto();
             profilePhotoFileService.deleteProfilePhotoById(currentProfilePhoto.getId());
         }
@@ -315,17 +318,17 @@ public class MemberService {
     /**
      * 회원 프로필 사진 삭제
      *
-     * @param profileMemberId   조회할 프로필 Member id
-     * @param loginMemberId     현재 로그인한 Member id
+     * @param profileMemberId 조회할 프로필 Member id
+     * @param loginMemberId   현재 로그인한 Member id
      */
     @Transactional
-    public ProfilePhotoResponse deleteProfilePhoto(UUID profileMemberId, UUID loginMemberId){
+    public ProfilePhotoResponse deleteProfilePhoto(UUID profileMemberId, UUID loginMemberId) {
         validateMemberAuthorize(profileMemberId, loginMemberId);
 
         Member currentMember = findByMemberId(loginMemberId);
         ProfilePhoto currentProfilePhoto = currentMember.getProfilePhoto();
 
-        if(currentProfilePhoto!=null){  //프로필 사진 삭제
+        if (currentProfilePhoto != null) {  //프로필 사진 삭제
             profilePhotoFileService.deleteProfilePhotoById(currentProfilePhoto.getId());
         }
         currentMember.updateProfilePhoto(null);
@@ -333,6 +336,20 @@ public class MemberService {
         ProfilePhoto baseProfilePhoto = profilePhotoFileService.findBaseProfilePhoto();
 
         return memberProfilePhotoMapper.toResponse(baseProfilePhoto);
+    }
+
+    /**
+     * 회원 프로필 사진 다운로드
+     */
+    public void downloadProfilePhoto(UUID profileMemberId, HttpServletResponse response, UUID loginMemberId) {
+        findByMemberId(loginMemberId);
+        Member profileMember = findByMemberId(profileMemberId);
+
+        if (profileMember.getProfilePhoto() == null) {
+            throw new ProfilePhotoFileDomainException("프로필 사진이 기본 이미지입니다.", HttpStatus.NOT_FOUND);
+        }
+
+        profilePhotoFileService.downloadProfilePhoto(profileMember.getProfilePhoto().getId(), response);
     }
 
 }
