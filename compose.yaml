@@ -30,6 +30,8 @@ services:
       - 'MYSQL_USER=${MYSQL_USER}'
       - 'MYSQL_PASSWORD=${MYSQL_PASSWORD}'
       - 'MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}'
+    volumes:
+      - mysql_data:/var/lib/mysql
     ports:
       - '${MYSQL_EX_PORT}:${MYSQL_IN_PORT}'
     healthcheck:
