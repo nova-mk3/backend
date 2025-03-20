@@ -13,8 +13,8 @@ public class PendingMemberResponse {
     private String name;
     private String email;
     private boolean isGraduation;
-    private int grade;
-    private int semester;
+    private String grade;
+    private String semester;
     private boolean isAbsence;
     private ProfilePhotoResponse profilePhoto;
     private String phone;

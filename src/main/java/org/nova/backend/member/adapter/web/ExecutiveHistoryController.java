@@ -9,11 +9,14 @@ import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.service.ExecutiveHistoryService;
 import org.nova.backend.member.application.service.MemberService;
+import org.nova.backend.member.domain.model.valueobject.Role;
 import org.nova.backend.shared.model.ApiResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,16 +31,40 @@ public class ExecutiveHistoryController {
     private final MemberService memberService;
 
     /**
-     * 연도 리스트 불러오기
+     * 연도 리스트 불러오기 : 모든 연도 조회
      */
     @GetMapping("/years")
     @ExecutiveHistoryApiDocument.GetYearListApiDoc
-    public ApiResponse<List<Integer>> getYears() {
-
+    public ResponseEntity<ApiResponse<List<Integer>>> getYears() {
         List<Integer> response = executiveHistoryService.getYears();
 
-        return ApiResponse.success(response);
+        return ResponseEntity.ok().body(ApiResponse.success(response));
     }
+
+    /**
+     * 연도 추가 : 2019년 ~ or 가장 최근 year 에서 1년 추가 임시 멤버로 관리자 저장 이전 연도의 임원들 권한 변경
+     */
+    @PostMapping("/year")
+    @ExecutiveHistoryApiDocument.AddYearApiDoc
+    public ResponseEntity<ApiResponse<Integer>> addMaxYear() {
+        int response = executiveHistoryService.addYear();
+
+        return ResponseEntity.ok().body(ApiResponse.success(response));
+    }
+
+    /**
+     * 임원 권한 변경
+     */
+    @PutMapping("/{executiveHistoryId}/{role}")
+    @ExecutiveHistoryApiDocument.UpdateExecutivesRoleApiDoc
+    public ResponseEntity<ApiResponse<MemberResponse>> updateExecutiveRole(
+            @PathVariable("executiveHistoryId") UUID executiveHistoryId, @PathVariable("role") Role role) {
+
+        MemberResponse response = executiveHistoryService.updateExecutiveRole(executiveHistoryId, role);
+
+        return ResponseEntity.ok().body(ApiResponse.success(response));
+    }
+
 
     /**
      * 특정 연도의 임원 이력 조회
@@ -50,7 +77,7 @@ public class ExecutiveHistoryController {
     }
 
     /**
-     * 임원 추가 : 특정 연도, role, 이름 또는 Member를 받음
+     * 단건 임원 추가 : 특정 연도, role, 이름 또는 Member를 받음
      */
     @PostMapping("")
     @ExecutiveHistoryApiDocument.AddExecutiveHistoryApiDoc
@@ -62,14 +89,14 @@ public class ExecutiveHistoryController {
     }
 
     /**
-     * 특정 임원 삭제 : ExecutiveHistoryId pk
+     * 특정 임원 이력 삭제 : ExecutiveHistoryId pk
      */
     @DeleteMapping("/{executiveHistoryId}")
     @ExecutiveHistoryApiDocument.DeleteExecutiveHistoryApiDoc
-    public ApiResponse<String> deleteExecutiveHistory(@PathVariable("executiveHistoryId") UUID request) {
-        executiveHistoryService.deleteExecutiveHistory(request);
+    public ApiResponse<String> deleteExecutiveHistory(@PathVariable("executiveHistoryId") UUID executiveHistoryId) {
+        executiveHistoryService.deleteExecutiveHistory(executiveHistoryId);
 
-        return ApiResponse.success("임원이 삭제되었습니다.");
+        return ApiResponse.success("임원 이력이 삭제되었습니다.");
     }
 
     /**

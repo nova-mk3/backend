@@ -105,5 +105,14 @@ public class Member {
         this.graduation = graduation;
     }
 
+    // 권한 변경
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
+    // 일반회원으로 권한 변경
+    public void updateRoleToGeneral() {
+        this.role = Role.GENERAL;
+    }
 
 }
