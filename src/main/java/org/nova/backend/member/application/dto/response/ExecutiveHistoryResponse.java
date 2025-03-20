@@ -13,6 +13,8 @@ public class ExecutiveHistoryResponse {
     private int year;
     private Role role;
     private String name;
-    private UUID memberId;
 
+    private UUID memberId;
+    private ProfilePhotoResponse profilePhotoResponse;
+    private String phone;
 }
