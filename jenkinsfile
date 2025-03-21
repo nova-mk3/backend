@@ -99,9 +99,8 @@ pipeline {
 
                     echo "Running new container..."
                     sh '''
-                    docker compose --env-file .env down || true
-                    docker compose --env-file .env build --no-cache
-                    docker compose up -d --no-deps spring-app
+                    docker compose --env-file .env build spring-app
+                    docker compose --env-file .env up -d --no-deps spring-app
                     '''
                 }
             }
