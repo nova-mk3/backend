@@ -59,6 +59,7 @@ pipeline {
                             """
                             writeFile file: ENV_FILE, text: envVars
                             echo ".env file created successfully (Production)"
+                            sh 'cp .env $WORKSPACE/.env'
                         }
                     }
                 }
