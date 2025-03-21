@@ -31,13 +31,13 @@ pipeline {
                             string(credentialsId: 'MYSQL_EX_PORT_PROD', variable: 'MYSQL_EX_PORT_PROD'),
                             string(credentialsId: 'SPRING_PROFILE_ACTIVE_PROD', variable: 'SPRING_PROFILE_ACTIVE_PROD'),
                             string(credentialsId: 'SPRING_APP_PORT_PROD', variable: 'SPRING_APP_PORT_PROD'),
-                            string(credentialsId: 'FILE_STORAGE_PATH_PROD', variable: 'FILE_STORAGE_PATH'),
-                            string(credentialsId: 'JWT_SECRET_KEY_PROD', variable: 'JWT_SECRET_KEY'),
-                            string(credentialsId: 'EMAIL_ADDRESS_PROD', variable: 'EMAIL_ADDRESS'),
-                            string(credentialsId: 'EMAIL_PASSWORD_PROD', variable: 'EMAIL_PASSWORD'),
-                            string(credentialsId: 'BASE_PROFILE_IMAGE_NAME_PROD', variable: 'BASE_PROFILE_IMAGE_NAME'),
-                            string(credentialsId: 'ADMIN_STUDENT_NUMBER_PROD', variable: 'ADMIN_STUDENT_NUMBER'),
-                            string(credentialsId: 'ADMIN_PASSWORD_PROD', variable: 'ADMIN_PASSWORD')
+                            string(credentialsId: 'FILE_STORAGE_PATH_PROD', variable: 'FILE_STORAGE_PATH_PROD'),
+                            string(credentialsId: 'JWT_SECRET_KEY_PROD', variable: 'JWT_SECRET_KEY_PROD'),
+                            string(credentialsId: 'EMAIL_ADDRESS_PROD', variable: 'EMAIL_ADDRESS_PROD'),
+                            string(credentialsId: 'EMAIL_PASSWORD_PROD', variable: 'EMAIL_PASSWORD_PROD'),
+                            string(credentialsId: 'BASE_PROFILE_IMAGE_NAME_PROD', variable: 'BASE_PROFILE_IMAGE_NAME_PROD'),
+                            string(credentialsId: 'ADMIN_STUDENT_NUMBER_PROD', variable: 'ADMIN_STUDENT_NUMBER_PROD'),
+                            string(credentialsId: 'ADMIN_PASSWORD_PROD', variable: 'ADMIN_PASSWORD_PROD')
                         ]) {
                             envVars = """
                                 MYSQL_DATABASE=${MYSQL_DATABASE_PROD}
@@ -49,13 +49,13 @@ pipeline {
                                 MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}
                                 SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}
                                 SPRING_APP_PORT=${SPRING_APP_PORT_PROD}
-                                FILE_STORAGE_PATH=${FILE_STORAGE_PATH}
-                                JWT_SECRET_KEY=${JWT_SECRET_KEY}
-                                EMAIL_ADDRESS=${EMAIL_ADDRESS}
-                                EMAIL_PASSWORD=${EMAIL_PASSWORD}
-                                BASE_PROFILE_IMAGE_NAME=${BASE_PROFILE_IMAGE_NAME}
-                                ADMIN_STUDENT_NUMBER=${ADMIN_STUDENT_NUMBER}
-                                ADMIN_PASSWORD=${ADMIN_PASSWORD}
+                                FILE_STORAGE_PATH=${FILE_STORAGE_PATH_PROD}
+                                JWT_SECRET_KEY=${JWT_SECRET_KEY_PROD}
+                                EMAIL_ADDRESS=${EMAIL_ADDRESS_PROD}
+                                EMAIL_PASSWORD=${EMAIL_PASSWORD_PROD}
+                                BASE_PROFILE_IMAGE_NAME=${BASE_PROFILE_IMAGE_NAME_PROD}
+                                ADMIN_STUDENT_NUMBER=${ADMIN_STUDENT_NUMBER_PROD}
+                                ADMIN_PASSWORD=${ADMIN_PASSWORD_PROD}
                             """
                             writeFile file: ENV_FILE, text: envVars
                             echo ".env file created successfully (Production)"
