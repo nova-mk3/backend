@@ -1,9 +1,18 @@
 pipeline {
     agent any
+
     environment {
         ENV_FILE = '.env'
     }
+
     stages {
+
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Set Environment Variables') {
             steps {
                 script {
@@ -42,12 +51,6 @@ pipeline {
             }
         }
 
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Grant Permissions') {
             steps {
                 sh 'chmod +x ./gradlew'
@@ -65,10 +68,8 @@ pipeline {
                 branch 'dev'
             }
             steps {
-                script {
-                    echo "Running tests on dev branch..."
-                    sh "./gradlew test"
-                }
+                echo "Running tests on dev branch..."
+                sh "./gradlew test"
             }
         }
 
@@ -83,7 +84,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Deploy to Production (Only for main branch)') {
             when {
@@ -110,7 +110,6 @@ pipeline {
             steps {
                 script {
                     def isPruneRunning = sh(script: "ps aux | grep 'docker image prune' | grep -v grep || true", returnStdout: true).trim()
-
                     if (isPruneRunning) {
                         echo "Docker prune is already running. Skipping this step."
                     } else {
