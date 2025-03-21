@@ -49,13 +49,13 @@ pipeline {
                                 MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}
                                 SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}
                                 SPRING_APP_PORT=${SPRING_APP_PORT_PROD}
-                                FILE_STORAGE_PATH=${FILE_STORAGE_PATH_PROD}
-                                JWT_SECRET_KEY=${JWT_SECRET_KEY_PROD}
-                                EMAIL_ADDRESS=${EMAIL_ADDRESS_PROD}
-                                EMAIL_PASSWORD=${EMAIL_PASSWORD_PROD}
-                                BASE_PROFILE_IMAGE_NAME=${BASE_PROFILE_IMAGE_NAME_PROD}
-                                ADMIN_STUDENT_NUMBER=${ADMIN_STUDENT_NUMBER_PROD}
-                                ADMIN_PASSWORD=${ADMIN_PASSWORD_PROD}
+                                FILE_STORAGE_PATH=${FILE_STORAGE_PATH}
+                                JWT_SECRET_KEY=${JWT_SECRET_KEY}
+                                EMAIL_ADDRESS=${EMAIL_ADDRESS}
+                                EMAIL_PASSWORD=${EMAIL_PASSWORD}
+                                BASE_PROFILE_IMAGE_NAME=${BASE_PROFILE_IMAGE_NAME}
+                                ADMIN_STUDENT_NUMBER=${ADMIN_STUDENT_NUMBER}
+                                ADMIN_PASSWORD=${ADMIN_PASSWORD}
                             """
                             writeFile file: ENV_FILE, text: envVars
                             echo ".env file created successfully (Production)"
