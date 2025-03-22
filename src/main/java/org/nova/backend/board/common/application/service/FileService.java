@@ -1,9 +1,8 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import org.nova.backend.member.domain.exception.MemberDomainException;
+import org.nova.backend.shared.constants.FilePathConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.nova.backend.board.util.FileStorageUtil;
@@ -31,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,10 +111,10 @@ public class FileService implements FileUseCase {
             FileUtil.validateFileSize(file);
         }
 
-        String storagePath = getStoragePath(postType);
+        String storagePath = getStoragePath();
 
         return files.stream()
-                .map(file -> processFileUpload(file, storagePath))
+                .map(file -> processFileUpload(file, storagePath, postType))
                 .collect(Collectors.toList());
     }
 
@@ -125,9 +123,14 @@ public class FileService implements FileUseCase {
      */
     private FileResponse processFileUpload(
             MultipartFile file,
-            String storagePath
+            String storagePath,
+            PostType postType
     ) {
-        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath);
+        String folder = (postType == PostType.PICTURES)
+                ? FilePathConstants.PUBLIC_FOLDER
+                : FilePathConstants.PROTECTED_FOLDER;
+
+        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, folder);
         File savedFile = new File(null, file.getOriginalFilename(), savedFilePath, null, 0);
         savedFile = filePersistencePort.save(savedFile);
 
@@ -140,10 +143,10 @@ public class FileService implements FileUseCase {
     }
 
     /**
-     * 파일 저장 경로 결정 (PostType 기준)
+     * 파일 저장 경로 결정
      */
-    private String getStoragePath(PostType postType) {
-        return Paths.get(baseFileStoragePath, "post", postType.name()).toString();
+    private String getStoragePath() {
+        return baseFileStoragePath;
     }
 
     /**
@@ -205,12 +208,10 @@ public class FileService implements FileUseCase {
             throw new FileDomainException("파일이 존재하지 않습니다.");
         }
 
-        String encodedFileName = URLEncoder.encode(file.getOriginalFilename(), StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20"); // 공백 문제 해결
+        String encodedFileName = FileUtil.encodeFileName(file.getOriginalFilename());
 
-        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename*=UTF-8''" + encodedFileName);
+        response.setContentType(FileUtil.getDefaultContentType());
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, FileUtil.getContentDispositionHeader(encodedFileName));
 
         try (InputStream inputStream = new FileInputStream(filePath.toFile())) {
             StreamUtils.copy(inputStream, response.getOutputStream());

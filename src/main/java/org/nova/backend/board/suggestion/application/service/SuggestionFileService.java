@@ -2,8 +2,8 @@ package org.nova.backend.board.suggestion.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.nova.backend.board.util.FileStorageUtil;
+import org.nova.backend.shared.constants.FilePathConstants;
 import org.springframework.transaction.annotation.Transactional;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -61,7 +61,7 @@ public class SuggestionFileService implements SuggestionFileUseCase {
             MultipartFile file,
             String storagePath
     ) {
-        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath);
+        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, FilePathConstants.PROTECTED_FOLDER);
         SuggestionFile savedFile = new SuggestionFile(null, file.getOriginalFilename(), savedFilePath, null);
         savedFile = filePersistencePort.save(savedFile);
 
@@ -72,8 +72,11 @@ public class SuggestionFileService implements SuggestionFileUseCase {
         );
     }
 
+    /**
+     * 파일 저장 경로 결정
+     */
     private String getStoragePath() {
-        return Paths.get(baseFileStoragePath, "post", "SUGGESTION").toString();
+        return baseFileStoragePath;
     }
 
     /**

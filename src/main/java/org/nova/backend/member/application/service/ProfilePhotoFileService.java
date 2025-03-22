@@ -4,8 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,12 +17,12 @@ import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.exception.ProfilePhotoFileDomainException;
 import org.nova.backend.member.domain.model.entity.ProfilePhoto;
+import org.nova.backend.shared.constants.FilePathConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
@@ -59,8 +57,7 @@ public class ProfilePhotoFileService {
         FileUtil.validateImageFile(profilePhoto);
         FileUtil.validateFileSize(profilePhoto);
 
-        String storagePath = Paths.get(baseFileStoragePath, "profile").toString();
-
+        String storagePath = baseFileStoragePath;
         return processProfilePhotoUpload(profilePhoto, storagePath);
     }
 
@@ -98,7 +95,7 @@ public class ProfilePhotoFileService {
             MultipartFile file,
             String storagePath
     ) {
-        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath);
+        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, FilePathConstants.PUBLIC_FOLDER);
         ProfilePhoto savedProfilePhoto = new ProfilePhoto(null, file.getOriginalFilename(), savedFilePath);
         savedProfilePhoto = profilePhotoFileRepository.save(savedProfilePhoto);
 
@@ -129,18 +126,15 @@ public class ProfilePhotoFileService {
      * 프로필 사진 다운로드 처리
      */
     private void processProfileDownload(ProfilePhoto profilePhoto, HttpServletResponse response) {
-
         Path filePath = Paths.get(profilePhoto.getFilePath());
         if (!Files.exists(filePath)) {
             throw new ProfilePhotoFileDomainException("프로필 사진이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
         }
 
-        String encodedFileName = URLEncoder.encode(profilePhoto.getOriginalFilename(), StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20"); // 공백 문제 해결
+        String encodedFileName = FileUtil.encodeFileName(profilePhoto.getOriginalFilename());
 
-        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename*=UTF-8''" + encodedFileName);
+        response.setContentType(FileUtil.getDefaultContentType());
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, FileUtil.getContentDispositionHeader(encodedFileName));
 
         try (InputStream inputStream = new FileInputStream(filePath.toFile())) {
             StreamUtils.copy(inputStream, response.getOutputStream());
