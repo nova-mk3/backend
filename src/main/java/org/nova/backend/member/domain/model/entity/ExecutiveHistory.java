@@ -35,4 +35,8 @@ public class ExecutiveHistory {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    // 권한 변경
+    public void updateRole(Role role) {
+        this.role = role;
+    }
 }

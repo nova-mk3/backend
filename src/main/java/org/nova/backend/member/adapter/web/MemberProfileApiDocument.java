@@ -61,6 +61,7 @@ public @interface MemberProfileApiDocument {
             @ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
             @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "409", description = "졸업생은 휴학중일 수 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @Target(ElementType.METHOD)

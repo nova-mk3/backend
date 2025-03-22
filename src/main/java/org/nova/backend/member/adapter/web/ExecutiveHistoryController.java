@@ -42,7 +42,7 @@ public class ExecutiveHistoryController {
     }
 
     /**
-     * 연도 추가 : 2019년 ~ or 가장 최근 year 에서 1년 추가 임시 멤버로 관리자 저장 이전 연도의 임원들 권한 변경
+     * 연도 추가 : 2019년 ~ or 가장 최근 year 에서 1년 추가 임시 멤버(temp_data) 저장 이전 연도의 임원들 권한 변경
      */
     @PostMapping("/year")
     @ExecutiveHistoryApiDocument.AddYearApiDoc
@@ -58,9 +58,9 @@ public class ExecutiveHistoryController {
     @PutMapping("/{executiveHistoryId}/{role}")
     @ExecutiveHistoryApiDocument.UpdateExecutivesRoleApiDoc
     public ResponseEntity<ApiResponse<MemberResponse>> updateExecutiveRole(
-            @PathVariable("executiveHistoryId") UUID executiveHistoryId, @PathVariable("role") Role role) {
-
-        MemberResponse response = executiveHistoryService.updateExecutiveRole(executiveHistoryId, role);
+        @PathVariable("executiveHistoryId") UUID executiveHistoryId, @PathVariable("role") Role role) {
+        
+        ExecutiveHistoryResponse response = executiveHistoryService.updateExecutiveRole(executiveHistoryId, role);
 
         return ResponseEntity.ok().body(ApiResponse.success(response));
     }

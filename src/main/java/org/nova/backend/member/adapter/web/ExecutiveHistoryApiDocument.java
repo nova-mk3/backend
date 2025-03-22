@@ -25,7 +25,7 @@ public @interface ExecutiveHistoryApiDocument {
     @interface GetYearListApiDoc {
     }
 
-    @Operation(summary = "연도 추가", description = "현재 연도 리스트에서 가장 최근 연도를 찾아 +1 한 값을 추가합니다. 이 연도에 관리자가 포함됩니다.")
+    @Operation(summary = "연도 추가", description = "현재 연도 리스트에서 가장 최근 연도를 찾아 +1 한 값을 추가합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "연도 추가 성공"),
             @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),

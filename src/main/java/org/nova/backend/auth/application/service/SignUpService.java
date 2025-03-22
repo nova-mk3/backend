@@ -52,6 +52,12 @@ public class SignUpService {
         isMemberAlreadyExist(memberRequest.getStudentNumber(), memberRequest.getEmail());
         isPendingMemberAlreadyExist(memberRequest.getStudentNumber(), memberRequest.getEmail());
 
+        // 졸업생은 휴학중일 수 없다.
+        if (signUpRequest.getMemberSignUpRequest().isGraduation() && signUpRequest.getMemberSignUpRequest()
+                .isAbsence()) {
+            throw new MemberDomainException("졸업생은 휴학중일 수 없습니다.", HttpStatus.CONFLICT);
+        }
+
         PendingGraduation pendingGraduation =
                 memberRequest.isGraduation() ? createPendingGraduation(signUpRequest.getGraduationSignUpRequest())
                         : null;

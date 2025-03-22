@@ -15,6 +15,6 @@ public class ExecutiveHistoryResponse {
     private String name;
 
     private UUID memberId;
-    private ProfilePhotoResponse profilePhotoResponse;
+    private ProfilePhotoResponse profilePhoto;
     private String phone;
 }

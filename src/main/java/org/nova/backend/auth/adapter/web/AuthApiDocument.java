@@ -20,7 +20,9 @@ public @interface AuthApiDocument {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
             @ApiResponse(responseCode = "409", content = @Content(mediaType = "application/json",
                     examples = {@ExampleObject(name = "학번 or 이메일 중복",
-                            value = "{\"code\": 409, \"message\": \"Member already exists. check student number or email 20202020 nova@chungbuk.ac.kr\"}")}
+                            value = "{\"code\": 409, \"message\": \"Member already exists. check student number or email 20202020 nova@chungbuk.ac.kr\"}"),
+                            @ExampleObject(name = "졸업생은 휴학중일 수 없습니다.",
+                                    value = "{\"code\": 409, \"message\": \"졸업생은 휴학중일 수 없습니다.\"}")}
             )),
             @ApiResponse(responseCode = "500", description = "서버 오류"),
     })
