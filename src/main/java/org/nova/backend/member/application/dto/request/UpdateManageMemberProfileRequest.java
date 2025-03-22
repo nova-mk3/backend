@@ -1,0 +1,33 @@
+package org.nova.backend.member.application.dto.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.UUID;
+import lombok.Getter;
+
+@Getter
+public class UpdateManageMemberProfileRequest {
+
+    @Schema(description = "졸업 여부")
+    private boolean graduation;
+
+    @Schema(description = "학년", example = "1")
+    private int grade;
+
+    @Schema(description = "이수 학기", example = "1")
+    private int semester;
+
+    @Schema(description = "휴학")
+    private boolean absence;
+
+    @Schema(example = "20000202")
+    private String birth;
+
+    private UUID profilePhoto;
+
+    @Schema(description = "(-)없이 전화번호를 입력해주세요.", example = "01000000000")
+    private String phone;
+
+    @Schema(example = "안녕하세요 ^O^")
+    private String introduction;
+
+}

@@ -25,6 +25,7 @@ import org.nova.backend.member.domain.exception.ProfilePhotoFileDomainException;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.ProfilePhoto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MemberService {
+
+    @Value("${admin.student.number}")
+    private String adminStudentNumber;
 
     private final MemberRepository memberRepository;
     private final GraduationRepository graduationRepository;
@@ -53,7 +57,7 @@ public class MemberService {
      * @return List<MemberResponse>
      */
     public List<MemberResponse> getAllMembers() {
-        List<Member> memberList = memberRepository.findAllMembers();
+        List<Member> memberList = memberRepository.findAllMembers(adminStudentNumber);
 
         return memberList.stream().map(this::getMemberResponseFromMember).toList();
     }
@@ -159,6 +163,11 @@ public class MemberService {
         validateMemberAuthorize(profileMemberId, loginMemberId);
         Member member = findByMemberId(loginMemberId);
 
+        // 졸업생은 휴학중일 수 없다.
+        if(updateMemberRequest.getUpdateMemberProfileRequest().isGraduation() && updateMemberRequest.getUpdateMemberProfileRequest().isAbsence()){
+            throw new MemberDomainException("졸업생은 휴학중일 수 없습니다.", HttpStatus.CONFLICT);
+        }
+
         //졸업생 정보 수정
         handleGraduation(member, updateMemberRequest);
         // 기본 회원 정보 수정
@@ -169,7 +178,7 @@ public class MemberService {
     }
 
     //졸업생 정보 수정
-    private void handleGraduation(Member member, UpdateMemberRequest updateMemberRequest) {
+    public void handleGraduation(Member member, UpdateMemberRequest updateMemberRequest) {
         boolean isGraduationMember = updateMemberRequest.getUpdateMemberProfileRequest().isGraduation();
 
         if (isGraduationMember) {
@@ -183,7 +192,7 @@ public class MemberService {
     }
 
     //졸업생 정보 반영
-    private void updateGraduation(Member member, UpdateGraduationRequest updateGraduationRequest) {
+    public void updateGraduation(Member member, UpdateGraduationRequest updateGraduationRequest) {
         if (member.isGraduation()) {  // 졸업생 정보 수정 : 기존에 졸업생 정보가 있음.
             member.getGraduation().updateProfile(updateGraduationRequest);
         } else {  //졸업생 정보 생성
@@ -352,4 +361,48 @@ public class MemberService {
         profilePhotoFileService.downloadProfilePhoto(profileMember.getProfilePhoto().getId(), response);
     }
 
+    /**
+     * 휴학 여부 변경
+     *
+     * @param memberId 선택된 회원
+     * @param isAbsence 휴학 여부
+     */
+    @Transactional
+    public Member updateAbsence(UUID memberId, boolean isAbsence) {
+        Member member = findByMemberId(memberId);
+        if(member.isGraduation()){
+            throw new MemberDomainException("졸업생은 휴학 여부를 변경할 수 없습니다.", HttpStatus.CONFLICT);
+        }
+        member.updateAbsence(isAbsence);
+        return member;
+    }
+
+    /**
+     * 학년 변경
+     *
+     * @param memberId
+     * @param grade
+     */
+    @Transactional
+    public Member updateGrade(UUID memberId, int grade) {
+        Member member = findByMemberId(memberId);
+
+        member.updateGrade(grade);  //학년 변경
+        member.updateSemester(grade * 2);  //학년 변경에 따른 학기 변경
+        return member;
+    }
+
+    /**
+     * 이름으로 검색
+     * @param name 이름
+     * @return 검색된 member 리스트
+     */
+    public List<MemberResponse> findMembersByName(String name) {
+        List<Member> memberList= memberRepository.findAllMembersByName(adminStudentNumber, name);
+
+        return memberList.stream().map(member -> {
+            ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
+            return memberMapper.toResponse(member, profilePhoto);
+        }).toList();
+    }
 }
