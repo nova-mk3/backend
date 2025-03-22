@@ -24,6 +24,9 @@ public class ImageFileService {
     @Value("${file.storage.path}")
     private String baseFileStoragePath;
 
+    @Value("${app.domain}")
+    private String appDomain;
+
     /**
      * 이미지 파일 정보 변환 (width, height 포함)
      */
@@ -43,7 +46,8 @@ public class ImageFileService {
             }
         }
 
-        String imageUrl = convertFilePathToUrl(file.getFilePath());
+        String relativeUrl = convertFilePathToUrl(file.getFilePath());
+        String imageUrl = appDomain + relativeUrl;
 
         return new ImageResponse(
                 file.getId(),
@@ -79,13 +83,14 @@ public class ImageFileService {
     /**
      * 파일 시스템 경로를 웹 URL로 변환
      */
-    private String convertFilePathToUrl(String filePath) {
+    public String convertFilePathToUrl(String filePath) {
         Path basePath = Paths.get(baseFileStoragePath);
         Path absolutePath = Paths.get(filePath);
 
         if (absolutePath.startsWith(basePath)) {
-            return "/file/" + basePath.relativize(absolutePath).toString().replace("\\", "/");
+            Path relativePath = basePath.relativize(absolutePath);
+            return "/files/" + relativePath.toString().replace("\\", "/");
         }
-        return "/file/" + absolutePath.toString().replace("\\", "/");
+        return "/files/" + absolutePath.getFileName().toString().replace("\\", "/");
     }
 }
