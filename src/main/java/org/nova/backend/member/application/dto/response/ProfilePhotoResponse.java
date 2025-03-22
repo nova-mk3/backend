@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class ProfilePhotoResponse {
     private UUID id;
     private String originalFileName;
-    private String downloadUrl;
+    private String imageUrl;
 }

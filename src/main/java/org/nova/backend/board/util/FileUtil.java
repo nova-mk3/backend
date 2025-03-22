@@ -1,11 +1,14 @@
 package org.nova.backend.board.util;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
+import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtil {
-    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB 제한
+    private static final long MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB 제한
     private static final int MAX_FILE_COUNT = 10;
     private static final List<String> ALLOWED_EXTENSIONS = List.of(
             "jpg", "jpeg", "png", "gif",  // 이미지 파일
@@ -55,13 +58,39 @@ public class FileUtil {
     /**
      * 파일 확장자 추출
      */
-    private static String getFileExtension(String fileName) {
+    static String getFileExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
             return "";
         }
         return fileName.substring(lastIndex + 1);
     }
+
+    /**
+     * 파일명 인코딩 (Content-Disposition용)
+     */
+    public static String encodeFileName(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            throw new FileDomainException("파일 이름이 없습니다.");
+        }
+        return URLEncoder.encode(fileName, StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20");
+    }
+
+    /**
+     * Content-Disposition 헤더 반환
+     */
+    public static String getContentDispositionHeader(String encodedFileName) {
+        return "attachment; filename*=UTF-8''" + encodedFileName;
+    }
+
+    /**
+     * Content-Type 반환
+     */
+    public static String getDefaultContentType() {
+        return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+    }
+
 
     /**
      * 이미지 파일인지 검증하는 메서드

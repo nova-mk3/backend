@@ -27,8 +27,15 @@ public class CORSFilter implements Filter, jakarta.servlet.Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        response.setHeader("Access-Control-Allow-Origin",
-                "http://localhost:8080, http://localhost:3000, http://localhost:3001");
+        String origin = request.getHeader("Origin");
+        if (origin != null && (
+                origin.equals("https://jinybook.site") ||
+                        origin.equals("http://localhost:8080") ||
+                        origin.equals("http://localhost:3000") ||
+                        origin.equals("http://localhost:3001"))) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+        }
+
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type");
         response.setHeader("Access-Control-Allow-Credentials", "true");
