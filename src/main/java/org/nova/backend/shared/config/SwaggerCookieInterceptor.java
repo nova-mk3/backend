@@ -16,7 +16,7 @@ public class SwaggerCookieInterceptor implements HandlerInterceptor {
         Optional<String> authToken = getAuthTokenFromRequest(request);
 
         if (authToken.isPresent()) {
-            log.info("Swagger 요청 - JWT 유지: {}", authToken.get());
+            log.info("Swagger 요청 - JWT 유지");
             response.addHeader("Set-Cookie", "AUTH_TOKEN=" + authToken.get() + "; Path=/; HttpOnly; Secure");
         } else {
             log.warn("Swagger 요청 - JWT 없음");

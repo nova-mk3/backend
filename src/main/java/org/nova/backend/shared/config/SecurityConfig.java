@@ -57,6 +57,8 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> {
+                    auth.requestMatchers("/files/public/**").permitAll();
+
                     //건의 게시판 관련 권한
                     configureSuggestionBoardPermissions(auth);
                     //게시판 관련 권한
