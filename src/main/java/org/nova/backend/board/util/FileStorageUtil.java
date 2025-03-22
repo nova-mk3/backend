@@ -1,5 +1,7 @@
 package org.nova.backend.board.util;
 
+import static org.nova.backend.board.util.FileUtil.getFileExtension;
+
 import jakarta.servlet.http.HttpServletResponse;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.slf4j.Logger;
@@ -24,29 +26,30 @@ public class FileStorageUtil {
      */
     public static String saveFileToLocal(
             MultipartFile file,
-            String storagePath
+            String basePath,
+            String folderName
     ) {
         try {
-            Path fileDir = Paths.get(storagePath);
+            String originalFileName = file.getOriginalFilename();
+            if (originalFileName == null) throw new FileDomainException("파일 이름이 없습니다.");
+
+            UUID uuid = UUID.randomUUID();
+            String extension = getFileExtension(originalFileName);
+            Path fileDir = Paths.get(basePath, folderName);
+
             if (!Files.exists(fileDir)) {
                 Files.createDirectories(fileDir);
                 logger.info("파일 저장 디렉토리가 생성되었습니다: {}", fileDir.toAbsolutePath());
             }
 
-            String originalFileName = file.getOriginalFilename();
-            if (originalFileName == null) {
-                throw new FileDomainException("파일 이름이 없습니다.");
-            }
-
-            String safeFileName = UUID.randomUUID() + "_" + originalFileName;
-            Path targetPath = fileDir.resolve(safeFileName);
-
+            Path targetPath = fileDir.resolve(uuid + "." + extension);
             if (!targetPath.toAbsolutePath().startsWith(fileDir.toAbsolutePath())) {
                 throw new FileDomainException("잘못된 파일 경로가 탐지되었습니다.");
             }
 
             file.transferTo(targetPath.toFile());
             return targetPath.toString();
+
         } catch (IOException e) {
             logger.error("파일 저장 중 오류 발생: {}", file.getOriginalFilename(), e);
             throw new FileDomainException("파일 저장 중 오류 발생", e);
