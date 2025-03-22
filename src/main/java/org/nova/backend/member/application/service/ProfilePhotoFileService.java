@@ -57,7 +57,7 @@ public class ProfilePhotoFileService {
         FileUtil.validateImageFile(profilePhoto);
         FileUtil.validateFileSize(profilePhoto);
 
-        String storagePath = Paths.get(baseFileStoragePath, "profile").toString();
+        String storagePath = baseFileStoragePath;
         return processProfilePhotoUpload(profilePhoto, storagePath);
     }
 
