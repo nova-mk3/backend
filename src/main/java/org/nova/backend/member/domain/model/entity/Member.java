@@ -100,7 +100,42 @@ public class Member {
         this.introduction = updateMemberProfileRequest.getIntroduction();
     }
 
-    // 졸업 여부 변경
+    // 학기 +1
+    public void updateSemester() {
+        this.semester += 1;
+    }
+
+    // 학기 수정
+    public void updateSemester(final int semester) {
+        this.semester = semester;
+    }
+
+    // 학년 +1
+    public void updateGrade() {
+        this.grade += 1;
+    }
+
+    // 학년 수정
+    public void updateGrade(final int grade) {
+        this.grade = grade;
+    }
+
+    // 휴학 여부 토글
+    public void updateAbsence() {
+        this.isAbsence = !this.isAbsence;
+    }
+
+    // 휴학 여부 변경
+    public void updateAbsence(boolean isAbsence) {
+        this.isAbsence = isAbsence;
+    }
+
+    //졸업 여부 변경
+    public void updateGraduation(boolean isGraduation) {
+        this.isGraduation = isGraduation;
+    }
+
+    // 졸업 정보 변경
     public void updateGraduationInfo(Graduation graduation) {
         this.graduation = graduation;
     }
