@@ -57,9 +57,9 @@ public class ExecutiveHistoryController {
      */
     @PutMapping("/{executiveHistoryId}/{role}")
     @ExecutiveHistoryApiDocument.UpdateExecutivesRoleApiDoc
-    public ResponseEntity<ApiResponse<MemberResponse>> updateExecutiveRole(
-        @PathVariable("executiveHistoryId") UUID executiveHistoryId, @PathVariable("role") Role role) {
-        
+    public ResponseEntity<ApiResponse<ExecutiveHistoryResponse>> updateExecutiveRole(
+            @PathVariable("executiveHistoryId") UUID executiveHistoryId, @PathVariable("role") Role role) {
+
         ExecutiveHistoryResponse response = executiveHistoryService.updateExecutiveRole(executiveHistoryId, role);
 
         return ResponseEntity.ok().body(ApiResponse.success(response));
