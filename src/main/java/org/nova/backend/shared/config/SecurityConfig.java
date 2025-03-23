@@ -200,11 +200,9 @@ public class SecurityConfig {
     private void configureAdministratorPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
-        auth.requestMatchers("/api/v1/admin")
-                .hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
+        auth.requestMatchers("/api/v1/admin/**").hasRole(Role.ADMINISTRATOR.toString())  //ROLE_ 접두사를 붙여서 권한을 확인한다.
                 .requestMatchers("/api/v1/pending-members/**").hasRole(Role.ADMINISTRATOR.toString())
-                .requestMatchers("/api/v1/executive-histories/**")
-                .hasRole(Role.ADMINISTRATOR.toString());
+                .requestMatchers("/api/v1/executive-histories/**").hasRole(Role.ADMINISTRATOR.toString());
     }
 
     private void configureAuthPermissions(

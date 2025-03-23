@@ -105,7 +105,7 @@ public class MemberController {
     }
 
     /**
-     * 회원 정보 수정
+     * 회원 본인 정보 수정
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{profileMemberId}")
