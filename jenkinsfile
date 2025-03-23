@@ -125,10 +125,9 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Stopping old container..."
+                    echo "Stopping old container if running..."
                     sh '''
-                    docker stop myapp || true
-                    docker rm myapp || true
+                    docker ps -q --filter "name=backend-spring-app-1" | grep -q . && docker stop backend-spring-app-1 && docker rm backend-spring-app-1 || true
                     '''
 
                     echo "Running new container..."
