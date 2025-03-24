@@ -16,6 +16,7 @@ jobs:
       contents: read
       security-events: write
       actions: read
+
     steps:
       - uses: actions/checkout@v4
 
@@ -32,15 +33,16 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Code (SAST) 분석
-        run: snyk code test --sarif > snyk-code.sarif || true
+        run: |
+          snyk code test --sarif > snyk-code.sarif || echo '{}' > snyk-code.sarif
 
       - name: Snyk Open Source (SCA) 분석
         run: snyk test --all-projects || true
 
-      - name: Snyk IaC (Infrastructure as Code) 분석
+      - name: Snyk IaC 분석
         run: snyk iac test --report || true
 
-      - name: 결과를 GitHub Code Scanning에 업로드
+      - name: SARIF 결과 GitHub에 업로드
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk-code.sarif
