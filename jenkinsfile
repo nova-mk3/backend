@@ -109,6 +109,9 @@ pipeline {
         }
 
         stage('Prepare Docker Context') {
+            when {
+                branch 'main'
+            }
             steps {
                 sh 'cp .env build/libs/.env'
             }
