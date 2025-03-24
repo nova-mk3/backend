@@ -130,10 +130,10 @@ pipeline {
                     docker ps -q --filter "name=backend-spring-app-1" | grep -q . && docker stop backend-spring-app-1 && docker rm backend-spring-app-1 || true
                     '''
 
-                    echo "Running new container..."
+                    echo "Running new container on correct network with consistent project name..."
                     sh '''
-                    docker compose --env-file .env build spring-app
-                    docker compose --env-file .env up -d --no-deps spring-app
+                    docker compose -p backend --env-file .env build spring-app
+                    docker compose -p backend --env-file .env up -d --no-deps spring-app
                     '''
                 }
             }
