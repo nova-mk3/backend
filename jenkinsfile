@@ -98,9 +98,6 @@ pipeline {
         }
 
         stage('Run Tests') {
-            when {
-                branch 'dev'
-            }
             steps {
                 echo "Running tests on dev branch..."
                 sh "./gradlew test"
@@ -133,7 +130,8 @@ pipeline {
                     echo "Running new container on correct network with consistent project name..."
                     sh '''
                     docker compose -p backend --env-file .env build spring-app
-                    docker compose -p backend --env-file .env up -d --no-deps spring-app
+                    docker compose -p backend --env-file .env up -d --no-deps spring-app \
+                      --volume "$PWD/.env:/app/.env"
                     '''
                 }
             }
