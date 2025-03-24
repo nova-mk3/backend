@@ -58,7 +58,7 @@ services:
       - 'ADMIN_PASSWORD=${ADMIN_PASSWORD}'
     volumes:
       - ${FILE_STORAGE_PATH}
-      - ./backend.env:/app/.env
+      - ./.env:/app/.env
     ports:
       - '${SPRING_APP_PORT}:8080'
     healthcheck:
