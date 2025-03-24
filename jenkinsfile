@@ -130,8 +130,7 @@ pipeline {
                     echo "Running new container on correct network with consistent project name..."
                     sh '''
                     docker compose -p backend --env-file .env build spring-app
-                    docker compose -p backend --env-file .env up -d --no-deps spring-app \
-                      --volume "$PWD/.env:/app/.env"
+                    docker compose -p backend --env-file .env up -d --no-deps spring-app
                     '''
                 }
             }
