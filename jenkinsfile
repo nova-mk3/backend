@@ -18,7 +18,8 @@ pipeline {
                 script {
                     echo "Debug: Current BRANCH_NAME = '${env.BRANCH_NAME}'"
 
-                    sh 'rm -rf .env'
+                    sh 'if [ -d .env ]; then rm -rf .env; fi'
+                    sh 'rm -f .env'
 
                     def envVars = ""
                     if (env.BRANCH_NAME == 'main') {
