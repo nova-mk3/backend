@@ -82,7 +82,7 @@ pipeline {
                             ADMIN_PASSWORD=1234
                         """
                     }
-                    writeFile file: ENV_FILE, text: envVars
+                    writeFile file: 'backend.env', text: envVars
                     echo ".env file created successfully"
                 }
             }
