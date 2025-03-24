@@ -92,11 +92,6 @@ pipeline {
                     }
 
                     writeFile file: '.env', text: envVars
-                    echo ".env file created successfully. Contents:"
-                    sh 'cat .env'
-
-                    echo "Current directory structure:"
-                    sh 'ls -al'
                 }
             }
         }
@@ -110,6 +105,12 @@ pipeline {
         stage('Build JAR') {
             steps {
                 sh "./gradlew clean build --no-daemon"
+            }
+        }
+
+        stage('Prepare Docker Context') {
+            steps {
+                sh 'cp .env build/libs/.env'
             }
         }
 
