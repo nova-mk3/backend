@@ -57,7 +57,7 @@ services:
       - 'ADMIN_STUDENT_NUMBER=${ADMIN_STUDENT_NUMBER}'
       - 'ADMIN_PASSWORD=${ADMIN_PASSWORD}'
     volumes:
-      - ${FILE_STORAGE_PATH}
+      - ${FILE_STORAGE_PATH}:${FILE_STORAGE_PATH}
     ports:
       - '${SPRING_APP_PORT}:8080'
     healthcheck:
