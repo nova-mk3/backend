@@ -32,7 +32,8 @@ public class CORSFilter implements Filter, jakarta.servlet.Filter {
                 origin.equals("https://jinybook.site") ||
                         origin.equals("http://localhost:8080") ||
                         origin.equals("http://localhost:3000") ||
-                        origin.equals("http://localhost:3001"))) {
+                        origin.equals("http://localhost:3001") ||
+                        origin.equals("http://localhost:3002"))) {
             response.setHeader("Access-Control-Allow-Origin", origin);
         }
 
