@@ -50,6 +50,7 @@ public class BasePostService implements BasePostUseCase {
     private final SecurityUtil securityUtil;
     private final BasePostMapper postMapper;
     private final PicturePostMapper picturePostMapper;
+    private final PostViewCountCacheService postViewCountCacheService;
 
     /**
      * 새로운 게시글과 첨부파일 저장
@@ -204,7 +205,7 @@ public class BasePostService implements BasePostUseCase {
             UUID postId
     ) {
 
-        basePostPersistencePort.increaseViewCount(postId);
+        postViewCountCacheService.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
