@@ -17,7 +17,8 @@ public class SwaggerCookieInterceptor implements HandlerInterceptor {
 
         if (authToken.isPresent()) {
             log.info("Swagger 요청 - JWT 유지");
-            response.addHeader("Set-Cookie", "AUTH_TOKEN=" + authToken.get() + "; Path=/; HttpOnly; Secure");
+            String sanitizedToken = sanitizeForHeader(authToken.get());
+            response.addHeader("Set-Cookie", "AUTH_TOKEN=" + sanitizedToken + "; Path=/; HttpOnly; Secure");
         } else {
             log.warn("Swagger 요청 - JWT 없음");
         }
@@ -34,5 +35,12 @@ public class SwaggerCookieInterceptor implements HandlerInterceptor {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * CR, LF 제거로 헤더 주입 방지
+     */
+    private String sanitizeForHeader(String input) {
+        return input.replaceAll("[\r\n]", "");
     }
 }
