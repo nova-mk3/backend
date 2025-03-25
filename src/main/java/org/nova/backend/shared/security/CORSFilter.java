@@ -8,12 +8,21 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
 import java.util.logging.Filter;
 import java.util.logging.LogRecord;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CORSFilter implements Filter, jakarta.servlet.Filter {
+
+    private static final Set<String> ALLOWED_ORIGINS = Set.of(
+            "https://jinybook.site",
+            "http://localhost:8080",
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:3002"
+    );
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -28,12 +37,8 @@ public class CORSFilter implements Filter, jakarta.servlet.Filter {
         HttpServletResponse response = (HttpServletResponse) res;
 
         String origin = request.getHeader("Origin");
-        if (origin != null && (
-                origin.equals("https://jinybook.site") ||
-                        origin.equals("http://localhost:8080") ||
-                        origin.equals("http://localhost:3000") ||
-                        origin.equals("http://localhost:3001") ||
-                        origin.equals("http://localhost:3002"))) {
+
+        if (isSafeOrigin(origin) && ALLOWED_ORIGINS.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
         }
 
@@ -48,6 +53,10 @@ public class CORSFilter implements Filter, jakarta.servlet.Filter {
         }
 
         chain.doFilter(req, res);
+    }
+
+    private boolean isSafeOrigin(String origin) {
+        return origin != null && !origin.contains("\r") && !origin.contains("\n");
     }
 
     @Override
