@@ -23,6 +23,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Set;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -101,6 +103,14 @@ public class SecurityConfig {
     private void logOut(LogoutConfigurer<HttpSecurity> logout) {
         logout.logoutUrl("/api/v1/members/logout")
                 .logoutSuccessHandler((request, response, authentication) -> {
+                    // CORS 헤더 설정
+                    String origin = request.getHeader("Origin");
+                    if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+                        response.setHeader("Access-Control-Allow-Origin", origin);
+                        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+                        response.setHeader("Access-Control-Allow-Credentials", "true");
+                    }
 
                     // auth token 담은 쿠키 제거
                     Cookie cookie = new Cookie("AUTH_TOKEN", null);
@@ -111,6 +121,15 @@ public class SecurityConfig {
                     response.setStatus(HttpServletResponse.SC_OK);
                 });
     }
+
+    // ALLOWED_ORIGINS Set 추가
+    private static final Set<String> ALLOWED_ORIGINS = Set.of(
+            "https://jinybook.site",
+            "http://localhost:8080",
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:3002"
+    );
 
     private void configureSuggestionBoardPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
