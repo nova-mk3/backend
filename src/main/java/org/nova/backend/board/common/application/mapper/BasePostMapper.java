@@ -60,6 +60,7 @@ public class BasePostMapper {
 
         return new BasePostDetailResponse(
                 post.getId(),
+                post.getPostType(),
                 post.getTitle(),
                 post.getContent(),
                 post.getViewCount(),
