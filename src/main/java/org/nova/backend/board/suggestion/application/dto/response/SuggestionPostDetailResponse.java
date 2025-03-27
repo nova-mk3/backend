@@ -19,5 +19,6 @@ public class SuggestionPostDetailResponse {
     private String adminReply;
     private LocalDateTime adminReplyTime;
     private List<SuggestionFileResponse> files;
+    private UUID authorId;
     private String authorName;
 }

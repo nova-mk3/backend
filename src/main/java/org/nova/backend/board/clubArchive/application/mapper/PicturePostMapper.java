@@ -54,6 +54,7 @@ public class PicturePostMapper {
                 post.getCommentCount(),
                 post.getCreatedTime(),
                 post.getModifiedTime(),
+                post.getMember().getId(),
                 post.getMember().getName(),
                 images,
                 isLiked

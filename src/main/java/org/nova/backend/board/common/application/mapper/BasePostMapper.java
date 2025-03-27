@@ -55,9 +55,6 @@ public class BasePostMapper {
                 ))
                 .toList();
 
-        ProfilePhoto profilePhoto = post.getMember().getProfilePhoto();
-        ProfilePhotoResponse memberProfilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
-
         return new BasePostDetailResponse(
                 post.getId(),
                 post.getPostType(),
@@ -69,8 +66,8 @@ public class BasePostMapper {
                 post.getCreatedTime(),
                 post.getModifiedTime(),
                 fileResponses,
+                post.getMember().getId(),
                 post.getMember().getName(),
-                memberProfilePhotoResponse,
                 isLiked
         );
     }
