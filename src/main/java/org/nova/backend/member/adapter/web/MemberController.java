@@ -3,6 +3,7 @@ package org.nova.backend.member.adapter.web;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.nova.backend.member.application.dto.request.AuthCodeEmailRequest;
 import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
+import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
@@ -46,28 +48,13 @@ public class MemberController {
     private final SecurityUtil securityUtil;
 
     /**
-     * 현재 로그인한 회원의 pk 조회, 로그인 되어있지 않으면 null 보냄
-     */
-    @GetMapping("")
-    @MemberProfileApiDocument.GetMemberPKApiDoc
-    public ResponseEntity<ApiResponse<UUID>> getMemberPK() {
-        Optional<UUID> memberId = securityUtil.getOptionalCurrentMemberId();
-
-        if(memberId.isEmpty()){  //로그인한 회원이 없으면 null 반환
-            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null));
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(memberId.get()));
-    }
-
-    /**
      * 현재 로그인한 회원의 간단 프로필 조회, 로그인 되어있지 않으면 null보냄
      */
     @GetMapping("/simple-profile")
     @MemberProfileApiDocument.GetMemberSimpleProfileApiDoc
     public ResponseEntity<ApiResponse<MemberSimpleProfileResponse>> getSimpleProfile() {
         Optional<UUID> memberId = securityUtil.getOptionalCurrentMemberId();
-        if(memberId.isEmpty()){  //로그인한 회원이 없으면 null 반환
+        if (memberId.isEmpty()) {  //로그인한 회원이 없으면 null 반환
             return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null));
         }
 
@@ -76,6 +63,17 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 
+    /**
+     * 모든 회원 정보 조회
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("")
+    @MemberProfileApiDocument.GetMemberListApiDoc
+    public ResponseEntity<ApiResponse<List<MemberResponse>>> getMemberList() {
+        List<MemberResponse> response = memberService.getAllMembers();
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
+    }
 
     /**
      * 회원 정보 조회
