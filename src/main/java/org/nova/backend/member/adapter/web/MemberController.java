@@ -3,6 +3,7 @@ package org.nova.backend.member.adapter.web;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.adapter.web.AuthApiDocument;
@@ -47,13 +48,16 @@ public class MemberController {
     /**
      * 현재 로그인한 회원의 pk 조회
      */
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("")
     @MemberProfileApiDocument.GetMemberPKApiDoc
     public ResponseEntity<ApiResponse<UUID>> getMemberPK() {
-        UUID memberId = securityUtil.getCurrentMemberId();
+        Optional<UUID> memberId = securityUtil.getOptionalCurrentMemberId();
 
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(memberId));
+        if(memberId.isEmpty()){  //로그인한 회원이 없으면 null 반환
+            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(memberId.get()));
     }
 
     /**
