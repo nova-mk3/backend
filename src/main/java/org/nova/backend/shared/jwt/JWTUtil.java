@@ -34,9 +34,18 @@ public class JWTUtil {
                 .get("role", String.class);
     }
 
+    /**
+     * JWT 토큰 만료 여부
+     *
+     * @return 만료됐을때 true, 만료되지 않았을 때 false
+     */
     public boolean isExpired(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration()
-                .before(new Date());
+        try {
+            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration()
+                    .before(new Date());
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     public String createJwt(String studentNumber, String name, String role, Long expiredMs) {

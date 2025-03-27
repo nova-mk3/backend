@@ -32,11 +32,11 @@ public class MemberSignUpRequest {
 
     private boolean graduation;
 
-    @Schema(description = "학년", example = "1")
-    private int grade;
+    @Schema(description = "학년", example = "1학년")
+    private String grade;
 
-    @Schema(description = "이수 학기", example = "1")
-    private int semester;
+    @Schema(description = "학기", example = "1학기")
+    private String semester;
 
     private boolean absence;
 
