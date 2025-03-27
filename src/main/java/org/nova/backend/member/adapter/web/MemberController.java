@@ -46,7 +46,7 @@ public class MemberController {
     private final SecurityUtil securityUtil;
 
     /**
-     * 현재 로그인한 회원의 pk 조회
+     * 현재 로그인한 회원의 pk 조회, 로그인 되어있지 않으면 null 보냄
      */
     @GetMapping("")
     @MemberProfileApiDocument.GetMemberPKApiDoc
@@ -61,14 +61,17 @@ public class MemberController {
     }
 
     /**
-     * 현재 로그인한 회원의 간단 프로필 조회
+     * 현재 로그인한 회원의 간단 프로필 조회, 로그인 되어있지 않으면 null보냄
      */
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/simple-profile")
     @MemberProfileApiDocument.GetMemberSimpleProfileApiDoc
     public ResponseEntity<ApiResponse<MemberSimpleProfileResponse>> getSimpleProfile() {
-        UUID memberId = securityUtil.getCurrentMemberId();
-        MemberSimpleProfileResponse response = memberService.getSimpleProfile(memberId);
+        Optional<UUID> memberId = securityUtil.getOptionalCurrentMemberId();
+        if(memberId.isEmpty()){  //로그인한 회원이 없으면 null 반환
+            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null));
+        }
+
+        MemberSimpleProfileResponse response = memberService.getSimpleProfile(memberId.get());
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
