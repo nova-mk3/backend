@@ -19,6 +19,7 @@ public class PicturePostDetailResponse {
     private int commentCount;
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
+    private UUID authorId;
     private String authorName;
     private List<ImageResponse> images;
     private boolean isLiked;

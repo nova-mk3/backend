@@ -51,6 +51,7 @@ public class SuggestionPostMapper {
                 post.getAdminReply(),
                 post.getAdminReplyTime(),
                 fileResponses,
+                post.getMember().getId(),
                 post.getMember().getName()
         );
     }
