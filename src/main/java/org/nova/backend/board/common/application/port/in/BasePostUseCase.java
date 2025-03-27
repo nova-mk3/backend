@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
+import org.nova.backend.board.common.application.dto.response.AllPostSummaryResponse;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
 import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
@@ -17,6 +18,7 @@ public interface BasePostUseCase {
     Page<?> searchPostsByCategory(UUID boardId, PostType postType, String keyword, String searchType, Pageable pageable);
     Page<BasePostSummaryResponse> getAllPosts(UUID boardId, Pageable pageable);
     Page<BasePostSummaryResponse> searchAllPosts(UUID boardId, String keyword, String searchType, Pageable pageable);
+    Page<AllPostSummaryResponse> getAllPostsFromAllBoards(Pageable pageable);
 
     BasePostDetailResponse getPostById(UUID boardId, UUID postId);
     Map<PostType, List<BasePostSummaryResponse>> getLatestPostsByType(UUID boardId);
