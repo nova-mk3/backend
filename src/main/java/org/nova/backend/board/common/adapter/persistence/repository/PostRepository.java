@@ -40,6 +40,10 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query("SELECT p.likeCount FROM Post p WHERE p.id = :postId")
     int getLikeCount(@Param("postId") UUID postId);
 
+    @Query("SELECT p FROM Post p WHERE p.postType <> 'EXAM_ARCHIVE'")
+    Page<Post> findAll(Pageable pageable);
+
+
     @Query("SELECT p FROM Post p WHERE p.board.id = :boardId AND p.postType = :postType " +
             "AND LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Post> searchByTitle(
