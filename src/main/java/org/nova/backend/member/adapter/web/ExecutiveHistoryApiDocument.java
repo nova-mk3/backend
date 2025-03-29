@@ -36,6 +36,17 @@ public @interface ExecutiveHistoryApiDocument {
     @interface AddYearApiDoc {
     }
 
+    @Operation(summary = "연도 삭제", description = "현재 연도 리스트에서 가장 최근 연도를 찾아 삭제합니다. 삭제된 연도의 임원 이력을 삭제하고 최신 연도 임원들에게 권한을 줍니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "연도 삭제 성공"),
+            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface DeleteYearApiDoc {
+    }
+
     @Operation(summary = "임원 권한 변경", description = "임원에게 노바 홈페이지 관리 권한을 부여합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "임원 권한 변경 성공"),
