@@ -124,7 +124,7 @@ public class SecurityConfig {
 
     // ALLOWED_ORIGINS Set 추가
     private static final Set<String> ALLOWED_ORIGINS = Set.of(
-            "https://jinybook.site",
+            "https://nova.cbnu.ac.kr",
             "http://localhost:8080",
             "http://localhost:3000",
             "http://localhost:3001",
