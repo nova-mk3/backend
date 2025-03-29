@@ -53,6 +53,17 @@ public class ExecutiveHistoryController {
     }
 
     /**
+     * 연도 삭제 : 가장 최근 year에서 1년 삭제, 삭제된 year의 임원 이력 삭제
+     */
+    @DeleteMapping
+    @ExecutiveHistoryApiDocument.DeleteYearApiDoc
+    public ResponseEntity<ApiResponse<String>> deleteMaxYear() {
+        executiveHistoryService.deleteYear();
+
+        return ResponseEntity.ok().body(ApiResponse.success("연도 삭제 완료"));
+    }
+
+    /**
      * 임원 권한 변경
      */
     @PutMapping("/{executiveHistoryId}/{role}")
@@ -65,14 +76,13 @@ public class ExecutiveHistoryController {
         return ResponseEntity.ok().body(ApiResponse.success(response));
     }
 
-
     /**
      * 특정 연도의 임원 이력 조회
      */
     @GetMapping("/{year}")
     @ExecutiveHistoryApiDocument.GetExecutiveHistoryByYearApiDoc
     public ApiResponse<List<ExecutiveHistoryResponse>> getExecutiveHistoryByYear(@PathVariable("year") int year) {
-        List<ExecutiveHistoryResponse> response = executiveHistoryService.getExecutiveHistoryByYear(year);
+        List<ExecutiveHistoryResponse> response = executiveHistoryService.getExecutiveHistoryResponseByYear(year);
         return ApiResponse.success(response);
     }
 

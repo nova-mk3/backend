@@ -32,7 +32,6 @@ public class ExecutiveHistoryService {
     private final ExecutiveHistoryMapper executiveHistoryMapper;
 
     private final MemberService memberService;
-    private final MemberMapper memberMapper;
 
     /**
      * 연도 리스트 불러오기(내림차순)
@@ -51,11 +50,51 @@ public class ExecutiveHistoryService {
         // 연도 추가를 위한 ExecutiveHistory temp data 저장
         ExecutiveHistory tempForNewYear = createTempExecutiveHistory(year + 1);
 
-        // 지난 임원들 권한 삭제
+        // 지난해 임원들 권한 삭제
         updateExecutivesToGeneral(year);
 
         return tempForNewYear.getYear();
     }
+
+    /**
+     * 연도 삭제 : 가장 최근 year에서 1년 삭제, 삭제된 year의 임원 이력을 삭제하고 최신 연도 임원들에게 권한을 줍니다.
+     *
+     * @return 삭제된 연도
+     */
+    @Transactional
+    public void deleteYear() {
+        int year = executiveHistoryRepository.findRecentYear(0);  // 가장 최근 year
+        if (year == 0) {
+            throw new ExecutiveHistoryDomainException("삭제할 연도가 없습니다.", HttpStatus.NOT_FOUND);
+        }
+
+        updateExecutivesToGeneral(year);  //삭제할 연도의 임원들 권한 삭제
+        deleteExecutiveHistory(year);  //임원 이력 삭제
+        updateMemberRoleByYear(year-1); //이전 연도 임원들에게 권한 부여
+    }
+
+    /**
+     * 특정 연도 임원들에게 권한 부여
+     */
+    private void updateMemberRoleByYear(int year){
+        List<ExecutiveHistory> executiveHistoryList = getExecutiveHistoryByYear(year);
+        executiveHistoryList.forEach(executiveHistory -> {
+            if(executiveHistory.getMember()==null) return;
+            executiveHistory.getMember().updateRole(executiveHistory.getRole());
+        });
+    }
+
+    /**
+     * 해당 연도의 임원 이력 삭제
+     */
+    private void deleteExecutiveHistory(int year) {
+        List<ExecutiveHistory> executiveHistoryList = executiveHistoryRepository.findExecutiveHistoryForDeleteByYear(
+                year);
+
+        executiveHistoryRepository.deleteAll(executiveHistoryList);
+
+    }
+
 
     /**
      * 연도 추가를 위한 임시 객체 생성
@@ -68,17 +107,15 @@ public class ExecutiveHistoryService {
     }
 
     /**
-     * 이전 연도 임원들 role GENERAL로 변경
+     * 해당 연도 임원들 role GENERAL로 변경
      */
     private void updateExecutivesToGeneral(int year) {
-        List<ExecutiveHistory> executivesList = executiveHistoryRepository.findPastExecutivesByYear(year);
-        if (!executivesList.isEmpty()) {
-            executivesList.forEach(executiveHistory -> {
-                if (executiveHistory.getMember() != null) {
-                    executiveHistory.getMember().updateRoleToGeneral();
-                }
-            });
-        }
+        List<ExecutiveHistory> executivesList = executiveHistoryRepository.findExecutiveHistoriesByYear(year, adminStudentNumber);
+        executivesList.forEach(executiveHistory -> {
+            if (executiveHistory.getMember() != null) {
+                executiveHistory.getMember().updateRoleToGeneral();
+            }
+        });
     }
 
     /**
@@ -145,12 +182,22 @@ public class ExecutiveHistoryService {
 
     /**
      * 특정 연도의 임원 이력 조회
+     *
+     * @return ExecutiveHistory 임원 이력
      */
-    public List<ExecutiveHistoryResponse> getExecutiveHistoryByYear(final int year) {
+    public List<ExecutiveHistory> getExecutiveHistoryByYear(final int year) {
 
-        List<ExecutiveHistory> executiveHistoryList = executiveHistoryRepository.findExecutiveHistoriesByYear(year,
+        return executiveHistoryRepository.findExecutiveHistoriesByYear(year,
                 adminStudentNumber);
+    }
 
+    /**
+     * 특정 연도의 임원 이력 조회
+     *
+     * @return response 객체
+     */
+    public List<ExecutiveHistoryResponse> getExecutiveHistoryResponseByYear(final int year) {
+        List<ExecutiveHistory> executiveHistoryList = getExecutiveHistoryByYear(year);
         return executiveHistoryList.stream().map(executiveHistoryMapper::toResponse).toList();
     }
 

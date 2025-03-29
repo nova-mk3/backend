@@ -10,6 +10,7 @@ import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.application.dto.request.AuthCodeEmailRequest;
 import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
 import org.nova.backend.member.application.dto.request.UpdateGraduationRequest;
+import org.nova.backend.member.application.dto.request.UpdateMemberProfileRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.GraduationResponse;
@@ -17,6 +18,7 @@ import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
+import org.nova.backend.member.application.mapper.GradeSemesterYearMapper;
 import org.nova.backend.member.application.mapper.GraduationMapper;
 import org.nova.backend.member.application.mapper.MemberMapper;
 import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
@@ -45,6 +47,7 @@ public class MemberService {
     private final ProfilePhotoFileService profilePhotoFileService;
     private final EmailAuthService emailAuthService;
 
+    private final GradeSemesterYearMapper gradeSemesterYearMapper;
     private final MemberMapper memberMapper;
     private final GraduationMapper graduationMapper;
     private final MemberProfilePhotoMapper memberProfilePhotoMapper;
@@ -151,7 +154,7 @@ public class MemberService {
     }
 
     /**
-     * 회원 정보 수정
+     * 마이페이지 회원 정보 수정
      *
      * @param profileMemberId     조회할 프로필 Member id
      * @param loginMemberId       현재 로그인한 Member id
@@ -163,21 +166,35 @@ public class MemberService {
         validateMemberAuthorize(profileMemberId, loginMemberId);
         Member member = findByMemberId(loginMemberId);
 
-        // 졸업생은 휴학중일 수 없다.
-        if(updateMemberRequest.getUpdateMemberProfileRequest().isGraduation() && updateMemberRequest.getUpdateMemberProfileRequest().isAbsence()){
-            throw new MemberDomainException("졸업생은 휴학중일 수 없습니다.", HttpStatus.CONFLICT);
-        }
-
+        //회원 기본 정보 수정
+        updateMemberProfile(member, updateMemberRequest.getUpdateMemberProfileRequest());
         //졸업생 정보 수정
         handleGraduation(member, updateMemberRequest);
-        // 기본 회원 정보 수정
-        member.updateProfileInfo(updateMemberRequest.getUpdateMemberProfileRequest());
 
         return new MyPageMemberResponse(true, getMemberResponseFromMember(member),
                 getGraduationFromMember(member.getGraduation()));
     }
 
-    //졸업생 정보 수정
+    /**
+     * 회원 정보 수정
+     *
+     * @param member                     수정 대상 사용자
+     * @param updateMemberProfileRequest 수정 사항 request
+     */
+    public void updateMemberProfile(Member member, UpdateMemberProfileRequest updateMemberProfileRequest) {
+        // 졸업생은 휴학중일 수 없다.
+        if (updateMemberProfileRequest.isGraduation() && updateMemberProfileRequest.isAbsence()) {
+            throw new MemberDomainException("졸업생은 휴학중일 수 없습니다.", HttpStatus.CONFLICT);
+        }
+
+        int grade = gradeSemesterYearMapper.toIntGrade(updateMemberProfileRequest.getGrade());
+        int semester = gradeSemesterYearMapper.toIntCompletionSemester(updateMemberProfileRequest.getSemester());
+
+        member.updateProfileInfo(updateMemberProfileRequest, grade, semester);
+    }
+
+
+    // 졸업생 정보 수정
     public void handleGraduation(Member member, UpdateMemberRequest updateMemberRequest) {
         boolean isGraduationMember = updateMemberRequest.getUpdateMemberProfileRequest().isGraduation();
 
@@ -193,10 +210,11 @@ public class MemberService {
 
     //졸업생 정보 반영
     public void updateGraduation(Member member, UpdateGraduationRequest updateGraduationRequest) {
+        int graduateYear = gradeSemesterYearMapper.toIntYear(updateGraduationRequest.getYear());
         if (member.isGraduation()) {  // 졸업생 정보 수정 : 기존에 졸업생 정보가 있음.
-            member.getGraduation().updateProfile(updateGraduationRequest);
+            member.getGraduation().updateProfile(graduateYear, updateGraduationRequest);
         } else {  //졸업생 정보 생성
-            Graduation newGraduation = graduationMapper.toEntity(updateGraduationRequest);
+            Graduation newGraduation = graduationMapper.toEntity(graduateYear, updateGraduationRequest);
             graduationRepository.save(newGraduation);
             member.updateGraduationInfo(newGraduation);
         }
@@ -364,13 +382,13 @@ public class MemberService {
     /**
      * 휴학 여부 변경
      *
-     * @param memberId 선택된 회원
+     * @param memberId  선택된 회원
      * @param isAbsence 휴학 여부
      */
     @Transactional
     public Member updateAbsence(UUID memberId, boolean isAbsence) {
         Member member = findByMemberId(memberId);
-        if(member.isGraduation()){
+        if (member.isGraduation()) {
             throw new MemberDomainException("졸업생은 휴학 여부를 변경할 수 없습니다.", HttpStatus.CONFLICT);
         }
         member.updateAbsence(isAbsence);
@@ -394,11 +412,12 @@ public class MemberService {
 
     /**
      * 이름으로 검색
+     *
      * @param name 이름
      * @return 검색된 member 리스트
      */
     public List<MemberResponse> findMembersByName(String name) {
-        List<Member> memberList= memberRepository.findAllMembersByName(adminStudentNumber, name);
+        List<Member> memberList = memberRepository.findAllMembersByName(adminStudentNumber, name);
 
         return memberList.stream().map(member -> {
             ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());

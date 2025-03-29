@@ -81,20 +81,16 @@ public class AdminService {
     }
 
     /**
-     * 회원 정보 단건 변경
+     * 관리자 회원 정보 수정
      */
     @Transactional
     public AdminMemberResponse updateMemberProfile(UUID memberId, UpdateMemberRequest updateMemberRequest) {
         Member member = memberService.findByMemberId(memberId);
-        // 졸업생은 휴학중일 수 없다.
-        if (updateMemberRequest.getUpdateMemberProfileRequest().isGraduation()
-                && updateMemberRequest.getUpdateMemberProfileRequest().isAbsence()) {
-            throw new MemberDomainException("졸업생은 휴학중일 수 없습니다.", HttpStatus.CONFLICT);
-        }
+
+        //기본 회원 정보 수정
+        memberService.updateMemberProfile(member, updateMemberRequest.getUpdateMemberProfileRequest());
         //졸업생 정보 수정
         memberService.handleGraduation(member, updateMemberRequest);
-        // 기본 회원 정보 수정
-        member.updateProfileInfo(updateMemberRequest.getUpdateMemberProfileRequest());
 
         return getAdminMemberResponse(member);
     }

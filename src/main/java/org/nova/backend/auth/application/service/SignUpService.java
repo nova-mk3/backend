@@ -8,6 +8,7 @@ import org.nova.backend.auth.application.dto.request.SignUpRequest;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.adapter.repository.PendingGraduationRepository;
 import org.nova.backend.member.adapter.repository.PendingMemberRepository;
+import org.nova.backend.member.application.mapper.GradeSemesterYearMapper;
 import org.nova.backend.member.application.mapper.PendingGraduationMapper;
 import org.nova.backend.member.application.mapper.PendingMemberMapper;
 import org.nova.backend.member.application.service.ProfilePhotoFileService;
@@ -29,6 +30,7 @@ public class SignUpService {
 
     private final MemberRepository memberRepository;
 
+    private final GradeSemesterYearMapper gradeSemesterYearMapper;
     private final PendingMemberMapper pendingMemberMapper;
     private final PendingGraduationMapper pendingGraduationMapper;
     private final PendingMemberRepository pendingMemberRepository;
@@ -69,7 +71,8 @@ public class SignUpService {
      * 졸업생 회원가입 정보 저장
      */
     private PendingGraduation createPendingGraduation(final GraduationSignUpRequest request) {
-        PendingGraduation signupGraduation = pendingGraduationMapper.toEntity(request);
+        int graduateYear = gradeSemesterYearMapper.toIntYear(request.getYear());
+        PendingGraduation signupGraduation = pendingGraduationMapper.toEntity(graduateYear,  request);
         return pendingGraduationRepository.save(signupGraduation);
     }
 

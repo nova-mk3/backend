@@ -18,13 +18,13 @@ public interface ExecutiveHistoryRepository extends JpaRepository<ExecutiveHisto
     @Query("SELECT DISTINCT eh.year FROM ExecutiveHistory eh ORDER BY eh.year DESC")
     List<Integer> findDistinctYears();
 
-    @Query("SELECT eh FROM ExecutiveHistory eh LEFT JOIN FETCH eh.member WHERE eh.year <= :year AND eh.member.role != 'GENERAL'")
-    List<ExecutiveHistory> findPastExecutivesByYear(@Param("year") int year);
-
     @Query("SELECT eh FROM ExecutiveHistory eh LEFT JOIN FETCH eh.member WHERE eh.year = :year AND eh.role IS NOT NULL AND eh.member.studentNumber != :adminStudentNumber ")
     List<ExecutiveHistory> findExecutiveHistoriesByYear(@Param("year") int year,
                                                         @Param("adminStudentNumber") String adminStudentNumber);
 
     @Query("SELECT eh FROM ExecutiveHistory eh JOIN FETCH eh.member WHERE eh.id=:executiveHistoryId")
     Optional<ExecutiveHistory> findExecutiveHistoryWithMemberById(@Param("executiveHistoryId") UUID executiveHistoryId);
+
+    @Query("SELECT eh FROM ExecutiveHistory eh WHERE eh.year=:year")
+    List<ExecutiveHistory> findExecutiveHistoryForDeleteByYear(@Param("year") int year);
 }
