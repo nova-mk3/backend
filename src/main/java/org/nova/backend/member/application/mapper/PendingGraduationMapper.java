@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class PendingGraduationMapper {
 
-    public PendingGraduation toEntity(GraduationSignUpRequest request) {
+    public PendingGraduation toEntity(int graduateYear, GraduationSignUpRequest request) {
         return new PendingGraduation(
                 UUID.randomUUID(),
-                request.getYear(),
+                graduateYear,
                 request.isContact(),
                 request.isWork(),
                 request.getJob(),

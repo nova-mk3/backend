@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 public class UpdateGraduationRequest {
 
-    @Schema(description = "졸업년도", example = "2025")
-    private int year;
+    @Schema(description = "졸업년도", example = "2025년")
+    private String year;
 
     @Schema(description = "재직 여부", example = "false")
     private boolean work;

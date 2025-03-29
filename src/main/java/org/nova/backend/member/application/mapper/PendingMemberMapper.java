@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class PendingMemberMapper {
 
-    private GradeMapper gradeMapper;
+    private GradeSemesterYearMapper gradeSemesterYearMapper;
     private MemberProfilePhotoMapper profilePhotoMapper;
 
     public PendingMember toEntity(MemberSignUpRequest request, String encryptedPassword, ProfilePhoto profilePhoto,
                                   PendingGraduation pendingGraduation) {
 
-        int grade = gradeMapper.toIntGrade(request.getGrade());  //학년
-        int semester = gradeMapper.toCompletionSemester(grade, request.getSemester());
+        int grade = gradeSemesterYearMapper.toIntGrade(request.getGrade());  //학년
+        int semester = gradeSemesterYearMapper.toCompletionSemester(grade, request.getSemester());
 
         return new PendingMember(
                 UUID.randomUUID(),
