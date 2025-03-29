@@ -59,6 +59,7 @@ public class CommentMapper {
                 comment.getContent(),
                 comment.getCreatedTime(),
                 comment.getModifiedTime(),
+                comment.getMember().getId(),
                 comment.getMember().getName(),
                 profilePhotoResponse,
                 childComment
