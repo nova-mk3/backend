@@ -71,7 +71,7 @@ public class SecurityConfig {
                     configurePictureBoardPermissions(auth);
                     //댓글 관련 권한
                     configureCommentPermissions(auth);
-                    //로그인 회원가입 관련 권한
+                    //로그인 회원가입, 사용자 정보 관련 권한
                     configureAuthPermissions(auth);
                     //관리자 관련 권한
                     configureAdministratorPermissions(auth);
@@ -229,9 +229,12 @@ public class SecurityConfig {
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
         auth
-                // 회원가입, 로그인
-                .requestMatchers("/api/v1/members/**", "/api/v1/members/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/members").permitAll()  //회원가입
+                .requestMatchers(HttpMethod.POST, "/api/v1/members/profile-photo").permitAll()  //회원가입시 프로필 사진 업로드
+                .requestMatchers( "/api/v1/members/simple-profile").permitAll()  //회원 간단 프로필 조회
+                .requestMatchers("/api/v1/members/login").permitAll()  //로그인
                 // 회원가입 시 이메일 인증
-                .requestMatchers("/api/v1/email-auth/**").permitAll();
+                .requestMatchers("/api/v1/email-auth/**").permitAll()
+                .requestMatchers("/api/v1/members/**").authenticated();  //회원 정보 접근 권한
     }
 }

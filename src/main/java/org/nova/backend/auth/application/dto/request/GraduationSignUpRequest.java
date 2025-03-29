@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 public class GraduationSignUpRequest {
 
-    @Schema(description = "졸업 연도", example = "2025")
-    private int year;
+    @Schema(description = "졸업 연도", example = "2025년")
+    private String year;
 
     @Schema(description = "연락 가능 여부", defaultValue = "false")
     private boolean contact;

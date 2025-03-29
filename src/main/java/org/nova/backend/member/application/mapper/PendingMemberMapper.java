@@ -13,10 +13,15 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class PendingMemberMapper {
 
+    private GradeSemesterYearMapper gradeSemesterYearMapper;
     private MemberProfilePhotoMapper profilePhotoMapper;
 
     public PendingMember toEntity(MemberSignUpRequest request, String encryptedPassword, ProfilePhoto profilePhoto,
                                   PendingGraduation pendingGraduation) {
+
+        int grade = gradeSemesterYearMapper.toIntGrade(request.getGrade());  //학년
+        int semester = gradeSemesterYearMapper.toCompletionSemester(grade, request.getSemester());
+
         return new PendingMember(
                 UUID.randomUUID(),
                 request.getStudentNumber(),
@@ -24,8 +29,8 @@ public class PendingMemberMapper {
                 request.getName(),
                 request.getEmail(),
                 request.isGraduation(),
-                request.getGrade(),
-                request.getSemester(),
+                grade,
+                semester,
                 request.isAbsence(),
                 profilePhoto,
                 request.getPhone(),

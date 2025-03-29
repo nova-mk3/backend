@@ -32,8 +32,8 @@ public class Graduation {
     private String contactDescription;
 
     // 졸업생 프로필 수정
-    public void updateProfile(UpdateGraduationRequest updateGraduationRequest) {
-        this.year = updateGraduationRequest.getYear();
+    public void updateProfile(int year, UpdateGraduationRequest updateGraduationRequest) {
+        this.year = year;
         this.isWork = updateGraduationRequest.isWork();
         this.job = updateGraduationRequest.getJob();
         this.isContact = updateGraduationRequest.isContact();

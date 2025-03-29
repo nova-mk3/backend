@@ -22,10 +22,10 @@ public class GraduationMapper {
         );
     }
 
-    public Graduation toEntity(UpdateGraduationRequest graduationRequest) {
+    public Graduation toEntity(int year, UpdateGraduationRequest graduationRequest) {
         return new Graduation(
                 UUID.randomUUID(),
-                graduationRequest.getYear(),
+                year,
                 graduationRequest.isContact(),
                 graduationRequest.isWork(),
                 graduationRequest.getJob(),
@@ -34,10 +34,10 @@ public class GraduationMapper {
         );
     }
 
-    public GraduationResponse toResponse(Graduation graduation){
-        if (graduation==null) {
+    public GraduationResponse toResponse(Graduation graduation) {
+        if (graduation == null) {
             return toBlankResponse();
-        }else{
+        } else {
             return new GraduationResponse(
                     graduation.getId(),
                     graduation.getYear(),
@@ -50,7 +50,7 @@ public class GraduationMapper {
         }
     }
 
-    private GraduationResponse toBlankResponse(){
+    private GraduationResponse toBlankResponse() {
         return new GraduationResponse(
                 null,
                 0,
