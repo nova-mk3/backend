@@ -27,6 +27,7 @@ import org.nova.backend.member.domain.exception.ProfilePhotoFileDomainException;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.ProfilePhoto;
+import org.nova.backend.member.domain.model.valueobject.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -118,8 +119,10 @@ public class MemberService {
 
         ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(profileMember.getProfilePhoto());
         ProfilePhotoResponse profilePhotoResponse = memberProfilePhotoMapper.toResponse(profilePhoto);
+        boolean isAdmin = profileMember.getRole() == Role.ADMINISTRATOR;
 
-        return new MemberSimpleProfileResponse(profileMember.getId(), profileMember.getName(), profilePhotoResponse);
+        return new MemberSimpleProfileResponse(profileMember.getId(), profileMember.getName(), profilePhotoResponse,
+                isAdmin);
     }
 
     /**
