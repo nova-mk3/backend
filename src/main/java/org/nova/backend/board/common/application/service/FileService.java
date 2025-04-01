@@ -1,6 +1,9 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.shared.constants.FilePathConstants;
 import org.springframework.http.HttpStatus;
@@ -15,7 +18,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
@@ -42,6 +44,7 @@ public class FileService implements FileUseCase {
     private final FilePersistencePort filePersistencePort;
     private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     @Value("${file.storage.path}")
     private String baseFileStoragePath;
@@ -113,9 +116,13 @@ public class FileService implements FileUseCase {
 
         String storagePath = getStoragePath();
 
-        return files.stream()
-                .map(file -> processFileUpload(file, storagePath, postType))
-                .collect(Collectors.toList());
+        List<CompletableFuture<FileResponse>> futures = files.stream()
+                .map(file -> CompletableFuture.supplyAsync(() -> processFileUpload(file, storagePath, postType), executor))
+                .toList();
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .toList();
     }
 
     /**
