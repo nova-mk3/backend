@@ -40,6 +40,8 @@ pipeline {
                             string(credentialsId: 'MYSQL_HOST_PROD', variable: 'MYSQL_HOST_PROD'),
                             string(credentialsId: 'MYSQL_IN_PORT_PROD', variable: 'MYSQL_IN_PORT_PROD'),
                             string(credentialsId: 'MYSQL_EX_PORT_PROD', variable: 'MYSQL_EX_PORT_PROD'),
+                            string(credentialsId: 'REDIS_HOST_PROD', variable: 'REDIS_HOST_PROD'),
+                            string(credentialsId: 'REDIS_PORT_PROD', variable: 'REDIS_PORT_PROD'),
                             string(credentialsId: 'SPRING_PROFILE_ACTIVE_PROD', variable: 'SPRING_PROFILE_ACTIVE_PROD'),
                             string(credentialsId: 'SPRING_APP_PORT_PROD', variable: 'SPRING_APP_PORT_PROD'),
                             string(credentialsId: 'FILE_STORAGE_PATH_PROD', variable: 'FILE_STORAGE_PATH'),
@@ -58,6 +60,8 @@ pipeline {
                             MYSQL_HOST=${MYSQL_HOST_PROD}
                             MYSQL_IN_PORT=${MYSQL_IN_PORT_PROD}
                             MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}
+                            REDIS_HOST=${REDIS_HOST_PROD}
+                            REDIS_PORT=${REDIS_PORT_PROD}
                             SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}
                             SPRING_APP_PORT=${SPRING_APP_PORT_PROD}
                             FILE_STORAGE_PATH=${FILE_STORAGE_PATH}
@@ -79,6 +83,8 @@ pipeline {
                         MYSQL_HOST=localhost
                         MYSQL_IN_PORT=3306
                         MYSQL_EX_PORT=3307
+                        REDIS_HOST=localhost
+                        REDIS_PORT=6379
                         SPRING_PROFILE_ACTIVE=dev
                         SPRING_APP_PORT=4001
                         FILE_STORAGE_PATH=/tmp/test-storage
