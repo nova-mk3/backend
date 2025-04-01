@@ -41,6 +41,7 @@ public class BasePostMapper {
                 0,
                 new ArrayList<>(),
                 new ArrayList<>(),
+                new ArrayList<>(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
