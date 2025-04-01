@@ -27,8 +27,7 @@ public class MemberProfilePhotoMapper {
                     .orElseThrow(() -> new ProfilePhotoFileDomainException("기본이미지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         }
 
-        String  relativeUrl = imageFileService.convertFilePathToUrl(profilePhoto.getFilePath());
-        String imageUrl = appDomain + relativeUrl;
+        String imageUrl = appDomain + "/files/public/" + profilePhoto.getFilePath().substring(profilePhoto.getFilePath().lastIndexOf("/") + 1);
 
         return new ProfilePhotoResponse(
                 profilePhoto.getId(),

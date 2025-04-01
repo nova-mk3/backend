@@ -92,8 +92,8 @@ public class ImageFileService {
 
         if (absolutePath.startsWith(protectedPath)) {
             Path fileName = absolutePath.getFileName();
-            return "/files/public/" + FilePathConstants.PUBLIC_FOLDER + "/" + fileName.toString();
+            return "/files/" + FilePathConstants.PUBLIC_FOLDER + "/" + fileName.toString();
         }
-        return "/files/public/" + absolutePath.getFileName().toString();
+        return "/files/" + absolutePath.getFileName().toString();
     }
 }
