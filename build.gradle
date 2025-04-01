@@ -68,6 +68,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-mysql'
     implementation 'io.github.cdimascio:dotenv-java:3.2.0'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'com.twelvemonkeys.imageio:imageio-webp:3.10.1'
 }
 
 hibernate {
