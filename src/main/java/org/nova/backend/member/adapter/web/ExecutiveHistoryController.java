@@ -6,12 +6,14 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.application.dto.request.AddExecutiveHistoryRequest;
 import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse;
-import org.nova.backend.member.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.MemberDetailResponse;
 import org.nova.backend.member.application.service.ExecutiveHistoryService;
 import org.nova.backend.member.application.service.MemberService;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.nova.backend.shared.model.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -110,15 +112,27 @@ public class ExecutiveHistoryController {
     }
 
     /**
-     * 모든 회원 목록 불러오기
+     * 회원 정보 단건 조회
      */
-    @GetMapping("/members")
-    @ExecutiveHistoryApiDocument.GetAllMembersApiDoc
-    public ApiResponse<List<MemberResponse>> getAllMembers() {
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/members/{memberId}")
+    @ExecutiveHistoryApiDocument.GetMemberProfileApiDoc
+    public ResponseEntity<ApiResponse<MemberDetailResponse>> getMemberProfile(@PathVariable("memberId") UUID memberId) {
+        MemberDetailResponse response = memberService.getMemberProfile(memberId);
 
-        List<MemberResponse> response = memberService.getAllMembers();
-
-        return ApiResponse.success(response);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
+
+//    /**
+//     * 모든 회원 목록 불러오기
+//     */
+//    @GetMapping("/members")
+//    @ExecutiveHistoryApiDocument.GetAllMembersApiDoc
+//    public ApiResponse<List<MemberResponse>> getAllMembers() {
+//
+//        List<MemberResponse> response = memberService.getAllMembers();
+//
+//        return ApiResponse.success(response);
+//    }
 
 }

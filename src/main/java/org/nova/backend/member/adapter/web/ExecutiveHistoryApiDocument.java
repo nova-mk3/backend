@@ -113,4 +113,18 @@ public @interface ExecutiveHistoryApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface GetAllMembersApiDoc {
     }
+
+    @Operation(summary = "회원 정보 조회", description = "요청한 사용자의 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 정보 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
+            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface GetMemberProfileApiDoc {
+    }
 }

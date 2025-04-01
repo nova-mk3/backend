@@ -14,6 +14,7 @@ import org.nova.backend.member.application.dto.request.UpdateMemberProfileReques
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.GraduationResponse;
+import org.nova.backend.member.application.dto.response.MemberDetailResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
@@ -140,6 +141,19 @@ public class MemberService {
 
         return new MyPageMemberResponse(isLoginMember, getMemberResponseFromMember(profileMember),
                 getGraduationFromMember(profileMember.getGraduation()));
+    }
+
+    /**
+     * 회원 프로필 정보 조회
+     *
+     * @param memberId 조회할 프로필 Member id
+     */
+    public MemberDetailResponse getMemberProfile(UUID memberId) {
+        Member profileMember = findByMemberId(memberId);
+
+        Graduation graduation = profileMember.isGraduation() ? profileMember.getGraduation() : null;
+        return new MemberDetailResponse(getMemberResponseFromMember(profileMember),
+                getGraduationFromMember(graduation));
     }
 
     /**
@@ -360,11 +374,10 @@ public class MemberService {
 
         if (currentProfilePhoto != null) {  //프로필 사진 삭제
             profilePhotoFileService.deleteProfilePhotoById(currentProfilePhoto.getId());
+            currentMember.updateProfilePhoto(null);
         }
-        currentMember.updateProfilePhoto(null);
 
         ProfilePhoto baseProfilePhoto = profilePhotoFileService.findBaseProfilePhoto();
-
         return memberProfilePhotoMapper.toResponse(baseProfilePhoto);
     }
 
@@ -413,18 +426,18 @@ public class MemberService {
         return member;
     }
 
-    /**
-     * 이름으로 검색
-     *
-     * @param name 이름
-     * @return 검색된 member 리스트
-     */
-    public List<MemberResponse> findMembersByName(String name) {
-        List<Member> memberList = memberRepository.findAllMembersByName(adminStudentNumber, name);
-
-        return memberList.stream().map(member -> {
-            ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
-            return memberMapper.toResponse(member, profilePhoto);
-        }).toList();
-    }
+//    /**
+//     * 이름으로 검색
+//     *
+//     * @param name 이름
+//     * @return 검색된 member 리스트
+//     */
+//    public List<MemberResponse> findMembersByName(String name) {
+//        List<Member> memberList = memberRepository.findAllMembersByName(adminStudentNumber, name);
+//
+//        return memberList.stream().map(member -> {
+//            ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
+//            return memberMapper.toResponse(member, profilePhoto);
+//        }).toList();
+//    }
 }
