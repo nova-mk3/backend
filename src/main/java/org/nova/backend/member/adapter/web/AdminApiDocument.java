@@ -83,20 +83,20 @@ public @interface AdminApiDocument {
     @interface GetAllMembersApiDoc {
     }
 
-    @Operation(summary = "회원 이름으로 검색", description = "회원 목록에서 이름으로 검색합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
-            @ApiResponse(responseCode = "400", description = "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
-            @ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
-            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다."),
-            @ApiResponse(responseCode = "409", description = "비밀번호 확인 실패"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface FindMembersByNameApiDoc {
-    }
+//    @Operation(summary = "회원 이름으로 검색", description = "회원 목록에서 이름으로 검색합니다.")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
+//            @ApiResponse(responseCode = "400", description = "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+//            @ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
+//            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
+//            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다."),
+//            @ApiResponse(responseCode = "409", description = "비밀번호 확인 실패"),
+//            @ApiResponse(responseCode = "500", description = "서버 오류")
+//    })
+//    @Target(ElementType.METHOD)
+//    @Retention(RetentionPolicy.RUNTIME)
+//    @interface FindMembersByNameApiDoc {
+//    }
 
     @Operation(summary = "회원 정보 단건 변경", description = "관리자 권한으로 특정 회원의 정보를 변경합니다.")
     @ApiResponses({
@@ -126,4 +126,17 @@ public @interface AdminApiDocument {
     @interface DeleteMemberApiDoc {
     }
 
+    @Operation(summary = "회원 정보 조회", description = "요청한 사용자의 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 정보 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
+            @ApiResponse(responseCode = "403", description = "인증되지 않은 접근입니다."),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface GetMemberProfileApiDoc {
+    }
 }

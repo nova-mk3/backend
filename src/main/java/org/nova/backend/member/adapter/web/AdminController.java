@@ -6,12 +6,15 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.response.AdminMemberResponse;
+import org.nova.backend.member.application.dto.response.MemberDetailResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.service.AdminService;
 import org.nova.backend.member.application.service.MemberService;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.shared.model.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -90,16 +93,28 @@ public class AdminController {
         return ResponseEntity.ok().body(ApiResponse.success(response));
     }
 
+//    /**
+//     * 이름으로 검색
+//     */
+//    @GetMapping("/name")
+//    @AdminApiDocument.FindMembersByNameApiDoc
+//    public ResponseEntity<ApiResponse<List<MemberResponse>>> findMembersByName(@RequestParam("name") String name) {
+//
+//        List<MemberResponse> memberList = memberService.findMembersByName(name);
+//
+//        return ResponseEntity.ok().body(ApiResponse.success(memberList));
+//    }
+
     /**
-     * 이름으로 검색
+     * 회원 정보 단건 조회
      */
-    @GetMapping("/name")
-    @AdminApiDocument.FindMembersByNameApiDoc
-    public ResponseEntity<ApiResponse<List<MemberResponse>>> findMembersByName(@RequestParam("name") String name) {
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{memberId}")
+    @AdminApiDocument.GetMemberProfileApiDoc
+    public ResponseEntity<ApiResponse<MemberDetailResponse>> getMemberProfile(@PathVariable("memberId") UUID memberId) {
+        MemberDetailResponse response = memberService.getMemberProfile(memberId);
 
-        List<MemberResponse> memberList = memberService.findMembersByName(name);
-
-        return ResponseEntity.ok().body(ApiResponse.success(memberList));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 
     /**
