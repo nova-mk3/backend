@@ -16,12 +16,16 @@ spring:
       max-lifetime: 1800000
       validation-timeout: 5000
       pool-name: Nova-Backend-Pool
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 3000
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
     out-of-order: false
-
   mail:
     host: smtp.naver.com
     port: 465

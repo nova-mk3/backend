@@ -41,6 +41,10 @@ public class ProfilePhoto {
                 Objects.equals(filePath, file.filePath);
     }
 
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, originalFilename, filePath);

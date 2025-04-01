@@ -36,7 +36,7 @@ public class FileUtil {
      */
     public static void validateFileSize(MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new FileDomainException("파일 크기가 너무 큽니다. 최대 허용 크기: " + (MAX_FILE_SIZE / (1024 * 1024)) + "MB");
+            throw new FileDomainException("파일 크기가 너무 큽니다. 최대 허용 크기: " + (MAX_FILE_SIZE / (1024L * 1024L)) + "MB");
         }
     }
 
@@ -58,7 +58,7 @@ public class FileUtil {
     /**
      * 파일 확장자 추출
      */
-    static String getFileExtension(String fileName) {
+    public static String getFileExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
             return "";
@@ -74,7 +74,7 @@ public class FileUtil {
             throw new FileDomainException("파일 이름이 없습니다.");
         }
         return URLEncoder.encode(fileName, StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20");
+                .replace("+", "%20");
     }
 
     /**

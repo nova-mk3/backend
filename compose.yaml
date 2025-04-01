@@ -42,12 +42,29 @@ services:
     networks:
       - 'backend_network'
 
+  redis:
+    image: 'redis:latest'
+    ports:
+      - "${REDIS_PORT}:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - 'backend_network'
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   spring-app:
     build: .
     environment:
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://${MYSQL_HOST}:${MYSQL_IN_PORT}/${MYSQL_DATABASE}'
       - 'SPRING_DATASOURCE_USERNAME=${MYSQL_USER}'
       - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
+      - 'SPRING_REDIS_HOST=${REDIS_HOST}'
+      - 'SPRING_REDIS_PORT=${REDIS_PORT}'
       - 'SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE}'
       - 'JWT_SECRET_KEY=${JWT_SECRET_KEY}'
       - 'FILE_STORAGE_PATH=${FILE_STORAGE_PATH}'
@@ -69,6 +86,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       jenkins:
         condition: service_healthy
 
@@ -78,6 +97,7 @@ services:
 volumes:
   jenkins_home:
   mysql_data:
+  redis_data:
 
 networks:
   backend_network:

@@ -1,7 +1,5 @@
 package org.nova.backend.board.util;
 
-import static org.nova.backend.board.util.FileUtil.getFileExtension;
-
 import jakarta.servlet.http.HttpServletResponse;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.slf4j.Logger;
@@ -27,14 +25,11 @@ public class FileStorageUtil {
     public static String saveFileToLocal(
             MultipartFile file,
             String basePath,
-            String folderName
+            String folderName,
+            UUID uuid,
+            String extension
     ) {
         try {
-            String originalFileName = file.getOriginalFilename();
-            if (originalFileName == null) throw new FileDomainException("파일 이름이 없습니다.");
-
-            UUID uuid = UUID.randomUUID();
-            String extension = getFileExtension(originalFileName);
             Path fileDir = Paths.get(basePath, folderName);
 
             if (!Files.exists(fileDir)) {
