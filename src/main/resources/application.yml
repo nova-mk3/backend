@@ -37,6 +37,11 @@ spring:
       mail.smtp.ssl.trust: smtp.naver.com
     sender: ${EMAIL_ADDRESS}
 
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
 file:
   storage:
     path: ${FILE_STORAGE_PATH}
@@ -54,3 +59,15 @@ admin:
 jwt:
   secret:
     key: ${JWT_SECRET_KEY}
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json

@@ -90,10 +90,10 @@ public class Member {
     }
 
     // 프로필 수정
-    public void updateProfileInfo(UpdateMemberProfileRequest updateMemberProfileRequest) {
+    public void updateProfileInfo(UpdateMemberProfileRequest updateMemberProfileRequest, int grade, int semester) {
         this.name = updateMemberProfileRequest.getName();
-        this.grade = updateMemberProfileRequest.getGrade();
-        this.semester = updateMemberProfileRequest.getSemester();
+        this.grade = grade;
+        this.semester = semester;
         this.isAbsence = updateMemberProfileRequest.isAbsence();
         this.birth = updateMemberProfileRequest.getBirth();
         this.phone = updateMemberProfileRequest.getPhone();

@@ -19,6 +19,7 @@ public interface BasePostPersistencePort {
     @EntityGraph(attributePaths = {"files"})
     Optional<Post> findById(UUID postId);
     Optional<Post> findByBoardIdAndPostId(UUID boardId, UUID postId);
+    Page<Post> findAll(Pageable pageable);
 
     void deleteById(UUID postId);
     void increaseViewCount(@Param("postId") UUID postId);

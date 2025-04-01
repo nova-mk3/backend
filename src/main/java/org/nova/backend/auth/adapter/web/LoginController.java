@@ -42,12 +42,10 @@ public class LoginController {
             accessToken = accessToken.substring(7); // "Bearer " 제거
         }
 
-        boolean isTokenExpired = jwtUtil.isExpired(accessToken);
-
-        if (isTokenExpired) {
-            throw new MemberDomainException("access token 만료", HttpStatus.UNAUTHORIZED);
+        if (jwtUtil.isExpired(accessToken)) {
+            throw new MemberDomainException("Access token 만료", HttpStatus.UNAUTHORIZED);
         }
 
-        return ResponseEntity.ok().body(ApiResponse.success("access token 만료 여부 검증 성공"));
+        return ResponseEntity.ok().body(ApiResponse.success("Access token 만료 여부 검증 성공"));
     }
 }

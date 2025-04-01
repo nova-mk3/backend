@@ -11,5 +11,6 @@ public class MemberSimpleProfileResponse {
     private UUID memberId;
     private String name;
     private ProfilePhotoResponse profilePhoto;
+    private boolean isAdmin;
 
 }

@@ -12,4 +12,4 @@ spring:
       enabled: false
 
 app:
-  domain: https://jinybook.site
+  domain: https://nova.cbnu.ac.kr

@@ -1,6 +1,8 @@
 package org.nova.backend.board.common.application.service;
 
 import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
+import org.nova.backend.board.common.application.dto.response.AllPostSummaryResponse;
+import org.nova.backend.board.common.application.mapper.AllPostMapper;
 import org.nova.backend.board.util.SecurityUtil;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
@@ -50,7 +52,7 @@ public class BasePostService implements BasePostUseCase {
     private final SecurityUtil securityUtil;
     private final BasePostMapper postMapper;
     private final PicturePostMapper picturePostMapper;
-    private final PostViewCountCacheService postViewCountCacheService;
+    private final AllPostMapper allPostMapper;
 
     /**
      * 새로운 게시글과 첨부파일 저장
@@ -205,7 +207,7 @@ public class BasePostService implements BasePostUseCase {
             UUID postId
     ) {
 
-        postViewCountCacheService.increaseViewCount(postId);
+        basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
@@ -371,5 +373,12 @@ public class BasePostService implements BasePostUseCase {
         }
 
         return groupedPosts;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AllPostSummaryResponse> getAllPostsFromAllBoards(Pageable pageable) {
+        return basePostPersistencePort.findAll(pageable)
+                .map(allPostMapper::toSummaryResponse);
     }
 }

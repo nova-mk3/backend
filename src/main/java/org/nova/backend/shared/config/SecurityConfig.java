@@ -23,6 +23,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Set;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -69,7 +71,7 @@ public class SecurityConfig {
                     configurePictureBoardPermissions(auth);
                     //댓글 관련 권한
                     configureCommentPermissions(auth);
-                    //로그인 회원가입 관련 권한
+                    //로그인 회원가입, 사용자 정보 관련 권한
                     configureAuthPermissions(auth);
                     //관리자 관련 권한
                     configureAdministratorPermissions(auth);
@@ -101,6 +103,14 @@ public class SecurityConfig {
     private void logOut(LogoutConfigurer<HttpSecurity> logout) {
         logout.logoutUrl("/api/v1/members/logout")
                 .logoutSuccessHandler((request, response, authentication) -> {
+                    // CORS 헤더 설정
+                    String origin = request.getHeader("Origin");
+                    if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+                        response.setHeader("Access-Control-Allow-Origin", origin);
+                        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+                        response.setHeader("Access-Control-Allow-Credentials", "true");
+                    }
 
                     // auth token 담은 쿠키 제거
                     Cookie cookie = new Cookie("AUTH_TOKEN", null);
@@ -111,6 +121,15 @@ public class SecurityConfig {
                     response.setStatus(HttpServletResponse.SC_OK);
                 });
     }
+
+    // ALLOWED_ORIGINS Set 추가
+    private static final Set<String> ALLOWED_ORIGINS = Set.of(
+            "https://nova.cbnu.ac.kr",
+            "http://localhost:8080",
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:3002"
+    );
 
     private void configureSuggestionBoardPermissions(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
@@ -144,7 +163,8 @@ public class SecurityConfig {
                         "/api/v1/boards/{boardId}/posts/latest",
                         "/api/v1/boards/{boardId}/posts/all",
                         "/api/v1/boards/{boardId}/posts/search",
-                        "/api/v1/boards/{boardId}/posts/all/search"
+                        "/api/v1/boards/{boardId}/posts/all/search",
+                        "/api/v1/posts/across-boards"
                 ).permitAll()
 
                 // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
@@ -209,9 +229,12 @@ public class SecurityConfig {
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth
     ) {
         auth
-                // 회원가입, 로그인
-                .requestMatchers("/api/v1/members/**", "/api/v1/members/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/members").permitAll()  //회원가입
+                .requestMatchers(HttpMethod.POST, "/api/v1/members/profile-photo").permitAll()  //회원가입시 프로필 사진 업로드
+                .requestMatchers( "/api/v1/members/simple-profile").permitAll()  //회원 간단 프로필 조회
+                .requestMatchers("/api/v1/members/login").permitAll()  //로그인
                 // 회원가입 시 이메일 인증
-                .requestMatchers("/api/v1/email-auth/**").permitAll();
+                .requestMatchers("/api/v1/email-auth/**").permitAll()
+                .requestMatchers("/api/v1/members/**").authenticated();  //회원 정보 접근 권한
     }
 }

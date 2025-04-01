@@ -16,6 +16,7 @@ public class CommentResponse {
     private String content;
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
+    private UUID authorId;
     private String authorName;
     private ProfilePhotoResponse authorProfilePhoto;
     private List<CommentResponse> children;

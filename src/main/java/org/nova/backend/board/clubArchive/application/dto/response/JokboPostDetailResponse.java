@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
-import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 
 @Getter
 @NoArgsConstructor
@@ -27,7 +26,7 @@ public class JokboPostDetailResponse {
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
     private List<FileResponse> files;
+    private UUID authorId;
     private String authorName;
-    private ProfilePhotoResponse authorProfilePhoto;
     private boolean isLiked;
 }

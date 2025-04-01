@@ -29,6 +29,11 @@ public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     }
 
     @Override
+    public Page<Post> findAll(Pageable pageable) {
+        return postRepository.findAll(pageable);
+    }
+
+    @Override
     public Post save(Post post) {
         return postRepository.save(post);
     }

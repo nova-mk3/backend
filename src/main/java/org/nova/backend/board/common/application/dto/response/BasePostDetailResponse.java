@@ -6,13 +6,14 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
+import org.nova.backend.board.common.domain.model.valueobject.PostType;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class BasePostDetailResponse {
     private UUID id;
+    private PostType postType;
     private String title;
     private String content;
     private int viewCount;
@@ -21,7 +22,7 @@ public class BasePostDetailResponse {
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
     private List<FileResponse> files;
+    private UUID authorId;
     private String authorName;
-    private ProfilePhotoResponse authorProfilePhoto;
     private boolean isLiked;
 }

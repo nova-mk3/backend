@@ -9,16 +9,11 @@ import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSumm
 import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.domain.model.entity.Post;
-import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
-import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
-import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
 public class JokboPostMapper {
-
-    private MemberProfilePhotoMapper profilePhotoMapper;
 
     public JokboPost toEntity(
             JokboPostRequest request,
@@ -47,9 +42,6 @@ public class JokboPostMapper {
                 ))
                 .toList();
 
-        ProfilePhoto profilePhoto = post.getMember().getProfilePhoto();
-        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
-
         return new JokboPostDetailResponse(
                 post.getId(),
                 post.getTitle(),
@@ -64,8 +56,8 @@ public class JokboPostMapper {
                 post.getCreatedTime(),
                 post.getModifiedTime(),
                 fileResponses,
+                post.getMember().getId(),
                 post.getMember().getName(),
-                profilePhotoResponse,
                 isLiked
         );
     }
@@ -84,9 +76,6 @@ public class JokboPostMapper {
                 ))
                 .toList();
 
-        ProfilePhoto profilePhoto = post.getMember().getProfilePhoto();
-        ProfilePhotoResponse profilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
-
         return new JokboPostDetailResponse(
                 post.getId(),
                 post.getTitle(),
@@ -101,8 +90,8 @@ public class JokboPostMapper {
                 post.getCreatedTime(),
                 post.getModifiedTime(),
                 fileResponses,
+                post.getMember().getId(),
                 post.getMember().getName(),
-                profilePhotoResponse,
                 isLiked
         );
     }
