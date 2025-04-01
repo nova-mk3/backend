@@ -95,11 +95,20 @@ public class ProfilePhotoFileService {
             MultipartFile file,
             String storagePath
     ) {
-        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, FilePathConstants.PUBLIC_FOLDER);
-        ProfilePhoto savedProfilePhoto = new ProfilePhoto(null, file.getOriginalFilename(), savedFilePath);
-        savedProfilePhoto = profilePhotoFileRepository.save(savedProfilePhoto);
+        String extension = FileUtil.getFileExtension(file.getOriginalFilename());
 
-        return memberProfilePhotoMapper.toResponse(savedProfilePhoto);
+        ProfilePhoto tempProfile = new ProfilePhoto(null, file.getOriginalFilename(), null);
+        ProfilePhoto savedProfile = profilePhotoFileRepository.save(tempProfile); // UUID 생성됨
+        UUID profilePhotoId = savedProfile.getId();
+
+        String savedFilePath = FileStorageUtil.saveFileToLocal(
+                file, storagePath, FilePathConstants.PUBLIC_FOLDER, profilePhotoId, extension
+        );
+
+        savedProfile.setFilePath(savedFilePath);
+        savedProfile = profilePhotoFileRepository.save(savedProfile);
+
+        return memberProfilePhotoMapper.toResponse(savedProfile);
     }
 
     /**
