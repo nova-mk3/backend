@@ -86,14 +86,7 @@ public class ImageFileService {
      * 파일 시스템 경로를 웹 URL로 변환
      */
     public String convertFilePathToUrl(String filePath) {
-        Path basePath = Paths.get(baseFileStoragePath);
-        Path protectedPath = basePath.resolve(FilePathConstants.PROTECTED_FOLDER);
         Path absolutePath = Paths.get(filePath);
-
-        if (absolutePath.startsWith(protectedPath)) {
-            Path fileName = absolutePath.getFileName();
-            return "/files/public/" + FilePathConstants.PUBLIC_FOLDER + "/" + fileName.toString();
-        }
-        return "/files/public/" + absolutePath.getFileName().toString();
+        return FilePathConstants.PUBLIC_FILE_URL_PREFIX + absolutePath.getFileName().toString();
     }
 }
