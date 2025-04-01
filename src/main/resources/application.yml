@@ -33,6 +33,11 @@ spring:
       mail.smtp.ssl.trust: smtp.naver.com
     sender: ${EMAIL_ADDRESS}
 
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
 file:
   storage:
     path: ${FILE_STORAGE_PATH}
