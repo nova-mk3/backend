@@ -69,6 +69,7 @@ dependencies {
     implementation 'io.github.cdimascio:dotenv-java:3.2.0'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'com.twelvemonkeys.imageio:imageio-webp:3.10.1'
+    implementation 'com.drewnoakes:metadata-extractor:2.18.0'
 }
 
 hibernate {
