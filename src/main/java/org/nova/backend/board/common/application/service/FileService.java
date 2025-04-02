@@ -1,21 +1,25 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.nova.backend.board.util.ImageOptimizerUtil;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.shared.constants.FilePathConstants;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.nova.backend.board.util.FileStorageUtil;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
@@ -42,6 +46,8 @@ public class FileService implements FileUseCase {
     private final FilePersistencePort filePersistencePort;
     private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
+    private final StringRedisTemplate redisTemplate;
 
     @Value("${file.storage.path}")
     private String baseFileStoragePath;
@@ -55,6 +61,11 @@ public class FileService implements FileUseCase {
         List<File> filesToDelete = filePersistencePort.findFilesByIds(fileIds);
         for (File file : filesToDelete) {
             FileStorageUtil.deleteFile(file.getFilePath());
+
+            String extension = FileUtil.getFileExtension(file.getOriginalFilename());
+            String fileName = file.getId() + "." + extension;
+            Path publicFilePath = Paths.get(baseFileStoragePath, FilePathConstants.PUBLIC_FOLDER, fileName);
+            FileStorageUtil.deleteFile(publicFilePath.toString());
         }
         filePersistencePort.deleteFilesByIds(fileIds);
     }
@@ -98,7 +109,7 @@ public class FileService implements FileUseCase {
     ) {
 
         memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         FileUtil.validateFileList(files);
 
@@ -113,9 +124,13 @@ public class FileService implements FileUseCase {
 
         String storagePath = getStoragePath();
 
-        return files.stream()
-                .map(file -> processFileUpload(file, storagePath, postType))
-                .collect(Collectors.toList());
+        List<CompletableFuture<FileResponse>> futures = files.stream()
+                .map(file -> CompletableFuture.supplyAsync(() -> processFileUpload(file, storagePath, postType), executor))
+                .toList();
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .toList();
     }
 
     /**
@@ -126,20 +141,56 @@ public class FileService implements FileUseCase {
             String storagePath,
             PostType postType
     ) {
-        String folder = (postType == PostType.PICTURES)
-                ? FilePathConstants.PUBLIC_FOLDER
-                : FilePathConstants.PROTECTED_FOLDER;
+        String originalFileName = file.getOriginalFilename();
+        String extension = FileUtil.getFileExtension(originalFileName);
 
-        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, folder);
-        File savedFile = new File(null, file.getOriginalFilename(), savedFilePath, null, 0);
+        File tempFile = new File(null, originalFileName, null, null, 0);
+        File savedFile = filePersistencePort.save(tempFile); // @GeneratedValue로 UUID 생성됨
+        UUID fileId = savedFile.getId();
+
+        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, FilePathConstants.PROTECTED_FOLDER, fileId, extension);
+
+        savedFile.setFilePath(savedFilePath);
         savedFile = filePersistencePort.save(savedFile);
+
+        if (postType == PostType.PICTURES) {
+            redisTemplate.opsForValue().set("upload:" + fileId, "uploading");
+
+            CompletableFuture.runAsync(() ->
+                    compressImageAsync(fileId, savedFilePath, storagePath, extension), executor
+            );
+        }
 
         return new FileResponse(
                 savedFile.getId(),
                 savedFile.getOriginalFilename(),
                 "/api/v1/files/" + savedFile.getId() + "/download"
         );
+    }
 
+    private void compressImageAsync(
+            UUID fileId,
+            String originalFilePath,
+            String storagePath,
+            String extension
+    ) {
+        String threadName = Thread.currentThread().getName();
+        logger.info("[압축 시작] fileId={} thread={}", fileId, threadName);
+
+        try {
+            redisTemplate.opsForValue().set("upload:" + fileId, "compressing");
+
+            Path protectedPath = Paths.get(originalFilePath);
+            Path publicDir = Paths.get(storagePath, FilePathConstants.PUBLIC_FOLDER);
+
+            ImageOptimizerUtil.compressToOriginalExtension(protectedPath, publicDir, fileId, extension);
+
+            redisTemplate.opsForValue().set("upload:" + fileId, "done");
+            logger.info("[압축 완료] fileId={}", fileId);
+        } catch (Exception e) {
+            logger.error("이미지 압축 중 오류", e);
+            redisTemplate.opsForValue().set("upload:" + fileId, "error");
+        }
     }
 
     /**
@@ -169,13 +220,12 @@ public class FileService implements FileUseCase {
             }
         }
 
-        Path filePath = Paths.get(file.getFilePath());
-        try {
-            Files.deleteIfExists(filePath);
-            logger.info("파일 삭제 성공: {}", file.getFilePath());
-        } catch (IOException e) {
-            logger.error("파일 삭제 실패: {}", file.getFilePath(), e);
-        }
+        Path originalPath = Paths.get(file.getFilePath());
+        FileStorageUtil.deleteFile(originalPath.toString());
+
+        String extension = FileUtil.getFileExtension(file.getOriginalFilename());
+        Path publicPath = Paths.get(baseFileStoragePath, FilePathConstants.PUBLIC_FOLDER, file.getId() + "." + extension);
+        FileStorageUtil.deleteFile(publicPath.toString());
 
         filePersistencePort.deleteFileById(fileId);
     }
@@ -190,7 +240,7 @@ public class FileService implements FileUseCase {
             UUID memberId
     ) {
         memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         File file = filePersistencePort.findFileById(fileId)
                 .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다."));

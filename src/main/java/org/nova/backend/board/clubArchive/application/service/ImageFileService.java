@@ -12,6 +12,7 @@ import org.nova.backend.board.clubArchive.application.dto.response.ImageResponse
 import org.nova.backend.board.clubArchive.domain.exception.PictureDomainException;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.domain.model.entity.File;
+import org.nova.backend.shared.constants.FilePathConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,8 @@ public class ImageFileService {
      */
     public ImageResponse createImageResponse(File file) {
         boolean isImage = isImageFile(file.getOriginalFilename());
-        int width = 0, height = 0;
+        int width = 0;
+        int height = 0;
 
         if (isImage) {
             try {
@@ -84,13 +86,7 @@ public class ImageFileService {
      * 파일 시스템 경로를 웹 URL로 변환
      */
     public String convertFilePathToUrl(String filePath) {
-        Path basePath = Paths.get(baseFileStoragePath);
         Path absolutePath = Paths.get(filePath);
-
-        if (absolutePath.startsWith(basePath)) {
-            Path relativePath = basePath.relativize(absolutePath);
-            return "/files/" + relativePath.toString().replace("\\", "/");
-        }
-        return "/files/" + absolutePath.getFileName().toString().replace("\\", "/");
+        return FilePathConstants.PUBLIC_FILE_URL_PREFIX + absolutePath.getFileName().toString();
     }
 }

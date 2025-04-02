@@ -74,6 +74,7 @@ public class PicturePostService implements PicturePostUseCase {
                 0,
                 new ArrayList<>(),
                 new ArrayList<>(),
+                new ArrayList<>(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );

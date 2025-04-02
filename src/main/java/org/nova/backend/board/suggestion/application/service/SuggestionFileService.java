@@ -6,7 +6,6 @@ import org.nova.backend.shared.constants.FilePathConstants;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.suggestion.application.dto.response.SuggestionFileResponse;
@@ -54,15 +53,23 @@ public class SuggestionFileService implements SuggestionFileUseCase {
 
         return files.stream()
                 .map(file -> processFileUpload(file, storagePath))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private SuggestionFileResponse processFileUpload(
             MultipartFile file,
             String storagePath
     ) {
-        String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, FilePathConstants.PROTECTED_FOLDER);
-        SuggestionFile savedFile = new SuggestionFile(null, file.getOriginalFilename(), savedFilePath, null);
+        String extension = FileUtil.getFileExtension(file.getOriginalFilename());
+
+        SuggestionFile tempFile = new SuggestionFile(null, file.getOriginalFilename(), null, null);
+        SuggestionFile savedFile = filePersistencePort.save(tempFile);
+        UUID fileId = savedFile.getId();
+
+        String savedFilePath = FileStorageUtil.saveFileToLocal(
+                file, storagePath, FilePathConstants.PROTECTED_FOLDER, fileId, extension
+        );
+        savedFile.setFilePath(savedFilePath);
         savedFile = filePersistencePort.save(savedFile);
 
         return new SuggestionFileResponse(
