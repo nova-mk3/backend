@@ -68,6 +68,33 @@ public class MemberService {
     }
 
     /**
+     * 특정 학년 회원 리스트 불러오기
+     *
+     * @return List<Member>
+     */
+    public List<Member> getAllMembersByGrade(int grade) {
+        if (grade == 0) { //졸업생
+            return memberRepository.findAllMembersByGraduation(adminStudentNumber);
+        }
+        if (grade > 4) {  // 초과학기
+            return memberRepository.findByGradeGreaterThan(grade, adminStudentNumber);
+        }
+        //재학생
+        return memberRepository.findAllMembersByGrade(grade, adminStudentNumber);
+    }
+
+    /**
+     * 특정 학년 회원 리스트 불러오기
+     *
+     * @return List<MemberResponse>
+     */
+    public List<MemberResponse> getAllMembersResponseByGrade(int grade) {
+        List<Member> memberList = getAllMembersByGrade(grade);
+        return memberList.stream().map(this::getMemberResponseFromMember).toList();
+    }
+
+
+    /**
      * id로 회원 찾기
      */
     public Member findByMemberId(UUID memberId) {

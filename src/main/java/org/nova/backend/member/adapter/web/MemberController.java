@@ -13,10 +13,12 @@ import org.nova.backend.member.application.dto.request.AuthCodeEmailRequest;
 import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
+import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
+import org.nova.backend.member.application.service.ExecutiveHistoryService;
 import org.nova.backend.member.application.service.MemberService;
 import org.nova.backend.member.application.service.ProfilePhotoFileService;
 import org.nova.backend.shared.model.ApiResponse;
@@ -44,6 +46,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final ProfilePhotoFileService profilePhotoFileService;
+    private final ExecutiveHistoryService executiveHistoryService;
 
     private final SecurityUtil securityUtil;
 
@@ -64,15 +67,36 @@ public class MemberController {
     }
 
     /**
-     * 모든 회원 정보 조회
+     * 회원 목록 조회 전체 조회 or 학년 별 전체 회원 목록 조회 0: 졸업생, 1~4: 각 학년, 5: 초과 학기
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("")
-    @MemberProfileApiDocument.GetMemberListApiDoc
-    public ResponseEntity<ApiResponse<List<MemberResponse>>> getMemberList() {
-        List<MemberResponse> response = memberService.getAllMembers();
+    @MemberProfileApiDocument.GetMemberListByGradeApiDoc
+    public ResponseEntity<ApiResponse<List<MemberResponse>>> getMemberList(
+            @RequestParam(value = "grade", required = false) Integer grade) {
+
+        List<MemberResponse> response = getMemberListByGrade(grade);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
+    }
+
+    private List<MemberResponse> getMemberListByGrade(Integer grade) {
+        if (grade == null) {
+            return memberService.getAllMembers();
+        }
+        return memberService.getAllMembersResponseByGrade(grade);
+
+    }
+
+    /**
+     * 특정 연도의 임원 이력 조회
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/executive-histories/{year}")
+    @ExecutiveHistoryApiDocument.GetExecutiveHistoryByYearApiDoc
+    public ApiResponse<List<ExecutiveHistoryResponse>> getExecutiveHistoryByYear(@PathVariable("year") int year) {
+        List<ExecutiveHistoryResponse> response = executiveHistoryService.getExecutiveHistoryResponseByYear(year);
+        return ApiResponse.success(response);
     }
 
     /**
@@ -136,8 +160,6 @@ public class MemberController {
                                                               HttpServletResponse response) {
         UUID loginMemberId = securityUtil.getCurrentMemberId();
         memberService.updatePassword(profileMemberId, loginMemberId, updatePasswordRequest);
-
-        //세션 로그아웃 핸들러 설정해야하는건가?
 
         // auth token 담은 쿠키 제거
         Cookie cookie = new Cookie("AUTH_TOKEN", null);

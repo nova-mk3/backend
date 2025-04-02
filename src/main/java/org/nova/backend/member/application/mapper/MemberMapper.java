@@ -44,7 +44,7 @@ public class MemberMapper {
                 member.getName(),
                 member.getEmail(),
                 member.isGraduation(),
-                member.getGrade() <= 4 ? member.getGrade() + "학년" : "초과 학기",
+                member.getGrade() <= 4 ? member.getGrade() + "학년" : "초과학기",
                 member.getSemester() + "학기",
                 member.isAbsence(),
                 profilePhotoMapper.toResponse(profilePhoto),
