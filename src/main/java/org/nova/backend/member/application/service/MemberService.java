@@ -15,6 +15,7 @@ import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.GraduationResponse;
 import org.nova.backend.member.application.dto.response.MemberDetailResponse;
+import org.nova.backend.member.application.dto.response.MemberForListResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
@@ -59,6 +60,17 @@ public class MemberService {
     /**
      * 모든 회원 리스트 불러오기
      *
+     * @return List<MemberForListResponse>
+     */
+    public List<MemberForListResponse> getAllMemberListResponse() {
+        List<Member> memberList = memberRepository.findAllMembers(adminStudentNumber);
+
+        return memberList.stream().map(this::getMemberForListResponseFromMember).toList();
+    }
+
+    /**
+     * 모든 회원 리스트 불러오기
+     *
      * @return List<MemberResponse>
      */
     public List<MemberResponse> getAllMembers() {
@@ -68,11 +80,49 @@ public class MemberService {
     }
 
     /**
+     * 특정 학년 회원 리스트 불러오기
+     *
+     * @return List<Member>
+     */
+    public List<Member> getAllMembersByGrade(int grade) {
+        if (grade == 0) { //졸업생
+            return memberRepository.findAllMembersByGraduation(adminStudentNumber);
+        }
+        if (grade > 4) {  // 초과학기
+            return memberRepository.findByGradeGreaterThan(grade, adminStudentNumber);
+        }
+        //재학생
+        return memberRepository.findAllMembersByGrade(grade, adminStudentNumber);
+    }
+
+    /**
+     * 특정 학년 회원 리스트 불러오기
+     *
+     * @return List<MemberResponse>
+     */
+    public List<MemberResponse> getAllMembersResponseByGrade(int grade) {
+        List<Member> memberList = getAllMembersByGrade(grade);
+        return memberList.stream().map(this::getMemberResponseFromMember).toList();
+    }
+
+
+    /**
      * id로 회원 찾기
      */
     public Member findByMemberId(UUID memberId) {
         return memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new MemberDomainException("member not found.", HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * Member List용 간소화된 응답 객체 생성
+     *
+     * @param member
+     * @return MemberForListResponse
+     */
+    public MemberForListResponse getMemberForListResponseFromMember(Member member) {
+        ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
+        return memberMapper.toResponseForList(member, profilePhoto);
     }
 
     /**

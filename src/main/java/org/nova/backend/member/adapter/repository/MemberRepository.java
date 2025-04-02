@@ -35,4 +35,18 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
     // 졸업하지 않은 member
     @Query("select m from Member m where m.isGraduation=false and m.role IS NOT NULL and m.studentNumber != :adminStudentNumber")
     List<Member> findMembersExcludeGraduation();
+
+    // 졸업생 조회
+    @Query("select m from Member m where m.isGraduation=true and m.isDeleted=false and m.role IS NOT NULL and m.studentNumber != :adminStudentNumber")
+    List<Member> findAllMembersByGraduation(@Param("adminStudentNumber") String adminStudentNumber);
+
+    //grade 이상 학년의 재학생 조회
+    @Query("select m from Member m where m.isGraduation=false and m.grade >= :grade and m.isDeleted=false and m.role IS NOT NULL and m.studentNumber != :adminStudentNumber")
+    List<Member> findByGradeGreaterThan(@Param("grade") int grade,
+                                        @Param("adminStudentNumber") String adminStudentNumber);
+
+    //특정 grade 의 재학생 조회
+    @Query("select m from Member m where m.grade = :grade and m.isGraduation=false and m.isDeleted=false and m.role IS NOT NULL and m.studentNumber != :adminStudentNumber")
+    List<Member> findAllMembersByGrade(@Param("grade") int grade,
+                                       @Param("adminStudentNumber") String adminStudentNumber);
 }

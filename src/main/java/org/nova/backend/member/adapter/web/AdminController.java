@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.response.AdminMemberResponse;
 import org.nova.backend.member.application.dto.response.MemberDetailResponse;
-import org.nova.backend.member.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.MemberForListResponse;
 import org.nova.backend.member.application.service.AdminService;
 import org.nova.backend.member.application.service.MemberService;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -86,9 +86,9 @@ public class AdminController {
      */
     @GetMapping("")
     @AdminApiDocument.GetAllMembersApiDoc
-    public ResponseEntity<ApiResponse<List<MemberResponse>>> getAllMembers() {
+    public ResponseEntity<ApiResponse<List<MemberForListResponse>>> getAllMembers() {
 
-        List<MemberResponse> response = memberService.getAllMembers();
+        List<MemberForListResponse> response = memberService.getAllMemberListResponse();
 
         return ResponseEntity.ok().body(ApiResponse.success(response));
     }
