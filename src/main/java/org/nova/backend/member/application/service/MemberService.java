@@ -15,6 +15,7 @@ import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.GraduationResponse;
 import org.nova.backend.member.application.dto.response.MemberDetailResponse;
+import org.nova.backend.member.application.dto.response.MemberForListResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
@@ -55,6 +56,17 @@ public class MemberService {
     private final MemberProfilePhotoMapper memberProfilePhotoMapper;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    /**
+     * 모든 회원 리스트 불러오기
+     *
+     * @return List<MemberForListResponse>
+     */
+    public List<MemberForListResponse> getAllMemberListResponse() {
+        List<Member> memberList = memberRepository.findAllMembers(adminStudentNumber);
+
+        return memberList.stream().map(this::getMemberForListResponseFromMember).toList();
+    }
 
     /**
      * 모든 회원 리스트 불러오기
@@ -100,6 +112,17 @@ public class MemberService {
     public Member findByMemberId(UUID memberId) {
         return memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new MemberDomainException("member not found.", HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * Member List용 간소화된 응답 객체 생성
+     *
+     * @param member
+     * @return MemberForListResponse
+     */
+    public MemberForListResponse getMemberForListResponseFromMember(Member member) {
+        ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
+        return memberMapper.toResponseForList(member, profilePhoto);
     }
 
     /**
