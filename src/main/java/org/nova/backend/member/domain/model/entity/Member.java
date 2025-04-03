@@ -94,6 +94,7 @@ public class Member {
         this.name = updateMemberProfileRequest.getName();
         this.grade = grade;
         this.semester = semester;
+        this.isGraduation = updateMemberProfileRequest.isGraduation();
         this.isAbsence = updateMemberProfileRequest.isAbsence();
         this.birth = updateMemberProfileRequest.getBirth();
         this.phone = updateMemberProfileRequest.getPhone();

@@ -7,7 +7,6 @@ import org.nova.backend.member.adapter.repository.ExecutiveHistoryRepository;
 import org.nova.backend.member.application.dto.request.AddExecutiveHistoryRequest;
 import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse;
 import org.nova.backend.member.application.mapper.ExecutiveHistoryMapper;
-import org.nova.backend.member.application.mapper.MemberMapper;
 import org.nova.backend.member.domain.exception.ExecutiveHistoryDomainException;
 import org.nova.backend.member.domain.model.entity.ExecutiveHistory;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -70,16 +69,18 @@ public class ExecutiveHistoryService {
 
         updateExecutivesToGeneral(year);  //삭제할 연도의 임원들 권한 삭제
         deleteExecutiveHistory(year);  //임원 이력 삭제
-        updateMemberRoleByYear(year-1); //이전 연도 임원들에게 권한 부여
+        updateMemberRoleByYear(year - 1); //이전 연도 임원들에게 권한 부여
     }
 
     /**
      * 특정 연도 임원들에게 권한 부여
      */
-    private void updateMemberRoleByYear(int year){
+    private void updateMemberRoleByYear(int year) {
         List<ExecutiveHistory> executiveHistoryList = getExecutiveHistoryByYear(year);
         executiveHistoryList.forEach(executiveHistory -> {
-            if(executiveHistory.getMember()==null) return;
+            if (executiveHistory.getMember() == null) {
+                return;
+            }
             executiveHistory.getMember().updateRole(executiveHistory.getRole());
         });
     }
@@ -102,7 +103,7 @@ public class ExecutiveHistoryService {
     private ExecutiveHistory createTempExecutiveHistory(int year) {
         ExecutiveHistory tempForYear = new ExecutiveHistory(
                 UUID.randomUUID(),
-                year + 1, null, "temp_data", null);
+                year, null, "temp_data", null);
         return executiveHistoryRepository.save(tempForYear);
     }
 
@@ -110,7 +111,8 @@ public class ExecutiveHistoryService {
      * 해당 연도 임원들 role GENERAL로 변경
      */
     private void updateExecutivesToGeneral(int year) {
-        List<ExecutiveHistory> executivesList = executiveHistoryRepository.findExecutiveHistoriesByYear(year, adminStudentNumber);
+        List<ExecutiveHistory> executivesList = executiveHistoryRepository.findExecutiveHistoriesByYear(year,
+                adminStudentNumber);
         executivesList.forEach(executiveHistory -> {
             if (executiveHistory.getMember() != null) {
                 executiveHistory.getMember().updateRoleToGeneral();
