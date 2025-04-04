@@ -17,4 +17,6 @@ public class ExecutiveHistoryResponse {
     private UUID memberId;
     private ProfilePhotoResponse profilePhoto;
     private String phone;
+    private String grade;
+    private String semester;
 }

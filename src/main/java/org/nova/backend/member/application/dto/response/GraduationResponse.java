@@ -9,7 +9,7 @@ import lombok.Getter;
 public class GraduationResponse {
 
     private UUID graduationId;
-    private int year;
+    private String year;
     private boolean contact;
     private boolean work;
     private String job;

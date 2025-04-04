@@ -40,7 +40,7 @@ public class GraduationMapper {
         } else {
             return new GraduationResponse(
                     graduation.getId(),
-                    graduation.getYear(),
+                    graduation.getYear() + "년",
                     graduation.isContact(),
                     graduation.isWork(),
                     graduation.getJob(),
@@ -53,7 +53,7 @@ public class GraduationMapper {
     private GraduationResponse toBlankResponse() {
         return new GraduationResponse(
                 null,
-                0,
+                null,
                 false,
                 false,
                 "",

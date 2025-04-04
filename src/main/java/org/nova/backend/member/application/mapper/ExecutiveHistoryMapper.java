@@ -34,14 +34,18 @@ public class ExecutiveHistoryMapper {
                 memberProfilePhotoMapper.toResponse(executiveHistory.getMember().getProfilePhoto())
                 : memberProfilePhotoMapper.toResponse(null);
 
+        Member executive = executiveHistory.getMember();
+
         return new ExecutiveHistoryResponse(
                 executiveHistory.getId(),
                 executiveHistory.getYear(),
                 executiveHistory.getRole(),
                 executiveHistory.getName(),
-                executiveHistory.getMember() != null ? executiveHistory.getMember().getId() : null,
+                executive != null ? executive.getId() : null,
                 profilePhotoResponse,
-                executiveHistory.getMember() != null ? executiveHistory.getMember().getPhone() : null
+                executive != null ? executive.getPhone() : null,
+                executive != null ? executive.getGrade() + "학년" : null,
+                executive != null ? executive.getSemester() + "학기" : null
         );
     }
 
