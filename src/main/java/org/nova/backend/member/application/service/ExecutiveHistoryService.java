@@ -97,7 +97,9 @@ public class ExecutiveHistoryService {
      * 연도 추가를 위한 임시 객체 생성
      */
     private ExecutiveHistory createTempExecutiveHistory(int year) {
-        ExecutiveHistory tempForYear = new ExecutiveHistory(UUID.randomUUID(), year, null, "temp_data", null);
+        ExecutiveHistory tempForYear = new ExecutiveHistory(
+                UUID.randomUUID(),
+                year, null, "temp_data", null);
         return executiveHistoryRepository.save(tempForYear);
     }
 
