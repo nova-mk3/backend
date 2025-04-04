@@ -11,7 +11,6 @@ import org.nova.backend.member.domain.exception.ExecutiveHistoryDomainException;
 import org.nova.backend.member.domain.model.entity.ExecutiveHistory;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ExecutiveHistoryService {
-
-    @Value("${admin.student.number}")
-    private String adminStudentNumber;
 
     private final int NOVA_FOUNDATION_YEAR = 2019;
 
@@ -101,9 +97,7 @@ public class ExecutiveHistoryService {
      * 연도 추가를 위한 임시 객체 생성
      */
     private ExecutiveHistory createTempExecutiveHistory(int year) {
-        ExecutiveHistory tempForYear = new ExecutiveHistory(
-                UUID.randomUUID(),
-                year, null, "temp_data", null);
+        ExecutiveHistory tempForYear = new ExecutiveHistory(UUID.randomUUID(), year, null, "temp_data", null);
         return executiveHistoryRepository.save(tempForYear);
     }
 
@@ -111,8 +105,7 @@ public class ExecutiveHistoryService {
      * 해당 연도 임원들 role GENERAL로 변경
      */
     private void updateExecutivesToGeneral(int year) {
-        List<ExecutiveHistory> executivesList = executiveHistoryRepository.findExecutiveHistoriesByYear(year,
-                adminStudentNumber);
+        List<ExecutiveHistory> executivesList = executiveHistoryRepository.findExecutiveHistoriesByYear(year);
         executivesList.forEach(executiveHistory -> {
             if (executiveHistory.getMember() != null) {
                 executiveHistory.getMember().updateRoleToGeneral();
@@ -189,8 +182,7 @@ public class ExecutiveHistoryService {
      */
     public List<ExecutiveHistory> getExecutiveHistoryByYear(final int year) {
 
-        return executiveHistoryRepository.findExecutiveHistoriesByYear(year,
-                adminStudentNumber);
+        return executiveHistoryRepository.findExecutiveHistoriesByYear(year);
     }
 
     /**
@@ -223,9 +215,8 @@ public class ExecutiveHistoryService {
      * 임원 기록 조회
      */
     private ExecutiveHistory findExecutiveHistory(final UUID executiveHistoryId) {
-        return executiveHistoryRepository.findExecutiveHistoryWithMemberById(executiveHistoryId)
-                .orElseThrow(
-                        () -> new ExecutiveHistoryDomainException("ExecutiveHistory Not Found", HttpStatus.NOT_FOUND));
+        return executiveHistoryRepository.findExecutiveHistoryWithMemberById(executiveHistoryId).orElseThrow(
+                () -> new ExecutiveHistoryDomainException("ExecutiveHistory Not Found", HttpStatus.NOT_FOUND));
     }
 
 }
