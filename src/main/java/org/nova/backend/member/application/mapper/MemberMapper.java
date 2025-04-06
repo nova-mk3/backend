@@ -58,6 +58,7 @@ public class MemberMapper {
 
     public MemberForListResponse toResponseForList(Member member, ProfilePhoto profilePhoto) {
         return new MemberForListResponse(
+                member.getId(),
                 member.getStudentNumber(),
                 member.getName(),
                 member.getEmail(),

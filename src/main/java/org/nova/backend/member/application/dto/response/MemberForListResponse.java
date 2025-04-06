@@ -1,5 +1,6 @@
 package org.nova.backend.member.application.dto.response;
 
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -7,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class MemberForListResponse {
 
+    private UUID memberId;
     private String studentNumber;
     private String name;
     private String email;
