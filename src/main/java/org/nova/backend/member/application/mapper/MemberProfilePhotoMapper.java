@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Paths;
+
 @Component
 @RequiredArgsConstructor
 public class MemberProfilePhotoMapper {
@@ -28,7 +30,8 @@ public class MemberProfilePhotoMapper {
                     .orElseThrow(() -> new ProfilePhotoFileDomainException("기본이미지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         }
 
-        String imageUrl = appDomain + FilePathConstants.PUBLIC_FILE_URL_PREFIX + profilePhoto.getFilePath().substring(profilePhoto.getFilePath().lastIndexOf("/") + 1);
+        String fileName = Paths.get(profilePhoto.getFilePath()).getFileName().toString();
+        String imageUrl = appDomain + FilePathConstants.PUBLIC_FILE_URL_PREFIX + fileName;
 
         return new ProfilePhotoResponse(
                 profilePhoto.getId(),
