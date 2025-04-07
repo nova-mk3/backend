@@ -25,6 +25,9 @@ public class GradeSemesterYearMapper {
      * @return ex) 1,2,..
      */
     public int toIntGrade(String stringGrade) {
+        if (stringGrade.equals("초과학기") || stringGrade.equals("초과 학기")) {
+            return 0;
+        }
         return Integer.parseInt(String.valueOf(stringGrade.charAt(0)));
     }
 

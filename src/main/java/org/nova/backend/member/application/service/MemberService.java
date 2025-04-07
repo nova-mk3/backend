@@ -256,6 +256,9 @@ public class MemberService {
         }
 
         int grade = gradeSemesterYearMapper.toIntGrade(updateMemberProfileRequest.getGrade());
+        if (grade == 0) {  // 초과 학기인 사람은 grade 변경 x
+            grade = member.getGrade();
+        }
         int semester = gradeSemesterYearMapper.toIntCompletionSemester(updateMemberProfileRequest.getSemester());
 
         member.updateProfileInfo(updateMemberProfileRequest, grade, semester);

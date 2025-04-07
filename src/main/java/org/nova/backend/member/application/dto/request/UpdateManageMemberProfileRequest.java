@@ -22,8 +22,6 @@ public class UpdateManageMemberProfileRequest {
     @Schema(example = "20000202")
     private String birth;
 
-    private UUID profilePhoto;
-
     @Schema(description = "(-)없이 전화번호를 입력해주세요.", example = "01000000000")
     private String phone;
 

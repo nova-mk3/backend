@@ -42,6 +42,7 @@ public class ExecutiveHistoryMapper {
                 executiveHistory.getRole(),
                 executiveHistory.getName(),
                 executive != null ? executive.getId() : null,
+                executive != null ? executive.getStudentNumber() : null,
                 profilePhotoResponse,
                 executive != null ? executive.getPhone() : null,
                 executive != null ? executive.getGrade() + "학년" : null,

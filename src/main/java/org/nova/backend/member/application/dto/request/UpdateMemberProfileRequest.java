@@ -12,10 +12,6 @@ public class UpdateMemberProfileRequest {
     @NotBlank(message = "이름을 입력해주세요.")
     private String name;
 
-    @Schema(example = "20202020")
-    @NotBlank(message = "학번을 입력해주세요.")
-    private String studentNumber;
-
     @Schema(description = "졸업 여부")
     private boolean graduation;
 
@@ -30,8 +26,6 @@ public class UpdateMemberProfileRequest {
 
     @Schema(example = "20000202")
     private String birth;
-
-    private UUID profilePhoto;
 
     @Schema(description = "(-)없이 전화번호를 입력해주세요.", example = "01000000000")
     private String phone;
