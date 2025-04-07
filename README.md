@@ -1,6 +1,6 @@
 # [BE] 충북대학교 노바 홈페이지
 
-## 웹사이트 주소
+## 웹사이트 주소 (Nova)
   https://nova.cbnu.ac.kr
 
 
