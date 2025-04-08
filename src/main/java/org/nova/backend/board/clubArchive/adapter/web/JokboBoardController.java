@@ -64,6 +64,7 @@ public class JokboBoardController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{postId}")
     @JokboBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<JokboPostDetailResponse>> getPostById(
