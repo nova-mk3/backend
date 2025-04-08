@@ -124,7 +124,7 @@ public class PicturePostService implements PicturePostUseCase {
             post.addFiles(newFiles);
         }
 
-        post.updatePost(request.getTitle(), request.getContent());
+        post.updatePost(PostType.PICTURES, request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
 
         boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();

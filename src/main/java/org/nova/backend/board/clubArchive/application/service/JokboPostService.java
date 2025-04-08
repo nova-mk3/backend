@@ -136,7 +136,7 @@ public class JokboPostService implements JokboPostUseCase {
             post.addFiles(newFiles);
         }
 
-        post.updatePost(request.getTitle(), request.getContent());
+        post.updatePost(PostType.EXAM_ARCHIVE, request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
 
         jokboPost.updateJokbo(request.getProfessorName(), request.getYear(), request.getSemester(), request.getSubject());
