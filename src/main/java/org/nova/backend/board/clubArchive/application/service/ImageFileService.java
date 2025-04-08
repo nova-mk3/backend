@@ -2,7 +2,6 @@ package org.nova.backend.board.clubArchive.application.service;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
@@ -48,8 +47,8 @@ public class ImageFileService {
             }
         }
 
-        String relativeUrl = convertFilePathToUrl(file.getFilePath());
-        String imageUrl = appDomain + relativeUrl;
+        String fileName = Paths.get(file.getFilePath()).getFileName().toString();
+        String imageUrl = appDomain + FilePathConstants.PUBLIC_FILE_URL_PREFIX + fileName;
 
         return new ImageResponse(
                 file.getId(),
@@ -80,13 +79,5 @@ public class ImageFileService {
                 .orElseThrow(() -> new PictureDomainException("대표 썸네일 이미지를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         return createImageResponse(firstImageFile);
-    }
-
-    /**
-     * 파일 시스템 경로를 웹 URL로 변환
-     */
-    public String convertFilePathToUrl(String filePath) {
-        Path absolutePath = Paths.get(filePath);
-        return FilePathConstants.PUBLIC_FILE_URL_PREFIX + absolutePath.getFileName().toString();
     }
 }
