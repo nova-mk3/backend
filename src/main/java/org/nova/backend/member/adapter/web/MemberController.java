@@ -14,8 +14,8 @@ import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse;
-import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
+import org.nova.backend.member.application.dto.response.MemberWithGraduationYearResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.service.ExecutiveHistoryService;
@@ -72,20 +72,19 @@ public class MemberController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("")
     @MemberProfileApiDocument.GetMemberListByGradeApiDoc
-    public ResponseEntity<ApiResponse<List<MemberResponse>>> getMemberList(
+    public ResponseEntity<ApiResponse<List<MemberWithGraduationYearResponse>>> getMemberList(
             @RequestParam(value = "grade", required = false) Integer grade) {
 
-        List<MemberResponse> response = getMemberListByGrade(grade);
+        List<MemberWithGraduationYearResponse> response = getMemberListByGrade(grade);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 
-    private List<MemberResponse> getMemberListByGrade(Integer grade) {
+    private List<MemberWithGraduationYearResponse> getMemberListByGrade(Integer grade) {
         if (grade == null) {
-            return memberService.getAllMembers();
+            return memberService.getAllMembersWithGraduationYear();
         }
         return memberService.getAllMembersResponseByGrade(grade);
-
     }
 
     /**

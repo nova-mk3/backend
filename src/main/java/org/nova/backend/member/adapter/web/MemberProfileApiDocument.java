@@ -25,7 +25,7 @@ public @interface MemberProfileApiDocument {
     @interface GetMemberSimpleProfileApiDoc {
     }
 
-    @Operation(summary = "모든 or 학년 별 회원 프로필 조회", description = "특정 학년의 프로필을 조회합니다. 0: 졸업생, 1~4: 해당 학년, 4 초과: 초과학기의 사용자들이 조회됩니다. ")
+    @Operation(summary = "모든 or 학년 별 회원 프로필 조회", description = "특정 학년의 프로필을 조회합니다. 0: 졸업생, 1~4: 해당 학년, 5 초과: 초과학기의 사용자들이 조회됩니다. ")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "모든 회원 리스트 반환"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
