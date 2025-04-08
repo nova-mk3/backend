@@ -19,6 +19,7 @@ import org.nova.backend.member.application.dto.response.MemberDetailResponse;
 import org.nova.backend.member.application.dto.response.MemberForListResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
 import org.nova.backend.member.application.dto.response.MemberSimpleProfileResponse;
+import org.nova.backend.member.application.dto.response.MemberWithGraduationYearResponse;
 import org.nova.backend.member.application.dto.response.MyPageMemberResponse;
 import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 import org.nova.backend.member.application.mapper.GradeSemesterYearMapper;
@@ -70,14 +71,17 @@ public class MemberService {
     }
 
     /**
-     * 모든 회원 리스트 불러오기
+     * 모든 회원 리스트 불러오기, 졸업 연도 필드는 null이 들어감.
      *
-     * @return List<MemberResponse>
+     * @return List<MemberWithGraduationYearResponse>
      */
-    public List<MemberResponse> getAllMembers() {
+    public List<MemberWithGraduationYearResponse> getAllMembersWithGraduationYear() {
         List<Member> memberList = memberRepository.findAllMembers(adminStudentNumber);
 
-        return memberList.stream().map(this::getMemberResponseFromMember).toList();
+        return memberList.stream().map(member -> {
+            ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
+            return memberMapper.toResponseWithGraduationYear(member, profilePhoto, 0);
+        }).toList();
     }
 
     /**
@@ -101,9 +105,13 @@ public class MemberService {
      *
      * @return List<MemberResponse>
      */
-    public List<MemberResponse> getAllMembersResponseByGrade(int grade) {
+    public List<MemberWithGraduationYearResponse> getAllMembersResponseByGrade(int grade) {
         List<Member> memberList = getAllMembersByGrade(grade);
-        return memberList.stream().map(this::getMemberResponseFromMember).toList();
+        return memberList.stream().map(member -> {
+            ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
+            int graduationYear = grade == 0 ? member.getGraduation().getYear() : 0;  //졸업생의 경우 졸업 연도를 가져옴.
+            return memberMapper.toResponseWithGraduationYear(member, profilePhoto, graduationYear);
+        }).toList();
     }
 
 

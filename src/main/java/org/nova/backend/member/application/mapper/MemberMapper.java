@@ -4,6 +4,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.nova.backend.member.application.dto.response.MemberForListResponse;
 import org.nova.backend.member.application.dto.response.MemberResponse;
+import org.nova.backend.member.application.dto.response.MemberWithGraduationYearResponse;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.PendingMember;
@@ -67,6 +68,26 @@ public class MemberMapper {
                 member.isAbsence(),
                 profilePhotoMapper.toResponse(profilePhoto),
                 member.getPhone()
+        );
+    }
+
+    public MemberWithGraduationYearResponse toResponseWithGraduationYear(Member member, ProfilePhoto profilePhoto,
+                                                                         int graduationYear) {
+        return new MemberWithGraduationYearResponse(
+                member.getId(),
+                member.getStudentNumber(),
+                member.getName(),
+                member.getEmail(),
+                member.isGraduation(),
+                member.getGrade() <= 4 ? member.getGrade() + "학년" : "초과 학기",
+                member.getSemester() + "학기",
+                member.isAbsence(),
+                profilePhotoMapper.toResponse(profilePhoto),
+                member.getPhone(),
+                member.getIntroduction(),
+                member.getBirth(),
+                member.getRole(),
+                graduationYear == 0 ? null : graduationYear + "년"
         );
     }
 
