@@ -82,7 +82,8 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime modifiedTime;
 
-    public void updatePost(String title, String content) {
+    public void updatePost(PostType postType, String title, String content) {
+        this.postType = postType;
         this.title = title;
         this.content = content;
         this.modifiedTime = LocalDateTime.now();

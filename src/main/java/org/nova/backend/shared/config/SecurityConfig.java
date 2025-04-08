@@ -138,7 +138,6 @@ public class SecurityConfig {
                 // 로그인 없이 접근 가능한 API
                 .requestMatchers(
                         "/api/v1/suggestions",
-                        "/api/v1/suggestions/{postId}",
                         "/api/v1/suggestions/search"
                 ).permitAll()
 
@@ -159,7 +158,6 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/api/v1/boards",
                         "/api/v1/boards/{boardId}/posts",
-                        "/api/v1/boards/{boardId}/posts/{postId}",
                         "/api/v1/boards/{boardId}/posts/latest",
                         "/api/v1/boards/{boardId}/posts/all",
                         "/api/v1/boards/{boardId}/posts/search",
@@ -182,8 +180,7 @@ public class SecurityConfig {
         auth
                 // 로그인 없이 접근 가능한 API
                 .requestMatchers(
-                        "/api/v1/boards/{boardId}/exam-posts",
-                        "/api/v1/boards/{boardId}/exam-posts/{postId}"
+                        "/api/v1/boards/{boardId}/exam-posts"
                 ).permitAll()
 
                 // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
@@ -197,8 +194,7 @@ public class SecurityConfig {
         auth
                 // 로그인 없이 접근 가능한 API
                 .requestMatchers(
-                        "/api/v1/boards/{boardId}/picture-posts",
-                        "/api/v1/boards/{boardId}/picture-posts/{postId}"
+                        "/api/v1/boards/{boardId}/picture-posts"
                 ).permitAll()
 
                 // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)

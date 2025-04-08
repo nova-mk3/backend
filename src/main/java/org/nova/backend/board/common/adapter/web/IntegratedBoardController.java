@@ -129,6 +129,7 @@ public class IntegratedBoardController {
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{postId}")
     @IntegratedBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<BasePostDetailResponse>> getPostById(
