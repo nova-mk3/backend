@@ -260,6 +260,13 @@ public class FileService implements FileUseCase {
 
         String encodedFileName = FileUtil.encodeFileName(file.getOriginalFilename());
 
+        try {
+            long fileSize = Files.size(filePath);
+            response.setContentLengthLong(fileSize);
+        } catch (IOException e) {
+            throw new FileDomainException("파일 크기 조회 중 오류 발생", e);
+        }
+
         response.setContentType(FileUtil.getDefaultContentType());
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, FileUtil.getContentDispositionHeader(encodedFileName));
 
