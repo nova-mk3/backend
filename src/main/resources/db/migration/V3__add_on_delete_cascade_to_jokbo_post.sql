@@ -1,0 +1,7 @@
+ALTER TABLE jokbo_post
+DROP FOREIGN KEY FKr9rbb1hdfe2mflxqxp0ahq276;
+
+ALTER TABLE jokbo_post
+ADD CONSTRAINT FKr9rbb1hdfe2mflxqxp0ahq276
+FOREIGN KEY (post_id) REFERENCES post(id)
+ON DELETE CASCADE;
