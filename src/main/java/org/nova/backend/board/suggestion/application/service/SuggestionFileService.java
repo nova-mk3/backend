@@ -60,15 +60,20 @@ public class SuggestionFileService implements SuggestionFileUseCase {
             MultipartFile file,
             String storagePath
     ) {
-        String extension = FileUtil.getFileExtension(file.getOriginalFilename());
-
         SuggestionFile tempFile = new SuggestionFile(null, file.getOriginalFilename(), null, null);
         SuggestionFile savedFile = filePersistencePort.save(tempFile);
-        UUID fileId = savedFile.getId();
+
+        UUID fileId = savedFile.getId(); // ID 가져오기
+        String extension = FileUtil.getFileExtension(file.getOriginalFilename());
 
         String savedFilePath = FileStorageUtil.saveFileToLocal(
-                file, storagePath, FilePathConstants.PROTECTED_FOLDER, fileId, extension
+                file,
+                storagePath,
+                FilePathConstants.PROTECTED_FOLDER,
+                fileId,
+                extension
         );
+
         savedFile.setFilePath(savedFilePath);
         savedFile = filePersistencePort.save(savedFile);
 
