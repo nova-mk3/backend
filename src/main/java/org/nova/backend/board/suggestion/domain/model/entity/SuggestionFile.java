@@ -35,7 +35,7 @@ public class SuggestionFile {
     @Column(nullable = false)
     private String originalFilename;
 
-    @Column(nullable = false)
+    @Column
     private String filePath;
 
     @Setter
