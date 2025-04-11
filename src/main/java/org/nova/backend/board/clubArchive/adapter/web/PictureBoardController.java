@@ -72,6 +72,7 @@ public class PictureBoardController {
     /**
      * 특정 사진 게시글 조회
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{postId}")
     @PictureBoardApiDocument.GetPostById
     public ResponseEntity<ApiResponse<PicturePostDetailResponse>> getPostById(

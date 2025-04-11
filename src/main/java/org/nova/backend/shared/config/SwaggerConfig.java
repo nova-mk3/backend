@@ -19,7 +19,8 @@ public class SwaggerConfig {
                         "/api/v1/boards/**",
                         "/api/v1/comments/**",
                         "/api/v1/files/**",
-                        "/api/v1/suggestions/**"
+                        "/api/v1/suggestions/**",
+                        "/api/v1/suggestion-files"
                 )
                 .build();
     }

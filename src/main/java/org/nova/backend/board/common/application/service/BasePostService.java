@@ -1,11 +1,12 @@
 package org.nova.backend.board.common.application.service;
 
+import java.util.EnumMap;
 import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
 import org.nova.backend.board.common.application.dto.response.AllPostSummaryResponse;
 import org.nova.backend.board.common.application.mapper.AllPostMapper;
 import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.shared.constants.BoardErrorMessages;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -209,7 +210,7 @@ public class BasePostService implements BasePostUseCase {
 
         basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
 
         UUID memberId = securityUtil.getOptionalCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
@@ -230,7 +231,7 @@ public class BasePostService implements BasePostUseCase {
                 .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
 
         Post post = basePostPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
 
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent()) {
             throw new BoardDomainException("이미 좋아요를 눌렀습니다.");
@@ -277,14 +278,14 @@ public class BasePostService implements BasePostUseCase {
             UUID memberId
     ) {
         Post post = basePostPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
 
         if (!post.getBoard().getId().equals(boardId)) {
-            throw new BoardDomainException("잘못된 게시판 ID입니다.");
+            throw new BoardDomainException(BoardErrorMessages.INVALID_BOARD_ID);
         }
 
         if (!post.getMember().getId().equals(memberId)) {
-            throw new BoardDomainException("게시글 수정 권한이 없습니다.");
+            throw new BoardDomainException(BoardErrorMessages.NO_AUTHORITY);
         }
 
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
@@ -297,7 +298,7 @@ public class BasePostService implements BasePostUseCase {
             newFiles.forEach(file -> file.setPost(post));
             post.addFiles(newFiles);
         }
-        post.updatePost(request.getTitle(), request.getContent());
+        post.updatePost(request.getPostType(), request.getTitle(), request.getContent());
         basePostPersistencePort.save(post);
 
         boolean isLiked = postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
@@ -323,11 +324,11 @@ public class BasePostService implements BasePostUseCase {
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> {
                     logger.error("삭제 요청한 게시글이 존재하지 않습니다. ID: {}", postId);
-                    return new BoardDomainException("게시글을 찾을 수 없습니다.");
+                    return new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND);
                 });
 
         if (!post.getBoard().getId().equals(boardId)) {
-            throw new BoardDomainException("잘못된 게시판 ID입니다. 게시글이 해당 게시판에 존재하지 않습니다.");
+            throw new BoardDomainException(BoardErrorMessages.INVALID_BOARD_ID);
         }
 
         Member member = memberRepository.findById(memberId)
@@ -335,7 +336,7 @@ public class BasePostService implements BasePostUseCase {
 
         if (!post.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
             logger.warn("사용자 {}가 게시글 {}를 삭제하려 했으나 권한이 없습니다.", memberId, postId);
-            throw new BoardDomainException("게시글 삭제 권한이 없습니다.");
+            throw new BoardDomainException(BoardErrorMessages.NO_AUTHORITY);
         }
 
         List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();
@@ -361,7 +362,7 @@ public class BasePostService implements BasePostUseCase {
                 PostType.NOTICE
         );
 
-        Map<PostType, List<BasePostSummaryResponse>> groupedPosts = new HashMap<>();
+        Map<PostType, List<BasePostSummaryResponse>> groupedPosts = new EnumMap<>(PostType.class);
 
         for (PostType postType : allowedPostTypes) {
             List<Post> posts = basePostPersistencePort.findLatestPostsByType(boardId, postType, 6);

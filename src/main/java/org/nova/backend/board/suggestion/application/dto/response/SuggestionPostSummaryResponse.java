@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SuggestionPostSummaryResponse {
     private UUID id;
+    private String authorName;
     private String title;
     private LocalDateTime createdTime;
     private boolean isPrivate;
