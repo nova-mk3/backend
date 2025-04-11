@@ -348,6 +348,7 @@ public class MemberService {
      * @param loginMemberId        현재 로그인한 Member id
      * @param authCodeEmailRequest 이메일 인증코드 요청 객체
      */
+    @Transactional
     public void sendEmailAuthCode(UUID profileMemberId, UUID loginMemberId, AuthCodeEmailRequest authCodeEmailRequest) {
         validateMemberAuthorize(profileMemberId, loginMemberId);
         findByMemberId(loginMemberId);

@@ -11,6 +11,7 @@ import org.nova.backend.auth.adapter.web.AuthApiDocument;
 import org.nova.backend.board.util.SecurityUtil;
 import org.nova.backend.member.application.dto.request.AuthCodeEmailRequest;
 import org.nova.backend.member.application.dto.request.CheckAuthCodeRequest;
+import org.nova.backend.member.application.dto.request.UpdateEmailRequest;
 import org.nova.backend.member.application.dto.request.UpdateMemberRequest;
 import org.nova.backend.member.application.dto.request.UpdatePasswordRequest;
 import org.nova.backend.member.application.dto.response.ExecutiveHistoryResponse;
@@ -220,9 +221,9 @@ public class MemberController {
     @PutMapping("/{profileMemberId}/email")
     @MemberProfileApiDocument.UpdateEmail
     public ResponseEntity<ApiResponse<String>> updateEmail(@PathVariable UUID profileMemberId,
-                                                           @RequestBody String email) {
+                                                           @RequestBody UpdateEmailRequest request) {
         UUID loginMemberId = securityUtil.getCurrentMemberId();
-        memberService.updateEmail(profileMemberId, loginMemberId, email);
+        memberService.updateEmail(profileMemberId, loginMemberId, request.getEmail());
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("이메일 변경 완료"));
     }
