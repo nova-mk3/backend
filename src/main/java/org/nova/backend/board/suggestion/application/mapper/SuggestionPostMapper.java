@@ -63,6 +63,7 @@ public class SuggestionPostMapper {
         boolean isAuthor = post.getMember().getId().equals(currentUserId);
         return new SuggestionPostSummaryResponse(
                 post.getId(),
+                post.getMember().getName(),
                 post.getTitle(),
                 post.getCreatedTime(),
                 post.isPrivate(),
