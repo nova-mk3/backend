@@ -34,6 +34,7 @@ services:
       - mysql_data:/var/lib/mysql
     ports:
       - '${MYSQL_EX_PORT}:${MYSQL_IN_PORT}'
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
@@ -77,12 +78,13 @@ services:
       - ${FILE_STORAGE_PATH}:${FILE_STORAGE_PATH}
     ports:
       - '${SPRING_APP_PORT}:8080'
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 500s
+      start_period: 60s
     depends_on:
       mysql:
         condition: service_healthy
@@ -90,7 +92,6 @@ services:
         condition: service_healthy
       jenkins:
         condition: service_healthy
-
     networks:
       - 'backend_network'
 

@@ -81,7 +81,10 @@ public class FileUtil {
      * Content-Disposition 헤더 반환
      */
     public static String getContentDispositionHeader(String encodedFileName) {
-        return "attachment; filename*=UTF-8''" + encodedFileName;
+        String fallbackFileName = encodedFileName
+                .replaceAll("%20", "_")
+                .replaceAll("%..", "_");
+        return "attachment; filename=\"" + fallbackFileName + "\"; filename*=UTF-8''" + encodedFileName;
     }
 
     /**
