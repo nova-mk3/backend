@@ -25,29 +25,23 @@ public class GradeSemesterYearMapper {
      * @return ex) 1,2,..
      */
     public int toIntGrade(String stringGrade) {
-        if (stringGrade.equals("초과학기") || stringGrade.equals("초과 학기")) {
+        if (stringGrade == null || stringGrade.equals("초과학기") || stringGrade.equals("초과 학기")) {
             return 0;
         }
         return Integer.parseInt(String.valueOf(stringGrade.charAt(0)));
     }
 
     /**
-     * @param stringSemester 1학기, 2학기, ...10학기
-     * @return 이수학기
+     * @param stringSemester 1학기, 2학기
+     * @return 재학중인 학기
      */
     public int toIntCompletionSemester(String stringSemester) {
         if (stringSemester == null || stringSemester.length() <= 2) {
             return 0;
         }
-        return Integer.parseInt(stringSemester.substring(0, stringSemester.length() - 2));
+
+        int semester = Integer.parseInt(stringSemester.substring(0, stringSemester.length() - 2));
+        return Math.min(semester, 2); //학기는 1학기, 2학기 중 선택
     }
 
-    /**
-     * @param stringSemester 1학기, 2학기
-     * @return 이수학기
-     */
-    public int toCompletionSemester(int grade, String stringSemester) {
-        int semester = Integer.parseInt(String.valueOf(stringSemester.charAt(0)));  //학기(1,2)
-        return (grade - 1) * 2 + semester;
-    }
 }

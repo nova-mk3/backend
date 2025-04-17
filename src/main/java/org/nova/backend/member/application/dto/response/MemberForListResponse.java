@@ -14,6 +14,7 @@ public class MemberForListResponse {
     private String email;
     private boolean isGraduation;
     private String grade;
+    private String semester;
     private boolean isAbsence;
     private ProfilePhotoResponse profilePhoto;
     private String phone;

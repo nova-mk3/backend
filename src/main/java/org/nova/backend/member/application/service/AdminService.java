@@ -47,13 +47,13 @@ public class AdminService {
             throw new MemberDomainException("업데이트 할 멤버가 없습니다.", HttpStatus.NOT_FOUND);
         }
 
-        inSchoolMembers.forEach(Member::updateSemester);
-
         inSchoolMembers.forEach(member -> {
-            if (member.getSemester() % 2 == 1) { // 홀수 학기일 때만 학년 업데이트
+            if (member.getSemester() == 2) { //2학기를 마친 사람 학년 업데이트
                 member.updateGrade();
             }
         });
+
+        inSchoolMembers.forEach(Member::updateSemester);
     }
 
     /**

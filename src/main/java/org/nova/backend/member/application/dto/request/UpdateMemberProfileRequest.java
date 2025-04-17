@@ -2,7 +2,6 @@ package org.nova.backend.member.application.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import java.util.UUID;
 import lombok.Getter;
 
 @Getter
@@ -18,7 +17,7 @@ public class UpdateMemberProfileRequest {
     @Schema(description = "학년", example = "1학년")
     private String grade;
 
-    @Schema(description = "이수 학기", example = "1학기")
+    @Schema(description = "학기", example = "1학기")
     private String semester;
 
     @Schema(description = "휴학")
