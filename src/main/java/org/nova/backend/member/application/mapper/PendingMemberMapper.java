@@ -20,7 +20,7 @@ public class PendingMemberMapper {
                                   PendingGraduation pendingGraduation) {
 
         int grade = gradeSemesterYearMapper.toIntGrade(request.getGrade());  //학년
-        int semester = gradeSemesterYearMapper.toCompletionSemester(grade, request.getSemester());
+        int semester = gradeSemesterYearMapper.toIntCompletionSemester(request.getSemester()); //학기
 
         return new PendingMember(
                 UUID.randomUUID(),
@@ -50,7 +50,7 @@ public class PendingMemberMapper {
                 pendingMember.getEmail(),
                 pendingMember.isGraduation(),
                 pendingMember.getGrade() <= 4 ? pendingMember.getGrade() + "학년" : "초과 학기",
-                pendingMember.getSemester() <= 8 ? pendingMember.getSemester() + "학기" : "초과 학기",
+                pendingMember.getSemester() + "학기",
                 pendingMember.isAbsence(),
                 profilePhotoMapper.toResponse(profilePhoto),
                 pendingMember.getPhone(),

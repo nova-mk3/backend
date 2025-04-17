@@ -101,14 +101,13 @@ public class Member {
         this.introduction = updateMemberProfileRequest.getIntroduction();
     }
 
-    // 학기 +1
+    // 학기 업데이트 1학기 <-> 2학기
     public void updateSemester() {
-        this.semester += 1;
-    }
-
-    // 학기 수정
-    public void updateSemester(final int semester) {
-        this.semester = semester;
+        if (this.semester >= 2) {
+            this.semester = 1;
+        } else if (this.semester == 1) {
+            this.semester = 2;
+        }
     }
 
     // 학년 +1

@@ -488,7 +488,6 @@ public class MemberService {
         Member member = findByMemberId(memberId);
 
         member.updateGrade(grade);  //학년 변경
-        member.updateSemester(grade * 2);  //학년 변경에 따른 학기 변경
         return member;
     }
 

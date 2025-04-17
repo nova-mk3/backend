@@ -13,7 +13,7 @@ public class UpdateManageMemberProfileRequest {
     @Schema(description = "학년", example = "1학년")
     private String grade;
 
-    @Schema(description = "이수 학기", example = "1학기")
+    @Schema(description = "학기", example = "1학기")
     private String semester;
 
     @Schema(description = "휴학")
