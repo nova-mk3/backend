@@ -40,14 +40,17 @@ public class MemberMapper {
     }
 
     public MemberResponse toResponse(Member member, ProfilePhoto profilePhoto) {
+        String gradeStr = formatGrade(member.getGrade());
+        String semesterStr = member.getSemester() == 0 ? "" : member.getSemester() + "학기";
+
         return new MemberResponse(
                 member.getId(),
                 member.getStudentNumber(),
                 member.getName(),
                 member.getEmail(),
                 member.isGraduation(),
-                member.getGrade() <= 4 ? member.getGrade() + "학년" : "초과 학기",
-                member.getSemester() + "학기",
+                gradeStr,
+                semesterStr,
                 member.isAbsence(),
                 profilePhotoMapper.toResponse(profilePhoto),
                 member.getPhone(),
@@ -58,14 +61,17 @@ public class MemberMapper {
     }
 
     public MemberForListResponse toResponseForList(Member member, ProfilePhoto profilePhoto) {
+        String gradeStr = formatGrade(member.getGrade());
+        String semesterStr = member.getSemester() == 0 ? "" : member.getSemester() + "학기";
+
         return new MemberForListResponse(
                 member.getId(),
                 member.getStudentNumber(),
                 member.getName(),
                 member.getEmail(),
                 member.isGraduation(),
-                member.getGrade() <= 4 ? member.getGrade() + "학년" : "초과 학기",
-                member.getSemester() + "학기",
+                gradeStr,
+                semesterStr,
                 member.isAbsence(),
                 profilePhotoMapper.toResponse(profilePhoto),
                 member.getPhone()
@@ -74,14 +80,17 @@ public class MemberMapper {
 
     public MemberWithGraduationYearResponse toResponseWithGraduationYear(Member member, ProfilePhoto profilePhoto,
                                                                          int graduationYear) {
+        String gradeStr = formatGrade(member.getGrade());
+        String semesterStr = member.getSemester() == 0 ? "" : member.getSemester() + "학기";
+
         return new MemberWithGraduationYearResponse(
                 member.getId(),
                 member.getStudentNumber(),
                 member.getName(),
                 member.getEmail(),
                 member.isGraduation(),
-                member.getGrade() <= 4 ? member.getGrade() + "학년" : "초과 학기",
-                member.getSemester() + "학기",
+                gradeStr,
+                semesterStr,
                 member.isAbsence(),
                 profilePhotoMapper.toResponse(profilePhoto),
                 member.getPhone(),
@@ -92,4 +101,7 @@ public class MemberMapper {
         );
     }
 
+    private String formatGrade(int grade) {
+        return grade >= 5 ? "초과학기" : grade + "학년";
+    }
 }

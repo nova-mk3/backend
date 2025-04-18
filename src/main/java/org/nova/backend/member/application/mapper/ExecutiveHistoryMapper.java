@@ -30,11 +30,14 @@ public class ExecutiveHistoryMapper {
     }
 
     public ExecutiveHistoryResponse toResponse(ExecutiveHistory executiveHistory) {
-        ProfilePhotoResponse profilePhotoResponse = executiveHistory.getMember() != null ?
-                memberProfilePhotoMapper.toResponse(executiveHistory.getMember().getProfilePhoto())
-                : memberProfilePhotoMapper.toResponse(null);
-
         Member executive = executiveHistory.getMember();
+        ProfilePhotoResponse profilePhotoResponse = memberProfilePhotoMapper.toResponse(
+                executive != null ? executive.getProfilePhoto() : null
+        );
+
+        String gradeText = getGradeText(executive);
+        String semesterText = getSemesterText(executive);
+        Integer graduationYear = getGraduationYear(executive);
 
         return new ExecutiveHistoryResponse(
                 executiveHistory.getId(),
@@ -45,9 +48,28 @@ public class ExecutiveHistoryMapper {
                 executive != null ? executive.getStudentNumber() : null,
                 profilePhotoResponse,
                 executive != null ? executive.getPhone() : null,
-                executive != null ? executive.getGrade() + "학년" : null,
-                executive != null ? executive.getSemester() + "학기" : null
+                gradeText,
+                semesterText,
+                executive != null && executive.isGraduation(),
+                graduationYear
         );
     }
 
+    private String getGradeText(Member member) {
+        if (member == null) return null;
+        if (member.isGraduation()) return "졸업생";
+        if (member.getGrade() >= 5) return "초과 학기";
+        return member.getGrade() + "학년";
+    }
+
+    private String getSemesterText(Member member) {
+        if (member == null || member.isGraduation() || member.getGrade() >= 5) return null;
+        int s = member.getSemester();
+        return (s >= 1 && s <= 2) ? s + "학기" : "1학기";
+    }
+
+    private Integer getGraduationYear(Member member) {
+        if (member == null || !member.isGraduation() || member.getGraduation() == null) return null;
+        return member.getGraduation().getYear();
+    }
 }

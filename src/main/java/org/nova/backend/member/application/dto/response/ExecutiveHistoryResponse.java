@@ -20,4 +20,6 @@ public class ExecutiveHistoryResponse {
     private String phone;
     private String grade;
     private String semester;
+    private boolean isGraduation;
+    private Integer graduationYear;
 }
