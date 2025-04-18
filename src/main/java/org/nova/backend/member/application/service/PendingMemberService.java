@@ -127,13 +127,13 @@ public class PendingMemberService {
     }
 
     /**
-     * 회원가입 요청 단건 거절
+     * 회원가입 요청 단건 거절 -> pendingMember 객체 삭제
      *
      * @param pendingMemberId pk
      */
     @Transactional
     public void rejectPendingMember(final UUID pendingMemberId) {
         PendingMember pendingMember = findPendingMember(pendingMemberId);
-        pendingMember.rejectPendingMember();
+        pendingMemberRepository.delete(pendingMember);
     }
 }
