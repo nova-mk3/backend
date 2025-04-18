@@ -25,11 +25,14 @@ public class GradeSemesterYearMapper {
      * @return ex) 1,2,..
      */
     public int toIntGrade(String stringGrade) {
-        if (stringGrade == null || stringGrade.equals("초과학기") || stringGrade.equals("초과 학기")) {
-            return 0;
+        if (stringGrade == null) return 0;
+
+        if (stringGrade.equals("초과학기") || stringGrade.equals("초과 학기")) {
+            return 5;
         }
         return Integer.parseInt(String.valueOf(stringGrade.charAt(0)));
     }
+
 
     /**
      * @param stringSemester 1학기, 2학기
