@@ -42,6 +42,8 @@ public class PendingMemberMapper {
     }
 
     public PendingMemberResponse toResponse(PendingMember pendingMember, ProfilePhoto profilePhoto) {
+        String gradeStr = formatGrade(pendingMember.getGrade());
+        String semesterStr = pendingMember.getSemester() == 0 ? "" : pendingMember.getSemester() + "학기";
 
         return new PendingMemberResponse(
                 pendingMember.getId(),
@@ -49,8 +51,8 @@ public class PendingMemberMapper {
                 pendingMember.getName(),
                 pendingMember.getEmail(),
                 pendingMember.isGraduation(),
-                pendingMember.getGrade() <= 4 ? pendingMember.getGrade() + "학년" : "초과 학기",
-                pendingMember.getSemester() + "학기",
+                gradeStr,
+                semesterStr,
                 pendingMember.isAbsence(),
                 profilePhotoMapper.toResponse(profilePhoto),
                 pendingMember.getPhone(),
@@ -60,4 +62,7 @@ public class PendingMemberMapper {
         );
     }
 
+    private String formatGrade(int grade) {
+        return grade >= 5 ? "초과학기" : grade + "학년";
+    }
 }
