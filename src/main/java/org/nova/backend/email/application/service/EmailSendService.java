@@ -63,7 +63,7 @@ public class EmailSendService {
         emailBody.append(
                 "<div style='max-width: 600px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); text-align: center;'>");
         emailBody.append(
-                "<img src='https://your-logo-url.com/logo.png' alt='NOVA 로고' style='width: 120px; margin-bottom: 20px;'>");
+                "<img src='https://nova.cbnu.ac.kr/files/public/novaLogo.svg' alt='NOVA 로고' style='width: 100px; margin-bottom: 20px;'>");
         emailBody.append(
                 "<div style='font-size: 24px; font-weight: bold; color: #7D60EC; margin-bottom: 10px;'>Nova 이메일 인증</div>");
         emailBody.append(
@@ -73,7 +73,7 @@ public class EmailSendService {
                         + authCode + "</div>");
         emailBody.append("<div style='margin-top: 20px;'>");
         emailBody.append(
-                "<a href='www.nova.cbnu.ac.kr' style='display: inline-block; padding: 12px 20px; background: #7D60EC; color: #fff; text-decoration: none; font-size: 16px; font-weight: bold; border-radius: 8px;'>Nova 로그인</a>");
+                "<a href='https://nova.cbnu.ac.kr/signin' style='display: inline-block; padding: 12px 20px; background: #7D60EC; color: #fff; text-decoration: none; font-size: 16px; font-weight: bold; border-radius: 8px;'>Nova 로그인</a>");
         emailBody.append("</div>");
         emailBody.append(
                 "<p style='margin-top: 30px; font-size: 12px; color: #888;'>이 메일은 자동 발송된 메일입니다.<br>문의사항은 <a href='mailto:nova_cbnu@naver.com' style='color: #7D60EC;'>nova_cbnu@naver.com</a>으로 연락주세요.</p>");
