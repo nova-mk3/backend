@@ -19,8 +19,8 @@ public class PendingMemberMapper {
     public PendingMember toEntity(MemberSignUpRequest request, String encryptedPassword, ProfilePhoto profilePhoto,
                                   PendingGraduation pendingGraduation) {
 
-        int grade = gradeSemesterYearMapper.toIntGrade(request.getGrade());  //학년
-        int semester = gradeSemesterYearMapper.toIntCompletionSemester(request.getSemester()); //학기
+        int grade = request.isGraduation()? 0: gradeSemesterYearMapper.toIntGrade(request.getGrade());  //학년
+        int semester =  request.isGraduation()? 0: gradeSemesterYearMapper.toIntCompletionSemester(request.getSemester()); //학기
 
         return new PendingMember(
                 UUID.randomUUID(),
