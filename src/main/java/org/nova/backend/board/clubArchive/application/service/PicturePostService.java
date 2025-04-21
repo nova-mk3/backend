@@ -170,11 +170,13 @@ public class PicturePostService implements PicturePostUseCase {
             UUID boardId,
             UUID postId
     ) {
+        UUID memberId = securityUtil.getOptionalCurrentMemberId()
+                .orElseThrow(() -> new UnauthorizedException("접근 권한이 없습니다."));
+
         basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
 
-        UUID memberId = securityUtil.getOptionalCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
 
         return picturePostMapper.toDetailResponse(post, isLiked);
