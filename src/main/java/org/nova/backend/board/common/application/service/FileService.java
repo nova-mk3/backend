@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 import org.nova.backend.board.util.ImageOptimizerUtil;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.shared.constants.FilePathConstants;
@@ -46,7 +47,8 @@ public class FileService implements FileUseCase {
     private final FilePersistencePort filePersistencePort;
     private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
-    private final ExecutorService executor = Executors.newFixedThreadPool(5);
+    private final ExecutorService executor =
+            Executors.newFixedThreadPool(Math.min(6, Runtime.getRuntime().availableProcessors() + 2));
     private final StringRedisTemplate redisTemplate;
 
     @Value("${file.storage.path}")
@@ -107,7 +109,6 @@ public class FileService implements FileUseCase {
             UUID memberId,
             PostType postType
     ) {
-
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -124,13 +125,23 @@ public class FileService implements FileUseCase {
 
         String storagePath = getStoragePath();
 
+        MultipartFile firstFile = files.getFirst();
+        FileResponse firstFileResponse = processFileUpload(firstFile, storagePath, postType, true);
+
         List<CompletableFuture<FileResponse>> futures = files.stream()
-                .map(file -> CompletableFuture.supplyAsync(() -> processFileUpload(file, storagePath, postType), executor))
+                .skip(1)
+                .map(file -> CompletableFuture.supplyAsync(() ->
+                        processFileUpload(file, storagePath, postType, false), executor))
                 .toList();
 
-        return futures.stream()
+        List<FileResponse> result = futures.stream()
                 .map(CompletableFuture::join)
                 .toList();
+
+        return Stream.concat(
+                Stream.of(firstFileResponse),
+                result.stream()
+        ).toList();
     }
 
     /**
@@ -139,26 +150,29 @@ public class FileService implements FileUseCase {
     private FileResponse processFileUpload(
             MultipartFile file,
             String storagePath,
-            PostType postType
+            PostType postType,
+            boolean isSynchronous
     ) {
         String originalFileName = file.getOriginalFilename();
         String extension = FileUtil.getFileExtension(originalFileName);
 
         File tempFile = new File(null, originalFileName, null, null, 0);
-        File savedFile = filePersistencePort.save(tempFile); // @GeneratedValue로 UUID 생성됨
+        File savedFile = filePersistencePort.save(tempFile); // UUID 생성됨
         UUID fileId = savedFile.getId();
 
         String savedFilePath = FileStorageUtil.saveFileToLocal(file, storagePath, FilePathConstants.PROTECTED_FOLDER, fileId, extension);
-
         savedFile.setFilePath(savedFilePath);
         savedFile = filePersistencePort.save(savedFile);
 
         if (postType == PostType.PICTURES) {
             redisTemplate.opsForValue().set("upload:" + fileId, "uploading");
 
-            CompletableFuture.runAsync(() ->
-                    compressImageAsync(fileId, savedFilePath, storagePath, extension), executor
-            );
+            if (isSynchronous) {
+                compressImageSync(fileId, savedFilePath, storagePath, extension);
+            } else {
+                CompletableFuture.runAsync(() ->
+                        compressImageAsync(fileId, savedFilePath, storagePath, extension), executor);
+            }
         }
 
         return new FileResponse(
@@ -189,6 +203,28 @@ public class FileService implements FileUseCase {
             logger.info("[압축 완료] fileId={}", fileId);
         } catch (Exception e) {
             logger.error("이미지 압축 중 오류", e);
+            redisTemplate.opsForValue().set("upload:" + fileId, "error");
+        }
+    }
+
+    private void compressImageSync(
+            UUID fileId,
+            String originalFilePath,
+            String storagePath,
+            String extension
+    ) {
+        try {
+            redisTemplate.opsForValue().set("upload:" + fileId, "compressing");
+
+            Path protectedPath = Paths.get(originalFilePath);
+            Path publicDir = Paths.get(storagePath, FilePathConstants.PUBLIC_FOLDER);
+
+            ImageOptimizerUtil.compressToOriginalExtension(protectedPath, publicDir, fileId, extension);
+
+            redisTemplate.opsForValue().set("upload:" + fileId, "done");
+            logger.info("[동기 압축 완료] 썸네일 fileId={}", fileId);
+        } catch (Exception e) {
+            logger.error("동기 이미지 압축 중 오류", e);
             redisTemplate.opsForValue().set("upload:" + fileId, "error");
         }
     }
