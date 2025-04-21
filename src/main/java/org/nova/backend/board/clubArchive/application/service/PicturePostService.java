@@ -2,6 +2,7 @@ package org.nova.backend.board.clubArchive.application.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -82,7 +83,11 @@ public class PicturePostService implements PicturePostUseCase {
         Post savedPost = basePostPersistencePort.save(post);
 
         if(request.getImageFileIds() != null && !request.getImageFileIds().isEmpty()) {
+            List<UUID> imageFileIds = request.getImageFileIds();
             List<File> files = fileUseCase.findFilesByIds(request.getImageFileIds());
+
+            files.sort(Comparator.comparingInt(file -> imageFileIds.indexOf(file.getId())));
+
             files.forEach(file -> file.setPost(savedPost));
             savedPost.addFiles(files);
         }
