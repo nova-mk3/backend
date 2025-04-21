@@ -63,7 +63,7 @@ public class EmailSendService {
         emailBody.append(
                 "<div style='max-width: 600px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); text-align: center;'>");
         emailBody.append(
-                "<img src='https://nova.cbnu.ac.kr/files/public/novaLogo.svg' alt='NOVA 로고' style='width: 100px; margin-bottom: 20px;'>");
+                "<img src='https://nova.cbnu.ac.kr/files/public/novaLogo.png' alt='NOVA 로고' style='width: 100px; margin-bottom: 20px;'>");
         emailBody.append(
                 "<div style='font-size: 24px; font-weight: bold; color: #7D60EC; margin-bottom: 10px;'>Nova 이메일 인증</div>");
         emailBody.append(
