@@ -20,6 +20,7 @@ public interface BasePostPersistencePort {
     Optional<Post> findById(UUID postId);
     Optional<Post> findByBoardIdAndPostId(UUID boardId, UUID postId);
     Page<Post> findAll(Pageable pageable);
+    Page<Post> findAllByMemberId(UUID memberId, Pageable pageable);
 
     void deleteById(UUID postId);
     void increaseViewCount(@Param("postId") UUID postId);
