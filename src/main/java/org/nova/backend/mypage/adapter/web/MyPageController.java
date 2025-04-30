@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.mypage.adapter.doc.MyPageApiDocument;
 import org.nova.backend.mypage.application.dto.response.MyPostsResponse;
+import org.nova.backend.mypage.application.dto.response.MySuggestionPostResponse;
 import org.nova.backend.mypage.application.port.in.MyPageUseCase;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
@@ -36,5 +37,16 @@ public class MyPageController {
         UUID memberId = securityUtil.getCurrentMemberId();
         Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdTime"));
         return ResponseEntity.ok(ApiResponse.success(myPageUseCase.getMyPosts(memberId, sorted)));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/suggestion-posts")
+    @MyPageApiDocument.GetMySuggestionPosts
+    public ResponseEntity<ApiResponse<Page<MySuggestionPostResponse>>> getMySuggestionPosts(
+            @Parameter(hidden = true) Pageable pageable
+    ) {
+        UUID memberId = securityUtil.getCurrentMemberId();
+        Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdTime"));
+        return ResponseEntity.ok(ApiResponse.success(myPageUseCase.getMySuggestionPosts(memberId, sorted)));
     }
 }

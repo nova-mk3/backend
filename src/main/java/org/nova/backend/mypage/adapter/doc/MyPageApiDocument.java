@@ -33,4 +33,26 @@ public @interface MyPageApiDocument {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface GetMyPosts {}
+
+    @Operation(
+            summary = "회원이 작성한 건의 게시글 조회",
+            description = """
+            로그인한 회원이 작성한 건의 게시글 목록을 최신순으로 조회합니다.
+
+            **정렬**
+            - 정렬 기준: `createdTime` (고정)
+            - 정렬 방식: `desc` (최신순, 고정)
+
+            **예제 요청**
+            `/api/v1/mypage/suggestion-posts?page=0&size=10`
+            """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "건의 게시글 조회 성공", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "인증 실패 (로그인이 필요합니다)"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface GetMySuggestionPosts {}
 }
