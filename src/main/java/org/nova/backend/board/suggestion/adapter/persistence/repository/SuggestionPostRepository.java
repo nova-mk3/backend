@@ -16,4 +16,8 @@ public interface SuggestionPostRepository extends JpaRepository<SuggestionPost, 
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
+    @Query("SELECT p FROM SuggestionPost p WHERE p.member.id = :memberId ORDER BY p.createdTime DESC")
+    Page<SuggestionPost> findAllByMemberId(@Param("memberId") UUID memberId, Pageable pageable);
+
 }

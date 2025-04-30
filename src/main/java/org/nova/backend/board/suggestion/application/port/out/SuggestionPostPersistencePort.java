@@ -11,4 +11,5 @@ public interface SuggestionPostPersistencePort {
     Page<SuggestionPost> findAll(Pageable pageable);
     Optional<SuggestionPost> findById(UUID postId);
     Page<SuggestionPost> searchByTitle(String keyword, Pageable pageable);
+    Page<SuggestionPost> findAllByMemberId(UUID memberId, Pageable pageable);
 }

@@ -96,4 +96,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
+    @Query("SELECT p FROM Post p WHERE p.member.id = :memberId ORDER BY p.createdTime DESC")
+    Page<Post> findAllByMemberId(@Param("memberId") UUID memberId, Pageable pageable);
 }

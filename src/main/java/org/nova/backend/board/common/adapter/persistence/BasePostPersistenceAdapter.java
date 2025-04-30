@@ -49,6 +49,11 @@ public class BasePostPersistenceAdapter implements BasePostPersistencePort {
     }
 
     @Override
+    public Page<Post> findAllByMemberId(UUID memberId, Pageable pageable) {
+        return postRepository.findAllByMemberId(memberId, pageable);
+    }
+
+    @Override
     @Transactional
     public void increaseViewCount(UUID postId) {
         postRepository.increaseViewCount(postId);

@@ -1,6 +1,5 @@
 package org.nova.backend.member.application.service;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +26,6 @@ import org.nova.backend.member.application.mapper.GraduationMapper;
 import org.nova.backend.member.application.mapper.MemberMapper;
 import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.exception.MemberDomainException;
-import org.nova.backend.member.domain.exception.ProfilePhotoFileDomainException;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.ProfilePhoto;
@@ -445,20 +443,6 @@ public class MemberService {
 
         ProfilePhoto baseProfilePhoto = profilePhotoFileService.findBaseProfilePhoto();
         return memberProfilePhotoMapper.toResponse(baseProfilePhoto);
-    }
-
-    /**
-     * 회원 프로필 사진 다운로드
-     */
-    public void downloadProfilePhoto(UUID profileMemberId, HttpServletResponse response, UUID loginMemberId) {
-        findByMemberId(loginMemberId);
-        Member profileMember = findByMemberId(profileMemberId);
-
-        if (profileMember.getProfilePhoto() == null) {
-            throw new ProfilePhotoFileDomainException("프로필 사진이 기본 이미지입니다.", HttpStatus.NOT_FOUND);
-        }
-
-        profilePhotoFileService.downloadProfilePhoto(profileMember.getProfilePhoto().getId(), response);
     }
 
     /**

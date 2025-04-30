@@ -20,7 +20,7 @@ public class SwaggerConfig {
                         "/api/v1/comments/**",
                         "/api/v1/files/**",
                         "/api/v1/suggestions/**",
-                        "/api/v1/suggestion-files"
+                        "/api/v1/suggestion-files/**"
                 )
                 .build();
     }
@@ -45,7 +45,8 @@ public class SwaggerConfig {
                 .group("User API")
                 .pathsToMatch(
                         "/api/v1/members/**",
-                        "/api/v1/email-auth/**"
+                        "/api/v1/email-auth/**",
+                        "/api/v1/mypage/**"
                 )
                 .build();
     }

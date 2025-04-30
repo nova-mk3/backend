@@ -11,17 +11,12 @@ import org.nova.backend.board.common.application.dto.response.BasePostSummaryRes
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.Post;
-import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
-import org.nova.backend.member.application.mapper.MemberProfilePhotoMapper;
 import org.nova.backend.member.domain.model.entity.Member;
-import org.nova.backend.member.domain.model.entity.ProfilePhoto;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
 public class BasePostMapper {
-
-    private MemberProfilePhotoMapper profilePhotoMapper;
 
     public Post toEntity(
             BasePostRequest request,
@@ -74,10 +69,6 @@ public class BasePostMapper {
     }
 
     public BasePostSummaryResponse toSummaryResponse(Post post) {
-
-        ProfilePhoto profilePhoto = post.getMember().getProfilePhoto();
-        ProfilePhotoResponse memberProfilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
-
         return new BasePostSummaryResponse(
                 post.getId(),
                 post.getPostType(),
@@ -88,8 +79,7 @@ public class BasePostMapper {
                 post.getCommentCount(),
                 post.getCreatedTime(),
                 post.getModifiedTime(),
-                post.getMember().getName(),
-                memberProfilePhotoResponse
+                post.getMember().getName()
         );
     }
 }

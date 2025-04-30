@@ -1,4 +1,4 @@
-package org.nova.backend.board.common.application.dto.response;
+package org.nova.backend.mypage.application.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,7 +10,7 @@ import org.nova.backend.board.common.domain.model.valueobject.PostType;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BasePostSummaryResponse {
+public class MyPostsResponse {
     private UUID id;
     private PostType type;
     private String title;
@@ -19,6 +19,5 @@ public class BasePostSummaryResponse {
     private int likeCount;
     private int commentCount;
     private LocalDateTime createdTime;
-    private LocalDateTime modifiedTime;
     private String authorName;
 }
