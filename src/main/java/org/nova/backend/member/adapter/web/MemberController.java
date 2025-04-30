@@ -267,16 +267,4 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(profilePhotoResponse));
     }
-
-    /**
-     * 회원 프로필 사진 다운로드
-     */
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/{profileMemberId}/profile-photo/download")
-    @MemberProfileApiDocument.DownloadProfilePhoto
-    public void downloadProfilePhoto(@PathVariable UUID profileMemberId, HttpServletResponse response) {
-        UUID loginMemberId = securityUtil.getCurrentMemberId();
-        memberService.downloadProfilePhoto(profileMemberId, response, loginMemberId);
-    }
-
 }
