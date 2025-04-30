@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.member.application.dto.response.ProfilePhotoResponse;
 
 @Getter
 @NoArgsConstructor
@@ -22,5 +21,4 @@ public class BasePostSummaryResponse {
     private LocalDateTime createdTime;
     private LocalDateTime modifiedTime;
     private String authorName;
-    private ProfilePhotoResponse authorProfilePhoto;
 }

@@ -74,10 +74,6 @@ public class BasePostMapper {
     }
 
     public BasePostSummaryResponse toSummaryResponse(Post post) {
-
-        ProfilePhoto profilePhoto = post.getMember().getProfilePhoto();
-        ProfilePhotoResponse memberProfilePhotoResponse = profilePhotoMapper.toResponse(profilePhoto);
-
         return new BasePostSummaryResponse(
                 post.getId(),
                 post.getPostType(),
@@ -88,8 +84,7 @@ public class BasePostMapper {
                 post.getCommentCount(),
                 post.getCreatedTime(),
                 post.getModifiedTime(),
-                post.getMember().getName(),
-                memberProfilePhotoResponse
+                post.getMember().getName()
         );
     }
 }
