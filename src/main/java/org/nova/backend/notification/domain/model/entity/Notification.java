@@ -46,7 +46,7 @@ public class Notification {
     private UUID targetId;
 
     @Column(nullable = false)
-    private PostType postType;
+    private PostType targetType;
 
     @Column(nullable = false)
     private boolean isRead;
