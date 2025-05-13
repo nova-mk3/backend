@@ -5,6 +5,8 @@ import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
 import org.nova.backend.board.common.application.dto.response.AllPostSummaryResponse;
 import org.nova.backend.board.common.application.mapper.AllPostMapper;
 import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.notification.application.port.in.NotificationUseCase;
+import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
 import org.nova.backend.shared.constants.BoardErrorMessages;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -54,6 +56,7 @@ public class BasePostService implements BasePostUseCase {
     private final BasePostMapper postMapper;
     private final PicturePostMapper picturePostMapper;
     private final AllPostMapper allPostMapper;
+    private final NotificationUseCase notificationUseCase;
 
     /**
      * 새로운 게시글과 첨부파일 저장
@@ -239,6 +242,16 @@ public class BasePostService implements BasePostUseCase {
 
         postLikePersistencePort.save(new PostLike(post, member));
         basePostPersistencePort.increaseLikeCount(postId);
+
+        if (!post.getMember().getId().equals(memberId)) {
+            notificationUseCase.create(
+                    post.getMember().getId(),
+                    EventType.POST_LIKE,
+                    post.getId(),
+                    post.getPostType(),
+                    member.getName()
+            );
+        }
 
         return basePostPersistencePort.getLikeCount(postId);
     }
