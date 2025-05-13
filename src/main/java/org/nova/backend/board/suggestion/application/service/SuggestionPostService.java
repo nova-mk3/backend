@@ -1,5 +1,7 @@
 package org.nova.backend.board.suggestion.application.service;
 
+import org.nova.backend.notification.application.port.in.NotificationUseCase;
+import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +38,7 @@ public class SuggestionPostService implements SuggestionPostUseCase {
     private final MemberRepository memberRepository;
     private final SuggestionFileUseCase fileUseCase;
     private final SuggestionPostMapper postMapper;
+    private final NotificationUseCase notificationUseCase;
 
     /**
      * 새로운 건의 게시글과 첨부파일 저장
@@ -157,6 +160,14 @@ public class SuggestionPostService implements SuggestionPostUseCase {
         post.addAdminReply(request.getReply());
         suggestionPostPersistencePort.save(post);
         logger.info("건의 게시글 답변 추가 완료 - 게시글 ID: {}", postId);
+
+        notificationUseCase.create(
+                post.getMember().getId(),
+                EventType.SUGGESTION_ANSWERED,
+                post.getId(),
+                null,
+                admin.getName()
+        );
 
         return new SuggestionReplyResponse(post.getAdminReply(),post.getAdminReplyTime());
     }
