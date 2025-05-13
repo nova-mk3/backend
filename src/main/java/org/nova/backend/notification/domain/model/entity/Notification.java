@@ -45,7 +45,7 @@ public class Notification {
     @Column(nullable = false)
     private UUID targetId;
 
-    @Column(nullable = false)
+    @Column
     private PostType targetType;
 
     @Column(nullable = false)
