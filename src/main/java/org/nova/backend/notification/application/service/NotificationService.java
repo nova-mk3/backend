@@ -1,5 +1,7 @@
 package org.nova.backend.notification.application.service;
 
+import org.nova.backend.member.domain.exception.MemberDomainException;
+import org.nova.backend.notification.application.dto.response.UnreadCountResponse;
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -41,7 +43,7 @@ public class NotificationService implements NotificationUseCase {
     ) {
 
         Member receiver = memberRepository.findById(receiverId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         String message = NotificationMessageBuilder.build(eventType, actorName);
         if (message == null) {
@@ -75,19 +77,29 @@ public class NotificationService implements NotificationUseCase {
     @Override
     @Transactional
     public void markAsRead(UUID notificationId, UUID receiverId) {
-        Notification notification = notificationPersistencePort.findById(notificationId)
-                .orElseThrow(() -> new NotificationDomainException("알림이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
-
-        if (!notification.getReceiver().getId().equals(receiverId)) {
-            throw new NotificationDomainException("해당 알림에 대한 권한이 없습니다.", HttpStatus.FORBIDDEN);
+        int updated = notificationPersistencePort.markAsRead(notificationId, receiverId);
+        if (updated == 0) {
+            throw new NotificationDomainException("알림이 존재하지 않거나 권한이 없습니다.", HttpStatus.NOT_FOUND);
         }
-
-        notificationPersistencePort.markAsRead(notificationId, receiverId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public long countUnread(UUID receiverId) {
-        return notificationPersistencePort.countByReceiverAndIsReadFalse(receiverId);
+    public UnreadCountResponse countUnread(UUID receiverId) {
+        int count = notificationPersistencePort.countByReceiverAndIsReadFalse(receiverId);
+        return new UnreadCountResponse(count);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<NotificationResponse> getUnreadNotifications(UUID receiver, Pageable pageable) {
+        return notificationPersistencePort.findUnreadByReceiver(receiver, pageable)
+                .map(NotificationMapper::toResponse);
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsRead(UUID receiverId) {
+        notificationPersistencePort.markAllAsRead(receiverId);
     }
 }
