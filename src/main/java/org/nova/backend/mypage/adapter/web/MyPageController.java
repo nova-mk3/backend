@@ -10,9 +10,7 @@ import org.nova.backend.mypage.application.dto.response.MySuggestionPostResponse
 import org.nova.backend.mypage.application.port.in.MyPageUseCase;
 import org.nova.backend.shared.model.ApiResponse;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.nova.backend.board.util.SecurityUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,8 +33,7 @@ public class MyPageController {
             @Parameter(hidden = true) Pageable pageable
     ) {
         UUID memberId = securityUtil.getCurrentMemberId();
-        Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdTime"));
-        return ResponseEntity.ok(ApiResponse.success(myPageUseCase.getMyPosts(memberId, sorted)));
+        return ResponseEntity.ok(ApiResponse.success(myPageUseCase.getMyPosts(memberId, pageable)));
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -46,7 +43,6 @@ public class MyPageController {
             @Parameter(hidden = true) Pageable pageable
     ) {
         UUID memberId = securityUtil.getCurrentMemberId();
-        Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdTime"));
-        return ResponseEntity.ok(ApiResponse.success(myPageUseCase.getMySuggestionPosts(memberId, sorted)));
+        return ResponseEntity.ok(ApiResponse.success(myPageUseCase.getMySuggestionPosts(memberId, pageable)));
     }
 }

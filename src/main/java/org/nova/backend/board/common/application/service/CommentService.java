@@ -1,5 +1,7 @@
 package org.nova.backend.board.common.application.service;
 
+import org.nova.backend.notification.application.port.in.NotificationUseCase;
+import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +33,7 @@ public class CommentService implements CommentUseCase {
     private final BasePostPersistencePort basePostPersistencePort;
     private final MemberRepository memberRepository;
     private final CommentMapper commentMapper;
+    private final NotificationUseCase notificationUseCase;
 
     /**
      * 댓글 수정 (본인 댓글만 수정 가능)
@@ -116,6 +119,31 @@ public class CommentService implements CommentUseCase {
 
         Comment comment = commentMapper.toEntity(request, post, member, parentComment);
         comment = commentPersistencePort.save(comment);
+
+        if (parentComment == null) {
+            // 일반 댓글 → 게시글 작성자에게 알림
+            if (!post.getMember().getId().equals(memberId)) {
+                notificationUseCase.create(
+                        post.getMember().getId(),
+                        EventType.COMMENT,
+                        post.getId(),
+                        post.getPostType(),
+                        member.getName()
+                );
+            }
+        } else {
+            // 대댓글 → 상위 댓글 작성자에게 알림
+            UUID parentWriterId = parentComment.getMember().getId();
+            if (!parentWriterId.equals(memberId)) {
+                notificationUseCase.create(
+                        parentWriterId,
+                        EventType.REPLY,
+                        post.getId(),
+                        post.getPostType(),
+                        member.getName()
+                );
+            }
+        }
 
         post.incrementCommentCount();
         basePostPersistencePort.save(post);
