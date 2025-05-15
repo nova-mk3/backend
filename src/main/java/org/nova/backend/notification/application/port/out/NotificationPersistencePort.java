@@ -9,7 +9,9 @@ import org.springframework.data.domain.Page;
 public interface NotificationPersistencePort {
     Notification save(Notification notification);
     Page<Notification> findByReceiver(UUID receiverId, Pageable pageable);
+    Page<Notification> findUnreadByReceiver(UUID receiverId, Pageable pageable);
     Optional<Notification> findById(UUID id);
-    long countByReceiverAndIsReadFalse(UUID receiverId);
-    void markAsRead(UUID notificationId, UUID receiverId);
+    int countByReceiverAndIsReadFalse(UUID receiverId);
+    int markAsRead(UUID notificationId, UUID receiverId);
+    int markAllAsRead(UUID receiverId);
 }
