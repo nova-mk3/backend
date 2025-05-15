@@ -3,7 +3,6 @@ package org.nova.backend.notification.adapter.doc;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,6 +26,14 @@ public @interface NotificationApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface CountUnread {}
 
+    @Operation(summary = "읽지 않은 알림 목록 조회", description = "현재 로그인한 사용자의 읽지 않은 알림을 최신순으로 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "읽지 않은 알림 조회 성공")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface GetUnreadNotifications {}
+
     @Operation(summary = "알림 읽음 처리", description = "알림을 읽음 처리합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "읽음 처리 성공"),
@@ -36,4 +43,12 @@ public @interface NotificationApiDocument {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface MarkAsRead {}
+
+    @Operation(summary = "모든 알림 읽음 처리", description = "사용자의 모든 안 읽은 알림을 읽음 처리합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "전체 읽음 처리 성공")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface MarkAllAsRead {}
 }
