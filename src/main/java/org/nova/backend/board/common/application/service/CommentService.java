@@ -120,15 +120,29 @@ public class CommentService implements CommentUseCase {
         Comment comment = commentMapper.toEntity(request, post, member, parentComment);
         comment = commentPersistencePort.save(comment);
 
-        if (!post.getMember().getId().equals(memberId)) {
-            EventType eventType = (parentComment == null) ? EventType.COMMENT : EventType.REPLY;
-            notificationUseCase.create(
-                    post.getMember().getId(),
-                    eventType,
-                    post.getId(),
-                    post.getPostType(),
-                    member.getName()
-            );
+        if (parentComment == null) {
+            // 일반 댓글 → 게시글 작성자에게 알림
+            if (!post.getMember().getId().equals(memberId)) {
+                notificationUseCase.create(
+                        post.getMember().getId(),
+                        EventType.COMMENT,
+                        post.getId(),
+                        post.getPostType(),
+                        member.getName()
+                );
+            }
+        } else {
+            // 대댓글 → 상위 댓글 작성자에게 알림
+            UUID parentWriterId = parentComment.getMember().getId();
+            if (!parentWriterId.equals(memberId)) {
+                notificationUseCase.create(
+                        parentWriterId,
+                        EventType.REPLY,
+                        post.getId(),
+                        post.getPostType(),
+                        member.getName()
+                );
+            }
         }
 
         post.incrementCommentCount();
