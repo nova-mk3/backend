@@ -1,5 +1,6 @@
 package org.nova.backend.member.helper;
 
+import java.util.concurrent.ThreadLocalRandom;
 import org.nova.backend.member.domain.model.entity.Graduation;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.entity.ProfilePhoto;
@@ -9,18 +10,22 @@ import java.util.UUID;
 
 public class MemberFixture {
 
-    public static Member createStudent() {
+    private MemberFixture() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
+    public static Member createStudent(ProfilePhoto profilePhoto) {
         return new Member(
                 UUID.randomUUID(),
-                "2020069049",
+                generateRandomStudentNumber(),
                 "password123!",
                 "홍길동",
-                "honggildong@example.com",
+                generateRandomEmail(),
                 false,
                 4,
                 2,
                 false,
-                new ProfilePhoto(UUID.randomUUID(), "student.jpg", "https://example.com/photos/student.jpg"),
+                profilePhoto,
                 "010-1234-5678",
                 "안녕하세요! 소프트웨어공학과 재학생입니다.",
                 "2000-01-01",
@@ -33,10 +38,10 @@ public class MemberFixture {
     public static Member createGraduatedStudent() {
         return new Member(
                 UUID.randomUUID(),
-                "20181234",
+                generateRandomStudentNumber(),
                 "password456!",
                 "이몽룡",
-                "leemongryong@example.com",
+                generateRandomEmail(),
                 true,
                 6,
                 2,
@@ -50,5 +55,14 @@ public class MemberFixture {
                 false
 
         );
+    }
+
+    private static String generateRandomEmail() {
+        return "hong" + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
+    }
+
+    private static String generateRandomStudentNumber() {
+        long randomNumber = ThreadLocalRandom.current().nextLong(1000000000L, 10000000000L);
+        return String.valueOf(randomNumber);
     }
 }
