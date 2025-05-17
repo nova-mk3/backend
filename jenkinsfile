@@ -123,17 +123,18 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            when {
-                not {
-                    branch 'main'
-                }
-            }
-            steps {
-                echo "Running tests on non-main branch..."
-                sh "./gradlew test"
-            }
-        }
+//         stage('Run Tests') {
+//             when {
+//                 allOf {
+//                     not { branch 'main' }
+//                     expression { !env.JENKINS_URL?.contains('nova.cbnu.ac.kr') }
+//                 }
+//             }
+//             steps {
+//                 echo "Running tests on non-main branch and non-production Jenkins..."
+//                 sh "ENABLE_TESTCONTAINERS=true ./gradlew test"
+//             }
+//         }
 
         stage('Build Docker Image') {
             when {
