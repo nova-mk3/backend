@@ -1,1 +1,1 @@
-./gradlew test --parallel
+./gradlew clean test --parallel
