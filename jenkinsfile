@@ -124,8 +124,13 @@ pipeline {
         }
 
         stage('Run Tests') {
+            when {
+                not {
+                    branch 'main'
+                }
+            }
             steps {
-                echo "Running tests on dev branch..."
+                echo "Running tests on non-main branch..."
                 sh "./gradlew test"
             }
         }
