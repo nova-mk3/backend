@@ -1,4 +1,4 @@
-package org.nova.backend.board.clubArchive.application.service;
+package org.nova.backend.board.common.application.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.nova.backend.board.common.application.port.out.BoardPersistencePort;
-import org.nova.backend.board.common.application.service.BoardService;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
@@ -23,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 @FastTest
 @ExtendWith(MockitoExtension.class)
-public class BoardUseCaseTest {
+class BoardServiceTest {
 
     @Mock
     private BoardPersistencePort boardPersistencePort;
@@ -50,8 +49,9 @@ public class BoardUseCaseTest {
 
         List<Board> boards = boardService.getAllBoards();
 
-        assertThat(boards).hasSize(2);
-        assertThat(boards).containsExactlyInAnyOrder(board1, board2);
+        assertThat(boards)
+                .hasSize(2)
+                .containsExactlyInAnyOrder(board1, board2);
     }
 
     @Test
@@ -60,9 +60,13 @@ public class BoardUseCaseTest {
 
         Board foundBoard = boardService.getBoardById(boardId1);
 
-        assertThat(foundBoard).isNotNull();
-        assertThat(foundBoard.getId()).isEqualTo(boardId1);
-        assertThat(foundBoard.getCategory()).isEqualTo(BoardCategory.INTEGRATED);
+        assertThat(foundBoard)
+                .isNotNull()
+                .extracting(Board::getId)
+                .isEqualTo(boardId1);
+
+        assertThat(foundBoard.getCategory())
+                .isEqualTo(BoardCategory.INTEGRATED);
     }
 
     @Test
