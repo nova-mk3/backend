@@ -1,15 +1,20 @@
 package org.nova.backend.board.common.application.service;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nova.backend.board.common.adapter.persistence.repository.FileRepository;
+import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
+import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.File;
+import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.member.adapter.repository.MemberRepository;
@@ -22,63 +27,46 @@ import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.notification.application.port.in.NotificationUseCase;
 import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.support.AbstractIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Testcontainers
 @Import(BasePostServiceTest.MockConfig.class)
-class BasePostServiceTest {
+class BasePostServiceTest extends AbstractIntegrationTest {
 
     @Autowired BasePostService basePostService;
     @Autowired MemberRepository memberRepository;
     @Autowired BoardRepository boardRepository;
     @Autowired FileRepository fileRepository;
+    @Autowired PostRepository postRepository;
     @Autowired BoardUseCase boardUseCase;
     @Autowired FileUseCase fileUseCase;
+    @Autowired EntityManager entityManager;
 
     private Member normalUser;
+    private Member normalUser2;
     private Member adminUser;
     private Board integratedBoard;
-
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withReuse(true);
-
-    @DynamicPropertySource
-    static void overrideProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-    }
 
     @BeforeEach
     void setUp() {
         ProfilePhoto profilePhoto = new ProfilePhoto(null, "test.jpg", "https://example.com/test.jpg");
         normalUser = MemberFixture.createStudent(profilePhoto);
+        normalUser2 = MemberFixture.createStudent(profilePhoto);
         adminUser = MemberFixture.createStudent(profilePhoto);
         adminUser.updateRole(Role.ADMINISTRATOR);
-        memberRepository.saveAll(List.of(normalUser, adminUser));
+        memberRepository.saveAll(List.of(normalUser, normalUser2, adminUser));
 
         integratedBoard = boardRepository.save(new Board(UUID.randomUUID(), BoardCategory.INTEGRATED));
+
+        when(boardUseCase.getBoardById(any(UUID.class))).thenReturn(integratedBoard);
 
         doAnswer(invocation -> {
             List<UUID> fileIds = invocation.getArgument(0);
@@ -89,12 +77,12 @@ class BasePostServiceTest {
 
     @Test
     @Transactional
-    void 제목이_NULL이면_예외발생() {
-        BasePostRequest request = new BasePostRequest("", "내용", PostType.FREE, null);
+    void 제목이_비어있으면_예외발생() {
+        BasePostRequest request = new BasePostRequest(" ", "내용", PostType.FREE, null);
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
 
-        assertThatThrownBy(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()))
-                .isInstanceOf(RuntimeException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()));
+        assertThat(thrown).isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("제목은 비어 있을 수 없습니다");
     }
 
@@ -124,8 +112,8 @@ class BasePostServiceTest {
         BasePostRequest request = new BasePostRequest("제목", null, PostType.FREE, null);
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
 
-        assertThatThrownBy(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()))
-                .isInstanceOf(RuntimeException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()));
+        assertThat(thrown).isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("내용은 비어 있을 수 없습니다.");
     }
 
@@ -160,8 +148,8 @@ class BasePostServiceTest {
         BasePostRequest request = new BasePostRequest("공지", "내용", PostType.NOTICE, null);
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
 
-        assertThatThrownBy(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()))
-                .isInstanceOf(RuntimeException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()));
+        assertThat(thrown).isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("공지사항은 관리자 또는 회장만 작성");
     }
 
@@ -181,8 +169,8 @@ class BasePostServiceTest {
         BasePostRequest request = new BasePostRequest("제목", "내용", PostType.NOTICE, null);
         when(boardUseCase.getBoardById(clubBoard.getId())).thenReturn(clubBoard);
 
-        assertThatThrownBy(() -> basePostService.createPost(clubBoard.getId(), request, adminUser.getId()))
-                .isInstanceOf(RuntimeException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.createPost(clubBoard.getId(), request, adminUser.getId()));
+        assertThat(thrown).isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("타입의 게시글을 저장할 수 없습니다");
     }
 
@@ -192,8 +180,8 @@ class BasePostServiceTest {
         BasePostRequest request = new BasePostRequest("제목", "내용", PostType.FREE, null);
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
 
-        assertThatThrownBy(() -> basePostService.createPost(integratedBoard.getId(), request, fakeUserId))
-                .isInstanceOf(RuntimeException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.createPost(integratedBoard.getId(), request, fakeUserId));
+        assertThat(thrown).isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("사용자를 찾을 수 없습니다");
     }
 
@@ -207,8 +195,8 @@ class BasePostServiceTest {
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
         when(fileUseCase.findFilesByIds(fileIds)).thenThrow(new BoardDomainException("파일을 찾을 수 없습니다"));
 
-        assertThatThrownBy(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()))
-                .isInstanceOf(BoardDomainException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()));
+        assertThat(thrown).isInstanceOf(BoardDomainException.class)
                 .hasMessageContaining("파일을 찾을 수 없습니다");
     }
 
@@ -222,8 +210,8 @@ class BasePostServiceTest {
         Member stranger = MemberFixture.createStudent(new ProfilePhoto(null, "s2", "url"));
         memberRepository.save(stranger);
 
-        assertThatThrownBy(() -> basePostService.deletePost(integratedBoard.getId(), post.getId(), stranger.getId()))
-                .isInstanceOf(BoardDomainException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.deletePost(integratedBoard.getId(), post.getId(), stranger.getId()));
+        assertThat(thrown).isInstanceOf(BoardDomainException.class)
                 .hasMessageContaining("권한이 없습니다");
     }
 
@@ -236,8 +224,8 @@ class BasePostServiceTest {
 
         basePostService.deletePost(integratedBoard.getId(), post.getId(), adminUser.getId());
 
-        assertThatThrownBy(() -> basePostService.getPostById(integratedBoard.getId(), post.getId()))
-                .isInstanceOf(BoardDomainException.class)
+        Throwable thrown = catchThrowable(() -> basePostService.getPostById(integratedBoard.getId(), post.getId()));
+        assertThat(thrown).isInstanceOf(BoardDomainException.class)
                 .hasMessageContaining("게시글을 찾을 수 없습니다.");
     }
 
@@ -257,6 +245,72 @@ class BasePostServiceTest {
         basePostService.updatePost(integratedBoard.getId(), post.getId(), update, normalUser.getId());
 
         assertThat(fileRepository.findById(file1.getId())).isNotPresent();
+    }
+
+    @Test
+    @Transactional
+    void 게시글에_좋아요_성공() {
+        BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
+        var post = basePostService.createPost(integratedBoard.getId(), request, normalUser.getId());
+        int count = basePostService.likePost(post.getId(), normalUser2.getId());
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    @Transactional
+    void 이미_좋아요한_사용자가_또_좋아요시_예외() {
+        BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
+        var post = basePostService.createPost(integratedBoard.getId(), request, normalUser.getId());
+        basePostService.likePost(post.getId(), normalUser2.getId());
+
+        Throwable thrown = catchThrowable(() -> basePostService.likePost(post.getId(), normalUser2.getId()));
+        assertThat(thrown).isInstanceOf(BoardDomainException.class)
+                .hasMessageContaining("이미 좋아요를 눌렀습니다.");
+    }
+
+    @Test
+    @Transactional
+    void 좋아요_취소_성공() {
+        BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.QNA, null);
+        var post = basePostService.createPost(integratedBoard.getId(), request, normalUser.getId());
+        basePostService.likePost(post.getId(), normalUser2.getId());
+
+        int count = basePostService.unlikePost(post.getId(), normalUser2.getId());
+        assertThat(count).isZero();
+    }
+
+    @Test
+    @Transactional
+    void 좋아요_하지_않은_상태에서_취소시_예외() {
+        BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
+        var post = basePostService.createPost(integratedBoard.getId(), request, normalUser.getId());
+
+        Throwable thrown = catchThrowable(() -> basePostService.unlikePost(post.getId(), normalUser2.getId()));
+        assertThat(thrown).isInstanceOf(BoardDomainException.class)
+                .hasMessageContaining("좋아요를 누르지 않은 게시글입니다.");
+    }
+
+    @Test
+    @Transactional
+    void 게시글_조회시_조회수_증가() {
+        BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
+        var post = basePostService.createPost(integratedBoard.getId(), request, normalUser.getId());
+
+        basePostService.getPostById(integratedBoard.getId(), post.getId());
+        basePostService.getPostById(integratedBoard.getId(), post.getId());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Post updated = postRepository.findById(post.getId()).get();
+        assertThat(updated.getViewCount()).isEqualTo(2);
+    }
+
+    @Test
+    @Transactional
+    void 게시판_타입별_최신글_조회() {
+        Map<PostType, List<BasePostSummaryResponse>> result = basePostService.getLatestPostsByType(integratedBoard.getId());
+        assertThat(result).containsKeys(PostType.QNA, PostType.FREE, PostType.NOTICE, PostType.INTRODUCTION);
     }
 
     @TestConfiguration
