@@ -24,6 +24,7 @@ import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.board.util.ValidationUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -53,6 +54,9 @@ public class PicturePostService implements PicturePostUseCase {
             PicturePostRequest request,
             UUID memberId
     ) {
+        ValidationUtil.requireNonBlank(request.getTitle(), "제목");
+        ValidationUtil.requireNonBlank(request.getContent(), "내용");
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -107,6 +111,9 @@ public class PicturePostService implements PicturePostUseCase {
             UpdatePicturePostRequest request,
             UUID memberId
     ) {
+        ValidationUtil.requireNonBlank(request.getTitle(), "제목");
+        ValidationUtil.requireNonBlank(request.getContent(), "내용");
+
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new PictureDomainException("게시글을 찾을 수 없습니다. ID: " + postId, HttpStatus.NOT_FOUND));
 

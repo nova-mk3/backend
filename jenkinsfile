@@ -125,8 +125,8 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                echo "Running tests on dev branch..."
-                sh "./gradlew test"
+                echo "Running tests on all branches"
+                sh "./gradlew clean test"
             }
         }
 

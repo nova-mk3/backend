@@ -2,6 +2,7 @@ package org.nova.backend.board.clubArchive.application.service;
 
 import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
 import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.board.util.ValidationUtil;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +54,14 @@ public class JokboPostService implements JokboPostUseCase {
     private final JokboPostMapper jokboPostMapper;
     private final SecurityUtil securityUtil;
 
+    private static final String MSG_NOT_FOUND_USER = "사용자를 찾을 수 없습니다.";
+    private static final String MSG_NO_UPDATE_PERMISSION = "게시글 수정 권한이 없습니다.";
+    private static final String MSG_NO_DELETE_PERMISSION = "게시글 삭제 권한이 없습니다.";
+    private static final String MSG_INVALID_CATEGORY = "족보 게시글은 'CLUB_ARCHIVE' 게시판에서만 작성할 수 있습니다.";
+    private static final String MSG_POST_NOT_FOUND = "게시글을 찾을 수 없습니다.";
+    private static final String MSG_JOKBO_NOT_FOUND = "족보 게시글을 찾을 수 없습니다.";
+    private static final String MSG_JOKBO_INFO_NOT_FOUND = "족보 게시글 정보를 찾을 수 없습니다.";
+
     /**
      * 족보 게시글 생성
      */
@@ -63,13 +72,16 @@ public class JokboPostService implements JokboPostUseCase {
             JokboPostRequest request,
             UUID memberId
     ) {
+        ValidationUtil.requireNonBlank(request.getTitle(), "제목");
+        ValidationUtil.requireNonBlank(request.getContent(), "내용");
+
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new MemberDomainException(MSG_NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
         Board board = boardUseCase.getBoardById(boardId);
 
         if (board.getCategory() != BoardCategory.CLUB_ARCHIVE) {
-            throw new BoardDomainException("족보 게시글은 'CLUB_ARCHIVE' 게시판에서만 작성할 수 있습니다.");
+            throw new BoardDomainException( MSG_INVALID_CATEGORY);
         }
 
         Post post =  new Post(
@@ -115,14 +127,17 @@ public class JokboPostService implements JokboPostUseCase {
             UpdateJokboPostRequest request,
             UUID memberId
     ) {
+        ValidationUtil.requireNonBlank(request.getTitle(), "제목");
+        ValidationUtil.requireNonBlank(request.getContent(), "내용");
+
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new BoardDomainException("족보 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
 
         JokboPost jokboPost = jokboPostPersistencePort.findByPost(post)
-                .orElseThrow(() -> new BoardDomainException("족보 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
 
         if (!post.getMember().getId().equals(memberId)) {
-            throw new BoardDomainException("게시글 수정 권한이 없습니다.");
+            throw new BoardDomainException(MSG_NO_UPDATE_PERMISSION);
         }
 
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
@@ -157,17 +172,17 @@ public class JokboPostService implements JokboPostUseCase {
             UUID memberId
     ) {
         Post post = postRepository.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_POST_NOT_FOUND));
 
         JokboPost jokboPost = jokboPostPersistencePort.findByPost(post)
-                .orElseThrow(() -> new BoardDomainException("족보 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_NOT_FOUND_USER));
 
         if (!post.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
             logger.warn("사용자 {}가 게시글 {}를 삭제하려 했으나 권한이 없습니다.", memberId, postId);
-            throw new BoardDomainException("게시글 삭제 권한이 없습니다.");
+            throw new BoardDomainException(MSG_NO_DELETE_PERMISSION);
         }
 
         List<UUID> fileIds = jokboPost.getPost().getFiles().stream().map(File::getId).toList();
@@ -189,10 +204,10 @@ public class JokboPostService implements JokboPostUseCase {
     ) {
         basePostPersistencePort.increaseViewCount(postId);
         Post post = postRepository.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException("족보 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
 
         JokboPost jokboPost = jokboPostPersistencePort.findByPostId(postId)
-                .orElseThrow(() -> new BoardDomainException("족보 게시글 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_INFO_NOT_FOUND));
 
         UUID memberId = securityUtil.getCurrentMemberIdOrNull();
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();

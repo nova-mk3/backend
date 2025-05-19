@@ -5,6 +5,7 @@ import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
 import org.nova.backend.board.common.application.dto.response.AllPostSummaryResponse;
 import org.nova.backend.board.common.application.mapper.AllPostMapper;
 import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.board.util.ValidationUtil;
 import org.nova.backend.notification.application.port.in.NotificationUseCase;
 import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
 import org.nova.backend.shared.constants.BoardErrorMessages;
@@ -58,6 +59,11 @@ public class BasePostService implements BasePostUseCase {
     private final AllPostMapper allPostMapper;
     private final NotificationUseCase notificationUseCase;
 
+    private static final String MSG_USER_NOT_FOUND = "사용자를 찾을 수 없습니다.";
+    private static final String MSG_POST_LIKE_DUPLICATE = "이미 좋아요를 눌렀습니다.";
+    private static final String MSG_POST_LIKE_NOT_FOUND = "좋아요를 누르지 않은 게시글입니다.";
+    private static final String MSG_UNAUTHORIZED_NOTICE = "공지사항은 관리자 또는 회장만 작성할 수 있습니다.";
+
     /**
      * 새로운 게시글과 첨부파일 저장
      *
@@ -72,11 +78,14 @@ public class BasePostService implements BasePostUseCase {
             BasePostRequest request,
             UUID memberId
     ) {
+        ValidationUtil.requireNonBlank(request.getTitle(), "제목");
+        ValidationUtil.requireNonBlank(request.getContent(), "내용");
+
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND));
 
         if (request.getPostType() == PostType.NOTICE && !boardSecurityChecker.isAdminOrPresident(member)) {
-            throw new UnauthorizedException("공지사항은 관리자 또는 회장만 작성할 수 있습니다.");
+            throw new UnauthorizedException(MSG_UNAUTHORIZED_NOTICE);
         }
 
         Board board = boardUseCase.getBoardById(boardId);
@@ -231,13 +240,13 @@ public class BasePostService implements BasePostUseCase {
             UUID memberId
     ) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND));
 
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
 
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent()) {
-            throw new BoardDomainException("이미 좋아요를 눌렀습니다.");
+            throw new BoardDomainException(MSG_POST_LIKE_DUPLICATE);
         }
 
         postLikePersistencePort.save(new PostLike(post, member));
@@ -266,7 +275,7 @@ public class BasePostService implements BasePostUseCase {
             UUID memberId
     ) {
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isEmpty()) {
-            throw new BoardDomainException("좋아요를 누르지 않은 게시글입니다.");
+            throw new BoardDomainException(MSG_POST_LIKE_NOT_FOUND);
         }
 
         postLikePersistencePort.deleteByPostIdAndMemberId(postId, memberId);
@@ -290,6 +299,9 @@ public class BasePostService implements BasePostUseCase {
             UpdateBasePostRequest request,
             UUID memberId
     ) {
+        ValidationUtil.requireNonBlank(request.getTitle(), "제목");
+        ValidationUtil.requireNonBlank(request.getContent(), "내용");
+
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
 
@@ -345,7 +357,7 @@ public class BasePostService implements BasePostUseCase {
         }
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND));
 
         if (!post.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
             logger.warn("사용자 {}가 게시글 {}를 삭제하려 했으나 권한이 없습니다.", memberId, postId);
