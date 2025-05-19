@@ -43,6 +43,7 @@ public class Notification {
     private UUID targetId;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private PostType targetType;
 
     @Column(nullable = false)
