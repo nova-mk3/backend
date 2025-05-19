@@ -9,12 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Set;
-import java.util.logging.Filter;
-import java.util.logging.LogRecord;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class CORSFilter implements Filter, jakarta.servlet.Filter {
+public class CORSFilter implements jakarta.servlet.Filter {
 
     private static final Set<String> ALLOWED_ORIGINS = Set.of(
             "https://nova.cbnu.ac.kr",
@@ -43,7 +41,7 @@ public class CORSFilter implements Filter, jakarta.servlet.Filter {
         }
 
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type");
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
@@ -58,10 +56,5 @@ public class CORSFilter implements Filter, jakarta.servlet.Filter {
 
     private boolean isSafeOrigin(String origin) {
         return origin != null && !origin.contains("\r") && !origin.contains("\n");
-    }
-
-    @Override
-    public boolean isLoggable(LogRecord record) {
-        return false;
     }
 }
