@@ -4,7 +4,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.suggestion.application.port.out.SuggestionPostPersistencePort;
-import org.nova.backend.mypage.application.dto.mapper.MyPageMapper;
+import org.nova.backend.mypage.application.mapper.MyPageMapper;
 import org.nova.backend.mypage.application.dto.response.MyPostsResponse;
 import org.nova.backend.mypage.application.dto.response.MySuggestionPostResponse;
 import org.nova.backend.mypage.application.port.in.MyPageUseCase;

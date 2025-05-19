@@ -1,4 +1,4 @@
-package org.nova.backend.mypage.application.dto.mapper;
+package org.nova.backend.mypage.application.mapper;
 
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.suggestion.domain.model.entity.SuggestionPost;
