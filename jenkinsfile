@@ -108,9 +108,16 @@ pipeline {
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                echo "Running tests on all branches"
+                sh "./gradlew test"
+            }
+        }
+
         stage('Build JAR') {
             steps {
-                sh "./gradlew clean build --no-daemon"
+                sh "./gradlew build -x test --no-daemon"
             }
         }
 
@@ -120,13 +127,6 @@ pipeline {
             }
             steps {
                 sh 'cp .env build/libs/.env'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                echo "Running tests on all branches"
-                sh "./gradlew test"
             }
         }
 
