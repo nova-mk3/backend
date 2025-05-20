@@ -16,5 +16,8 @@ spring:
     livereload:
       enabled: false
 
+cookie:
+  secure: true
+
 app:
   domain: https://nova.cbnu.ac.kr
