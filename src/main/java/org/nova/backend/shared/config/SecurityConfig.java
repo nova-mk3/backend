@@ -8,6 +8,7 @@ import org.nova.backend.shared.jwt.JWTFilter;
 import org.nova.backend.shared.jwt.JWTUtil;
 import org.nova.backend.shared.security.CORSFilter;
 import org.nova.backend.shared.security.LoginFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,6 +33,9 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+
+    @Value("${cookie.secure}")
+    private boolean isSecureCookie;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -90,7 +94,12 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+                .addFilterAt(
+                        new LoginFilter(
+                                authenticationManager(authenticationConfiguration),
+                                jwtUtil,
+                                isSecureCookie
+                        ),
                         UsernamePasswordAuthenticationFilter.class);
 
         http
