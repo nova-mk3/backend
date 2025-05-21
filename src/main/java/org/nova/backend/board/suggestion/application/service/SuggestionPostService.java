@@ -1,5 +1,6 @@
 package org.nova.backend.board.suggestion.application.service;
 
+import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.notification.application.port.in.NotificationUseCase;
 import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,7 +166,7 @@ public class SuggestionPostService implements SuggestionPostUseCase {
                 post.getMember().getId(),
                 EventType.SUGGESTION_ANSWERED,
                 post.getId(),
-                null,
+                PostType.SUGGESTION,
                 admin.getName()
         );
 
