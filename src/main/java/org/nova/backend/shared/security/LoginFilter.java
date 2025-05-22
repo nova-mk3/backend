@@ -24,10 +24,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final boolean isSecureCookie;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+    public LoginFilter(
+            AuthenticationManager authenticationManager,
+            JWTUtil jwtUtil,
+            boolean isSecureCookie
+    ) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.isSecureCookie = isSecureCookie;
 
         setFilterProcessesUrl("/api/v1/members/login");
     }
@@ -71,8 +77,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Cookie cookie = new Cookie("AUTH_TOKEN", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 10); // 10시간
-        response.addCookie(cookie);
+        cookie.setMaxAge(60 * 60 * 5); // 5시간
+
+        response.setHeader("Set-Cookie", String.format(
+                "AUTH_TOKEN=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Strict%s",
+                token, 60 * 60 * 5,
+                isSecureCookie ? "; Secure" : ""
+        ));
     }
 
     /*

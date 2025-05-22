@@ -16,6 +16,9 @@ spring:
     livereload:
       enabled: false
 
+cookie:
+  secure: false
+
 logging:
   level:
     org.springframework.security: DEBUG

@@ -55,6 +55,9 @@ jwt:
   secret:
     key: ${JWT_SECRET_KEY}
 
+cookie:
+  same-site: Strict
+
 springdoc:
   api-docs:
     enabled: true
