@@ -18,7 +18,10 @@ public class MemberMapper {
 
     private MemberProfilePhotoMapper profilePhotoMapper;
 
-    public Member toEntity(PendingMember pendingMember, Graduation graduation) {
+    public Member toEntity(
+            PendingMember pendingMember,
+            Graduation graduation
+    ) {
         return new Member(
                 UUID.randomUUID(),
                 pendingMember.getStudentNumber(),
@@ -29,6 +32,7 @@ public class MemberMapper {
                 pendingMember.getGrade(),
                 pendingMember.getSemester(),
                 pendingMember.isAbsence(),
+                false,
                 pendingMember.getProfilePhoto(),
                 pendingMember.getPhone(),
                 pendingMember.getIntroduction(),
@@ -39,7 +43,10 @@ public class MemberMapper {
         );
     }
 
-    public MemberResponse toResponse(Member member, ProfilePhoto profilePhoto) {
+    public MemberResponse toResponse(
+            Member member,
+            ProfilePhoto profilePhoto
+    ) {
         String gradeStr = formatGrade(member.getGrade());
         String semesterStr = member.getSemester() == 0 ? "" : member.getSemester() + "학기";
 
@@ -78,8 +85,11 @@ public class MemberMapper {
         );
     }
 
-    public MemberWithGraduationYearResponse toResponseWithGraduationYear(Member member, ProfilePhoto profilePhoto,
-                                                                         int graduationYear) {
+    public MemberWithGraduationYearResponse toResponseWithGraduationYear(
+            Member member,
+            ProfilePhoto profilePhoto,
+            int graduationYear
+    ) {
         String gradeStr = formatGrade(member.getGrade());
         String semesterStr = member.getSemester() == 0 ? "" : member.getSemester() + "학기";
 

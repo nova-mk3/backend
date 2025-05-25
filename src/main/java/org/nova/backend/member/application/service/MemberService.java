@@ -322,22 +322,30 @@ public class MemberService {
      *
      * @param profileMemberId       조회할 프로필 Member id
      * @param loginMemberId         현재 로그인한 Member id
-     * @param updatePasswordRequest 비밀번호 요청 객체
+     * @param request 비밀번호 요청 객체
      */
     @Transactional
-    public void updatePassword(UUID profileMemberId, UUID loginMemberId, UpdatePasswordRequest updatePasswordRequest) {
+    public void updatePassword(UUID profileMemberId, UUID loginMemberId, UpdatePasswordRequest request) {
         validateMemberAuthorize(profileMemberId, loginMemberId);
+        Member member = findByMemberId(loginMemberId);
 
-        Member currendMember = findByMemberId(loginMemberId);
-        checkPassword(currendMember, updatePasswordRequest.getCurrentPassword());
+        if (member.isTempPassword()) {
+            if (!request.getNewPassword().equals(request.getCheckNewPassword())) {
+                throw new MemberDomainException("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+            }
 
-        if (!updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getCheckNewPassword())) {
+            member.updatePasswordWithTemp(bCryptPasswordEncoder.encode(request.getNewPassword()));
+            return;
+        }
+
+        checkPassword(member, request.getCurrentPassword());
+
+        if (!request.getNewPassword().equals(request.getCheckNewPassword())) {
             throw new MemberDomainException("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        currendMember.updatePassword(bCryptPasswordEncoder.encode(updatePasswordRequest.getNewPassword()));
+        member.updatePassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
     }
-
 
     /**
      * 회원 이메일로 이메일 변경을 위한 인증코드 전송
@@ -474,19 +482,4 @@ public class MemberService {
         member.updateGrade(grade);  //학년 변경
         return member;
     }
-
-//    /**
-//     * 이름으로 검색
-//     *
-//     * @param name 이름
-//     * @return 검색된 member 리스트
-//     */
-//    public List<MemberResponse> findMembersByName(String name) {
-//        List<Member> memberList = memberRepository.findAllMembersByName(adminStudentNumber, name);
-//
-//        return memberList.stream().map(member -> {
-//            ProfilePhoto profilePhoto = profilePhotoFileService.getProfilePhoto(member.getProfilePhoto());
-//            return memberMapper.toResponse(member, profilePhoto);
-//        }).toList();
-//    }
 }

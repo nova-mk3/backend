@@ -89,4 +89,25 @@ public @interface AuthApiDocument {
     @Retention(RetentionPolicy.RUNTIME)
     @interface WithdrawalApiDoc {
     }
+
+    @Operation(
+            summary = "비밀번호 초기화",
+            description = """
+        사용자가 이름과 이메일을 입력하여 임시 비밀번호를 요청하면, 등록된 회원 정보와 일치하는 경우 
+        해당 이메일 주소로 임시 비밀번호를 발급하여 전송합니다.
+        
+        ✔️ 발급된 임시 비밀번호는 10자리 랜덤 문자열이며, 기존 비밀번호를 대체하여 저장됩니다.
+        ✔️ 사용자의 비밀번호는 암호화되어 저장되며, `isTempPassword` 플래그가 true로 설정됩니다.
+        ✔️ 로그인 시 `isTempPassword`가 true인 사용자는 비밀번호 변경 페이지로 리다이렉트해야 합니다.        
+        """,
+            tags = {"Password Reset API"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "임시 비밀번호 이메일 전송 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface PasswordResetApiDoc {}
 }

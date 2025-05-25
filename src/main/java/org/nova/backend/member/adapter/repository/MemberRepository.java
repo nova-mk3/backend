@@ -15,9 +15,9 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
     @Query("select m from Member m where m.isDeleted=false and m.role IS NOT NULL and m.studentNumber!= :adminStudentNumber")
     List<Member> findAllMembers(@Param("adminStudentNumber") String adminStudentNumber);
 
-//    @Query("select m from Member m where m.name like %:name% and m.isDeleted=false and m.role IS NOT NULL and m.studentNumber!= :adminStudentNumber")
-//    List<Member> findAllMembersByName(@Param("adminStudentNumber") String adminStudentNumber,
-//                                      @Param("name") String name);
+    // 이름과 이메일로 회원 조회 (비밀번호 찾기용)
+    @Query("SELECT m FROM Member m WHERE m.name = :name AND m.email = :email AND m.isDeleted = false")
+    Optional<Member> findByNameAndEmail(@Param("name") String name, @Param("email") String email);
 
     @Query("select m from Member m left join fetch m.graduation where m.id=:id and m.isDeleted=false")
     Optional<Member> findMemberById(@Param("id") UUID member);
