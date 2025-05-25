@@ -239,6 +239,7 @@ public class SecurityConfig {
         auth
                 .requestMatchers(HttpMethod.POST, "/api/v1/members").permitAll()  //회원가입
                 .requestMatchers(HttpMethod.POST, "/api/v1/members/profile-photo").permitAll()  //회원가입시 프로필 사진 업로드
+                .requestMatchers(HttpMethod.POST, "/api/v1/members/reset-password").permitAll()  //비밀번호 초기화
                 .requestMatchers( "/api/v1/members/simple-profile").permitAll()  //회원 간단 프로필 조회
                 .requestMatchers("/api/v1/members/login").permitAll()  //로그인
                 // 회원가입 시 이메일 인증
