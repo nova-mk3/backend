@@ -44,6 +44,9 @@ public class Member {
 
     private boolean isAbsence;
 
+    @Column(nullable = false)
+    private boolean isTempPassword;
+
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "profile_photo_id")
     private ProfilePhoto profilePhoto;
@@ -150,4 +153,13 @@ public class Member {
         this.role = Role.GENERAL;
     }
 
+    public void resetPasswordWithTemp(String encodedTempPassword) {
+        this.password = encodedTempPassword;
+        this.isTempPassword = true;
+    }
+
+    public void updatePasswordWithTemp(String newPassword) {
+        this.password = newPassword;
+        this.isTempPassword = false;
+    }
 }
