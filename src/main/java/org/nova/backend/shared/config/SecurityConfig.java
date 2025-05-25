@@ -8,6 +8,7 @@ import org.nova.backend.shared.jwt.JWTFilter;
 import org.nova.backend.shared.jwt.JWTUtil;
 import org.nova.backend.shared.security.CORSFilter;
 import org.nova.backend.shared.security.LoginFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -25,18 +26,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.util.Set;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final String POST_BASE = "/api/v1/boards/{boardId}/posts";
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    @Value("${cookie.secure}")
+    private boolean isSecureCookie;
 
-        return configuration.getAuthenticationManager();
+    @Bean
+    public AuthenticationManager authenticationManager() throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
@@ -46,7 +50,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            AuthenticationManager authManager
+    ) throws Exception {
 
         http
                 .csrf(AbstractHttpConfigurer::disable);
@@ -58,7 +65,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable);
 
         http
-                .authorizeHttpRequests((auth) -> {
+                .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/files/public/**").permitAll();
 
                     //건의 게시판 관련 권한
@@ -90,11 +97,16 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+                .addFilterAt(
+                        new LoginFilter(
+                                authManager,
+                                jwtUtil,
+                                isSecureCookie
+                        ),
                         UsernamePasswordAuthenticationFilter.class);
 
         http
-                .sessionManagement((session) -> session
+                .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
@@ -166,11 +178,11 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // 로그인한 사용자만 접근 가능한 API (일반 게시글 작성, 수정)
-                .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/posts")
+                .requestMatchers(HttpMethod.POST, POST_BASE)
                 .authenticated()
 
                 // 공지사항 게시판의 게시글 작성 & 수정 (관리자 & 회장만)
-                .requestMatchers(HttpMethod.POST, "/api/v1/boards/{boardId}/posts")
+                .requestMatchers(HttpMethod.POST, POST_BASE)
                 .hasAnyRole(Role.ADMINISTRATOR.toString(), Role.CHAIRMAN.toString());
     }
 

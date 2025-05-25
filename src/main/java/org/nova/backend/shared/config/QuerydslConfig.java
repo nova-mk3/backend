@@ -5,7 +5,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class QuerydslConfig {
 
     private final EntityManager entityManager;

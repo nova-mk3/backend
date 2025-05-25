@@ -40,5 +40,8 @@ admin:
     number: test-admin
   password: admin1234
 
+cookie:
+  secure: false
+
 app:
   domain: http://localhost:9999
