@@ -50,6 +50,7 @@ public class AdminInitializer implements CommandLineRunner {
                 0,
                 0,
                 false,
+                false,
                 null,
                 "",
                 "노바 홈페이지 관리자 입니다*^^*.",
