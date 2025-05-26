@@ -3,6 +3,7 @@ package org.nova.backend.auth.adapter.web;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.nova.backend.auth.application.dto.response.LoginResponse;
 
 @Tag(name = "회원 인증 API", description = "회원가입 로그인 API")
 public @interface AuthApiDocument {
@@ -56,15 +58,19 @@ public @interface AuthApiDocument {
 
     @Operation(summary = "로그인", description = "회원가입된 정보로 본인 인증 로그인")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "로그인 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class))
+            ),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
             @ApiResponse(responseCode = "401", description = "로그인 실패. 학번 또는 비밀번호를 다시 확인해주세요."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @interface LoginApiDoc {
-    }
+    @interface LoginApiDoc {}
 
     @Operation(summary = "로그아웃", description = "로그인한 정보를 삭제합니다. AUTH_TOKEN 담긴 쿠키 삭제")
     @ApiResponses({
@@ -99,8 +105,7 @@ public @interface AuthApiDocument {
         ✔️ 발급된 임시 비밀번호는 10자리 랜덤 문자열이며, 기존 비밀번호를 대체하여 저장됩니다.
         ✔️ 사용자의 비밀번호는 암호화되어 저장되며, `isTempPassword` 플래그가 true로 설정됩니다.
         ✔️ 로그인 시 `isTempPassword`가 true인 사용자는 비밀번호 변경 페이지로 리다이렉트해야 합니다.        
-        """,
-            tags = {"Password Reset API"}
+        """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "임시 비밀번호 이메일 전송 성공"),
