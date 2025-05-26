@@ -192,6 +192,11 @@ public class MemberService {
     public MyPageMemberResponse getMemberProfile(UUID profileMemberId, UUID loginMemberId) {
         Member profileMember = findByMemberId(profileMemberId);
         boolean isLoginMember = isLoginMember(profileMemberId, loginMemberId);
+
+        if (!isLoginMember && profileMember.getStudentNumber().equals(adminStudentNumber)) {
+            throw new MemberDomainException("관리자 프로필은 조회할 수 없습니다.", HttpStatus.FORBIDDEN);
+        }
+
         if (!isLoginMember) {
             findByMemberId(loginMemberId);
         }
