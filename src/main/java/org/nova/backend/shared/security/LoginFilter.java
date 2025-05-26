@@ -67,13 +67,35 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication authentication) {
+    protected void successfulAuthentication(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain,
+            Authentication authentication
+    ) throws IOException {
         log.info("로그인 성공");
 
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         String token = createAuthorizationToken(authentication);
 
-        //쿠키에 auth 토큰 담기
+        // JSON 응답 추가
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        boolean isTempPassword = customUserDetails.isTempPassword();
+
+        String jsonResponse = String.format("""
+        {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "message": "로그인 성공",
+                "tempPassword": %s
+            }
+        }
+        """, isTempPassword);
+
+        //헤더 설정
         Cookie cookie = new Cookie("AUTH_TOKEN", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
@@ -84,6 +106,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 token, 60 * 60 * 5,
                 isSecureCookie ? "; Secure" : ""
         ));
+
+        response.getWriter().write(jsonResponse);
     }
 
     /*
