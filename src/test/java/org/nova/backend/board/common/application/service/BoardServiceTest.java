@@ -2,6 +2,7 @@ package org.nova.backend.board.common.application.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,6 +45,7 @@ class BoardServiceTest {
     }
 
     @Test
+    @DisplayName("모든 게시판을 조회할 수 있다")
     void 게시판_전체_조회() {
         when(boardPersistencePort.findAllBoards()).thenReturn(List.of(board1, board2));
 
@@ -55,6 +57,7 @@ class BoardServiceTest {
     }
 
     @Test
+    @DisplayName("게시판 ID로 특정 게시판을 조회할 수 있다")
     void 게시판_ID로_조회() {
         when(boardPersistencePort.findById(boardId1)).thenReturn(Optional.of(board1));
 
@@ -70,6 +73,7 @@ class BoardServiceTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 게시판 ID로 조회 시 예외가 발생한다")
     void 존재하지_않는_게시판_조회시_예외발생() {
         UUID randomBoardId = UUID.randomUUID();
         when(boardPersistencePort.findById(randomBoardId)).thenReturn(Optional.empty());
