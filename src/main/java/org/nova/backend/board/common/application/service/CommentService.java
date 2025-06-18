@@ -80,18 +80,14 @@ public class CommentService implements CommentUseCase {
 
         Post post = comment.getPost();
 
-        int deletedCommentCount = 1;
-        List<Comment> childComments = commentPersistencePort.findAllByParentId(commentId);
-        deletedCommentCount += childComments.size();
-
-        for (Comment childComment : childComments) {
-            commentPersistencePort.deleteById(childComment.getId());
-        }
-
+        List<Comment> children = commentPersistencePort.findAllByParentId(commentId);
+        children.forEach(c -> commentPersistencePort.deleteById(c.getId()));
         commentPersistencePort.deleteById(commentId);
 
-        post.decrementCommentCount(deletedCommentCount);
-        basePostPersistencePort.save(post);
+        post.getComments().removeAll(children);
+        post.getComments().remove(comment);
+
+        post.decrementCommentCount(children.size() + 1);
     }
 
 
@@ -119,6 +115,7 @@ public class CommentService implements CommentUseCase {
 
         Comment comment = commentMapper.toEntity(request, post, member, parentComment);
         comment = commentPersistencePort.save(comment);
+        post.getComments().add(comment);
 
         if (parentComment == null) {
             // 일반 댓글 → 게시글 작성자에게 알림
@@ -146,7 +143,6 @@ public class CommentService implements CommentUseCase {
         }
 
         post.incrementCommentCount();
-        basePostPersistencePort.save(post);
 
         List<Comment> allComments = commentPersistencePort.findAllByPostId(postId);
 

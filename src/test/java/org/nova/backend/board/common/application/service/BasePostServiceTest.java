@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.nova.backend.board.common.adapter.persistence.repository.FileRepository;
 import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
@@ -76,6 +77,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시글 작성 시 제목이 비어있으면 예외가 발생해야 한다")
     @Transactional
     void 제목이_비어있으면_예외발생() {
         BasePostRequest request = new BasePostRequest(" ", "내용", PostType.FREE, null);
@@ -87,6 +89,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("파일이 포함된 게시글 작성이 성공적으로 이루어져야 한다")
     @Transactional
     void 파일이_포함된_게시글_작성_성공() {
         File file1 = fileRepository.save(new File(null, "file1", "/path/file1", null, 0));
@@ -107,6 +110,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시글 작성 시 내용이 NULL이면 예외가 발생해야 한다")
     @Transactional
     void 내용이_NULL이면_예외발생() {
         BasePostRequest request = new BasePostRequest("제목", null, PostType.FREE, null);
@@ -118,6 +122,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("동일한 유저가 같은 제목으로 여러 번 게시글을 작성할 수 있어야 한다")
     @Transactional
     void 동일한_유저가_같은_제목으로_여러번_게시글_작성_가능() {
         BasePostRequest request = new BasePostRequest("중복제목", "첫번째 내용", PostType.FREE, null);
@@ -132,6 +137,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("일반 유저가 FREE 타입 게시글 작성이 성공적으로 이루어져야 한다")
     @Transactional
     void 일반유저가_FREE_게시글_작성_성공() {
         BasePostRequest request = new BasePostRequest("제목", "내용", PostType.FREE, null);
@@ -144,6 +150,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("일반 유저가 NOTICE 타입 게시글 작성 시 예외가 발생해야 한다")
     void 일반유저가_NOTICE_작성시_예외발생() {
         BasePostRequest request = new BasePostRequest("공지", "내용", PostType.NOTICE, null);
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
@@ -154,6 +161,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("관리자 사용자가 NOTICE 타입 게시글 작성이 성공적으로 이루어져야 한다")
     void 관리자_사용자가_NOTICE_작성_성공() {
         BasePostRequest request = new BasePostRequest("관리자공지", "내용", PostType.NOTICE, null);
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
@@ -164,6 +172,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("잘못된 게시판 타입으로 게시글 작성 시 예외가 발생해야 한다")
     void 잘못된_게시판_타입이면_예외() {
         Board clubBoard = boardRepository.save(new Board(UUID.randomUUID(), BoardCategory.CLUB_ARCHIVE));
         BasePostRequest request = new BasePostRequest("제목", "내용", PostType.NOTICE, null);
@@ -175,6 +184,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 사용자로 게시글 작성 시 예외가 발생해야 한다")
     void 존재하지_않는_사용자면_예외() {
         UUID fakeUserId = UUID.randomUUID();
         BasePostRequest request = new BasePostRequest("제목", "내용", PostType.FREE, null);
@@ -186,6 +196,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 파일 ID로 게시글 작성 시 예외가 발생해야 한다")
     @Transactional
     void 존재하지_않는_파일ID_포함시_예외발생() {
         UUID fakeFileId = UUID.randomUUID();
@@ -201,6 +212,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시글 삭제 시 작성자가 아니고 관리자도 아닌 경우 예외가 발생해야 한다")
     @Transactional
     void 게시글_삭제_작성자가_아니고_관리자도_아니면_예외() {
         BasePostRequest request = new BasePostRequest("삭제 테스트", "내용", PostType.FREE, null);
@@ -216,6 +228,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시글 삭제 시 관리자는 본인 글이 아니어도 삭제가 가능해야 한다")
     @Transactional
     void 게시글_삭제_관리자는_본인글_아니어도_삭제_가능() {
         BasePostRequest request = new BasePostRequest("삭제 테스트", "내용", PostType.FREE, null);
@@ -230,6 +243,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시글 수정 시 파일 삭제가 정상적으로 이루어져야 한다")
     @Transactional
     void 게시글_수정_파일_삭제_정상작동() {
         File file1 = fileRepository.save(new File(null, "file1", "/path/file1", null, 0));
@@ -248,6 +262,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시글에 좋아요가 성공적으로 추가되어야 한다")
     @Transactional
     void 게시글에_좋아요_성공() {
         BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
@@ -257,6 +272,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("이미 좋아요한 사용자가 다시 좋아요 시도 시 예외가 발생해야 한다")
     @Transactional
     void 이미_좋아요한_사용자가_또_좋아요시_예외() {
         BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
@@ -269,6 +285,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("좋아요 취소가 성공적으로 이루어져야 한다")
     @Transactional
     void 좋아요_취소_성공() {
         BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.QNA, null);
@@ -280,6 +297,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("좋아요하지 않은 상태에서 취소 시도 시 예외가 발생해야 한다")
     @Transactional
     void 좋아요_하지_않은_상태에서_취소시_예외() {
         BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
@@ -291,6 +309,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시글 조회 시 조회수가 정상적으로 증가해야 한다")
     @Transactional
     void 게시글_조회시_조회수_증가() {
         BasePostRequest request = new BasePostRequest("안녕하세요", "내용", PostType.INTRODUCTION, null);
@@ -307,6 +326,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("게시판 타입별 최신글 조회가 정상적으로 이루어져야 한다")
     @Transactional
     void 게시판_타입별_최신글_조회() {
         Map<PostType, List<BasePostSummaryResponse>> result = basePostService.getLatestPostsByType(integratedBoard.getId());
