@@ -17,12 +17,12 @@ public class NotificationCleanupScheduler {
     private final NotificationRepository notificationRepository;
 
     /**
-     * 매일 새벽 3시에 읽은 알림 중 30일 이상 지난 것 삭제
+     * 매일 새벽 3시에 읽은 알림 중 6개월 이상 지난 것 삭제
      */
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void cleanupOldReadNotifications() {
-        LocalDateTime threshold = LocalDateTime.now().minusDays(30);
+        LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
         int deleted = notificationRepository.deleteOldReadNotifications(threshold);
         if (deleted > 0) {
             log.info("[알림 정리 배치] {}개의 읽은 알림 삭제 완료", deleted);

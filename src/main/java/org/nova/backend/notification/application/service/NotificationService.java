@@ -46,9 +46,6 @@ public class NotificationService implements NotificationUseCase {
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         String message = NotificationMessageBuilder.build(eventType, actorName);
-        if (message == null) {
-            message = eventType.getMessageTemplate();
-        }
 
         Notification notification = new Notification(
                 UUID.randomUUID(),
