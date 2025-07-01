@@ -219,7 +219,6 @@ public class BasePostService implements BasePostUseCase {
             UUID boardId,
             UUID postId
     ) {
-
         basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
                 .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
