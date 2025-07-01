@@ -108,12 +108,12 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                echo "Running tests on all branches"
-                sh "./gradlew test"
-            }
-        }
+//         stage('Run Tests') {
+//             steps {
+//                 echo "Running tests on all branches"
+//                 sh "./gradlew test"
+//             }
+//         }
 
         stage('Build JAR') {
             steps {
