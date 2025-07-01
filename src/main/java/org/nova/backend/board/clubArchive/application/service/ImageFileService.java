@@ -21,9 +21,6 @@ import org.springframework.stereotype.Service;
 public class ImageFileService {
     private final FileUseCase fileUseCase;
 
-    @Value("${file.storage.path}")
-    private String baseFileStoragePath;
-
     @Value("${app.domain}")
     private String appDomain;
 
