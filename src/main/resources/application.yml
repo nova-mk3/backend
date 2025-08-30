@@ -37,6 +37,11 @@ spring:
       max-file-size: 500MB
       max-request-size: 500MB
 
+management:
+  health:
+    mail:
+      enabled: false
+
 file:
   storage:
     path: ${FILE_STORAGE_PATH}
