@@ -2,6 +2,7 @@ package org.nova.backend.shared.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.nova.backend.shared.jwt.JWTFilter;
@@ -23,9 +24,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
-
-import java.util.Set;
 
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
@@ -68,9 +66,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/files/public/**").permitAll();
-
-                    auth.requestMatchers("/actuator/prometheus")
-                            .access(new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"));
+                    auth.requestMatchers("/actuator/prometheus").permitAll();
 
                     //건의 게시판 관련 권한
                     configureSuggestionBoardPermissions(auth);
