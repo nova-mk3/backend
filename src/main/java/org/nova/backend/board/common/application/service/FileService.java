@@ -1,26 +1,20 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
-import org.nova.backend.board.util.ImageOptimizerUtil;
-import org.nova.backend.member.domain.exception.MemberDomainException;
-import org.nova.backend.shared.constants.FilePathConstants;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.nova.backend.board.util.FileStorageUtil;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
@@ -29,13 +23,22 @@ import org.nova.backend.board.common.application.port.out.FilePersistencePort;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
+import org.nova.backend.board.util.FileCacheKeyConstants;
+import org.nova.backend.board.util.FileStorageUtil;
 import org.nova.backend.board.util.FileUtil;
+import org.nova.backend.board.util.ImageOptimizerUtil;
+import org.nova.backend.board.util.ImageOptimizerUtil.ImageCompressResult;
 import org.nova.backend.member.adapter.repository.MemberRepository;
+import org.nova.backend.member.domain.exception.MemberDomainException;
+import org.nova.backend.shared.constants.FilePathConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -126,12 +129,12 @@ public class FileService implements FileUseCase {
         String storagePath = getStoragePath();
 
         MultipartFile firstFile = files.getFirst();
-        FileResponse firstFileResponse = processFileUpload(firstFile, storagePath, postType, true);
+        FileResponse firstFileResponse = processFileUpload(firstFile, storagePath, postType);
 
         List<CompletableFuture<FileResponse>> futures = files.stream()
                 .skip(1)
                 .map(file -> CompletableFuture.supplyAsync(() ->
-                        processFileUpload(file, storagePath, postType, false), executor))
+                        processFileUpload(file, storagePath, postType), executor))
                 .toList();
 
         List<FileResponse> result = futures.stream()
@@ -150,8 +153,7 @@ public class FileService implements FileUseCase {
     private FileResponse processFileUpload(
             MultipartFile file,
             String storagePath,
-            PostType postType,
-            boolean isSynchronous
+            PostType postType
     ) {
         String originalFileName = file.getOriginalFilename();
         String extension = FileUtil.getFileExtension(originalFileName);
@@ -165,14 +167,10 @@ public class FileService implements FileUseCase {
         savedFile = filePersistencePort.save(savedFile);
 
         if (postType == PostType.PICTURES) {
+            copyFileToPublic(savedFilePath, storagePath, fileId, extension);
             redisTemplate.opsForValue().set("upload:" + fileId, "uploading");
-
-            if (isSynchronous) {
-                compressImageSync(fileId, savedFilePath, storagePath, extension);
-            } else {
-                CompletableFuture.runAsync(() ->
-                        compressImageAsync(fileId, savedFilePath, storagePath, extension), executor);
-            }
+            CompletableFuture.runAsync(() ->
+                    compressImageAsync(fileId, savedFilePath, storagePath, extension), executor);
         }
 
         return new FileResponse(
@@ -180,6 +178,24 @@ public class FileService implements FileUseCase {
                 savedFile.getOriginalFilename(),
                 "/api/v1/files/" + savedFile.getId() + "/download"
         );
+    }
+
+    private void copyFileToPublic(
+            String sourcePath,
+            String storagePath,
+            UUID fileId,
+            String extension
+    ) {
+        Path source = Paths.get(sourcePath);
+        Path publicDir = Paths.get(storagePath, FilePathConstants.PUBLIC_FOLDER);
+
+        try {
+            Files.createDirectories(publicDir);
+            Path target = publicDir.resolve(fileId + "." + extension);
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new FileDomainException("공개용 이미지 복사 중 오류가 발생했습니다.", e);
+        }
     }
 
     private void compressImageAsync(
@@ -197,34 +213,17 @@ public class FileService implements FileUseCase {
             Path protectedPath = Paths.get(originalFilePath);
             Path publicDir = Paths.get(storagePath, FilePathConstants.PUBLIC_FOLDER);
 
-            ImageOptimizerUtil.compressToOriginalExtension(protectedPath, publicDir, fileId, extension);
+            ImageCompressResult compressResult = ImageOptimizerUtil.compressToOriginalExtension(protectedPath, publicDir, fileId, extension);
+
+            redisTemplate.opsForValue().set(
+                    FileCacheKeyConstants.imageMetaKey(fileId),
+                    compressResult.originalWidth() + "x" + compressResult.originalHeight()
+            );
 
             redisTemplate.opsForValue().set("upload:" + fileId, "done");
             logger.info("[압축 완료] fileId={}", fileId);
         } catch (Exception e) {
             logger.error("이미지 압축 중 오류", e);
-            redisTemplate.opsForValue().set("upload:" + fileId, "error");
-        }
-    }
-
-    private void compressImageSync(
-            UUID fileId,
-            String originalFilePath,
-            String storagePath,
-            String extension
-    ) {
-        try {
-            redisTemplate.opsForValue().set("upload:" + fileId, "compressing");
-
-            Path protectedPath = Paths.get(originalFilePath);
-            Path publicDir = Paths.get(storagePath, FilePathConstants.PUBLIC_FOLDER);
-
-            ImageOptimizerUtil.compressToOriginalExtension(protectedPath, publicDir, fileId, extension);
-
-            redisTemplate.opsForValue().set("upload:" + fileId, "done");
-            logger.info("[동기 압축 완료] 썸네일 fileId={}", fileId);
-        } catch (Exception e) {
-            logger.error("동기 이미지 압축 중 오류", e);
             redisTemplate.opsForValue().set("upload:" + fileId, "error");
         }
     }
