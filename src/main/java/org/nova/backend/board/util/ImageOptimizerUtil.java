@@ -7,16 +7,16 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.OutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import javax.imageio.ImageIO;
-import java.nio.file.Files;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.awt.image.AffineTransformOp;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
+import java.awt.image.AffineTransformOp;
 
 public class ImageOptimizerUtil {
     private static final Logger logger = LoggerFactory.getLogger(ImageOptimizerUtil.class);
@@ -30,14 +30,17 @@ public class ImageOptimizerUtil {
      * @param inputPath 원본 이미지 경로
      * @param outputDir 저장 디렉토리 (예: public)
      * @param uuid 고유 파일 이름 생성용 UUID
-     * @return 저장된 WebP 파일 경로
+     * @return 저장된 WebP 파일 경로와 원본 이미지 크기
      */
-    public static Path compressToOriginalExtension(
+    public static ImageCompressResult compressToOriginalExtension(
             Path inputPath,
             Path outputDir,
             UUID uuid,
             String originalExtension
     ) {
+        Path outputPath = outputDir.resolve(uuid + "." + originalExtension);
+        Path tempOutputPath = outputDir.resolve(uuid + "." + originalExtension + ".tmp");
+
         try {
             BufferedImage originalImage = ImageIO.read(inputPath.toFile());
             if (originalImage == null) {
@@ -59,22 +62,29 @@ public class ImageOptimizerUtil {
                 Files.createDirectories(outputDir);
             }
 
-            Path outputPath = outputDir.resolve(uuid + "." + originalExtension);
-
-            try (OutputStream os = Files.newOutputStream(outputPath)) {
+            try (var os = Files.newOutputStream(tempOutputPath)) {
                 boolean written = ImageIO.write(compressedImage, originalExtension, os);
                 if (!written) {
                     throw new FileDomainException("압축 이미지 저장 실패 (확장자=" + originalExtension + "): " + outputPath);
                 }
             }
 
+            Files.move(tempOutputPath, outputPath, StandardCopyOption.REPLACE_EXISTING);
+
             logger.info("이미지 압축 저장 완료: {}", outputPath);
-            return outputPath;
+            return new ImageCompressResult(outputPath, originalImage.getWidth(), originalImage.getHeight());
         } catch (IOException e) {
-            logger.error("이미지 압축 중 오류", e);
             throw new FileDomainException("이미지 압축 실패", e);
+        } finally {
+            try {
+                Files.deleteIfExists(tempOutputPath);
+            } catch (IOException ex) {
+                logger.warn("압축 실패 후 임시 파일 삭제 실패: {}", tempOutputPath, ex);
+            }
         }
     }
+
+    public record ImageCompressResult(Path outputPath, int originalWidth, int originalHeight) {}
 
     public static BufferedImage applyExifOrientationFix(Path inputPath, BufferedImage image) {
         try {
