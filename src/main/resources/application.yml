@@ -23,13 +23,16 @@ spring:
       timeout: 3000
   mail:
     host: smtp.naver.com
-    port: 465
+    port: 587
     username: ${EMAIL_ADDRESS}
     password: ${EMAIL_PASSWORD}
     properties:
-      mail.smtp.auth: true        # SMTP 서버와의 인증
-      mail.smtp.ssl.enable: true  # SSL 보안 연결(필수)
-      mail.smtp.ssl.trust: smtp.naver.com
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
     sender: ${EMAIL_ADDRESS}
 
   servlet:
