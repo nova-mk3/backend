@@ -2,12 +2,15 @@ package org.nova.backend.email.application.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nova.backend.email.domain.exception.EmailException;
 import org.nova.backend.email.domain.model.EmailAuth;
+import org.nova.backend.shared.util.LogMaskingUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,8 @@ public class EmailSendService {
      * @param emailAuth 수신 이메일 주소, 인증 코드
      */
     public void sendAuthCodeEmail(EmailAuth emailAuth) {
+        log.info("인증 코드 이메일 발송 시작 - 이메일: {}",
+                LogMaskingUtil.maskEmail(emailAuth.getEmail()));
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
 
@@ -44,9 +49,13 @@ public class EmailSendService {
             mimeMessageHelper.setText(emailBody.toString(), true);
 
             javaMailSender.send(mimeMessage);
+            log.info("인증 코드 이메일 발송 완료 - 이메일: {}",
+                    LogMaskingUtil.maskEmail(emailAuth.getEmail()));
 
-        } catch (MessagingException e) {
-            throw new EmailException("email send failed." + emailAuth.getEmail(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (MessagingException | MailException e) {
+            log.error("인증 코드 이메일 발송 실패 - 이메일: {}",
+                    LogMaskingUtil.maskEmail(emailAuth.getEmail()), e);
+            throw new EmailException("이메일 인증 메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -56,7 +65,8 @@ public class EmailSendService {
      * @param toEmail 수신자 이메일 주소
      * @param tempPassword 임시 비밀번호
      */
-    public void sendTempPasswordEmail(String toEmail, String tempPassword) {
+    public void sendTempPasswordEmail(UUID memberId, String toEmail, String tempPassword) {
+        log.info("임시 비밀번호 이메일 발송 시작 - 사용자 ID: {}", memberId);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
 
@@ -71,9 +81,11 @@ public class EmailSendService {
             mimeMessageHelper.setText(emailBody.toString(), true);
 
             javaMailSender.send(mimeMessage);
+            log.info("임시 비밀번호 이메일 발송 완료 - 사용자 ID: {}", memberId);
 
-        } catch (MessagingException e) {
-            throw new EmailException("임시 비밀번호 이메일 전송 실패: " + toEmail, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (MessagingException | MailException e) {
+            log.error("임시 비밀번호 이메일 발송 실패 - 사용자 ID: {}", memberId, e);
+            throw new EmailException("임시 비밀번호 이메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

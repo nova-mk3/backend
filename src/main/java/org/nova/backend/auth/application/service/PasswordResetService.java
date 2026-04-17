@@ -21,14 +21,23 @@ public class PasswordResetService {
     private final EmailSendService emailSendService;
 
     public void resetPassword(PasswordResetRequest request) {
-        Member member = memberRepository.findByNameAndEmail(request.getName(), request.getEmail())
-                .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        log.info("비밀번호 초기화 시작");
+        try {
+            Member member = memberRepository.findByNameAndEmail(request.getName(), request.getEmail())
+                    .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+            log.info("회원 조회 성공 - 사용자 ID: {}", member.getId());
 
-        String tempPassword = generateTempPassword();
-        member.resetPasswordWithTemp(passwordEncoder.encode(tempPassword));
-        memberRepository.save(member);
+            String tempPassword = generateTempPassword();
+            member.resetPasswordWithTemp(passwordEncoder.encode(tempPassword));
+            memberRepository.save(member);
+            log.info("임시 비밀번호 저장 완료 - 사용자 ID: {}", member.getId());
 
-        emailSendService.sendTempPasswordEmail(member.getEmail(), tempPassword);
+            emailSendService.sendTempPasswordEmail(member.getId(), member.getEmail(), tempPassword);
+            log.info("임시 비밀번호 메일 발송 완료 - 사용자 ID: {}", member.getId());
+        } catch (Exception e) {
+            log.error("비밀번호 초기화 중 에러 발생", e);
+            throw e;
+        }
     }
 
     private String generateTempPassword() {
