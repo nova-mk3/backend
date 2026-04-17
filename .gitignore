@@ -41,3 +41,4 @@ out/
 
 ### queryDSL files ###
 src/main/generated/
+/spec/*
