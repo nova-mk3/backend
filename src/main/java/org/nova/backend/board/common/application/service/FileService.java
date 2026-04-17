@@ -99,7 +99,7 @@ public class FileService implements FileUseCase {
     @Transactional(readOnly = true)
     public Optional<File> findFileById(UUID fileId) {
         return Optional.ofNullable(filePersistencePort.findFileById(fileId)
-                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다. ID: " + fileId)));
+                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다. ID: " + fileId, HttpStatus.NOT_FOUND)));
     }
 
     /**
@@ -194,7 +194,7 @@ public class FileService implements FileUseCase {
             Path target = publicDir.resolve(fileId + "." + extension);
             Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new FileDomainException("공개용 이미지 복사 중 오류가 발생했습니다.", e);
+            throw new FileDomainException("공개용 이미지 복사 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -245,13 +245,13 @@ public class FileService implements FileUseCase {
             UUID memberId
     ) {
         File file = filePersistencePort.findFileById(fileId)
-                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다."));
+                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (file.getPost() != null) {
             UUID postOwnerId = file.getPost().getMember().getId();
 
             if (!postOwnerId.equals(memberId)) {
-                throw new FileDomainException("게시글 작성자만 파일을 삭제할 수 있습니다.");
+                throw new FileDomainException("게시글 작성자만 파일을 삭제할 수 있습니다.", HttpStatus.FORBIDDEN);
             }
         }
 
@@ -278,7 +278,7 @@ public class FileService implements FileUseCase {
                 .orElseThrow(() -> new MemberDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         File file = filePersistencePort.findFileById(fileId)
-                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다."));
+                .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         processFileDownload(file, response);
         updateDownloadCount(file);
@@ -290,7 +290,7 @@ public class FileService implements FileUseCase {
     private void processFileDownload(File file, HttpServletResponse response) {
         Path filePath = Paths.get(file.getFilePath());
         if (!Files.exists(filePath)) {
-            throw new FileDomainException("파일이 존재하지 않습니다.");
+            throw new FileDomainException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
         }
 
         String encodedFileName = FileUtil.encodeFileName(file.getOriginalFilename());
@@ -299,7 +299,7 @@ public class FileService implements FileUseCase {
             long fileSize = Files.size(filePath);
             response.setContentLengthLong(fileSize);
         } catch (IOException e) {
-            throw new FileDomainException("파일 크기 조회 중 오류 발생", e);
+            throw new FileDomainException("파일 크기 조회 중 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR, e);
         }
 
         response.setContentType(FileUtil.getDefaultContentType());
@@ -309,7 +309,7 @@ public class FileService implements FileUseCase {
             StreamUtils.copy(inputStream, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException e) {
-            throw new FileDomainException("파일 다운로드 중 오류 발생", e);
+            throw new FileDomainException("파일 다운로드 중 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR, e);
         }
     }
 

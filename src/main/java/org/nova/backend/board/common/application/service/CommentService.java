@@ -22,6 +22,7 @@ import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,10 +47,10 @@ public class CommentService implements CommentUseCase {
             UUID memberId
     ) {
         Comment comment = commentPersistencePort.findById(commentId)
-                .orElseThrow(() -> new CommentDomainException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentDomainException("댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (!comment.getMember().getId().equals(memberId)) {
-            throw new CommentDomainException("자신의 댓글만 수정할 수 있습니다.");
+            throw new CommentDomainException("자신의 댓글만 수정할 수 있습니다.", HttpStatus.FORBIDDEN);
         }
 
         comment.updateContent(request.getContent());
@@ -68,14 +69,14 @@ public class CommentService implements CommentUseCase {
             UUID memberId
     ) {
         Comment comment = commentPersistencePort.findById(commentId)
-                .orElseThrow(() -> new CommentDomainException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentDomainException("댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (!comment.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
             logger.warn("사용자 {}가 댓글 {}를 삭제하려 했으나 권한이 없습니다.", memberId, commentId);
-            throw new CommentDomainException("댓글 삭제 권한이 없습니다.");
+            throw new CommentDomainException("댓글 삭제 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
 
         Post post = comment.getPost();
@@ -102,15 +103,15 @@ public class CommentService implements CommentUseCase {
             UUID memberId
     ) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         Post post = basePostPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         Comment parentComment = null;
         if (request.getParentCommentId() != null) {
             parentComment = commentPersistencePort.findById(request.getParentCommentId())
-                    .orElseThrow(() -> new CommentDomainException("대댓글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new CommentDomainException("대댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         }
 
         Comment comment = commentMapper.toEntity(request, post, member, parentComment);

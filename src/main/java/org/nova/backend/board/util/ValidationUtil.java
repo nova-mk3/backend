@@ -1,6 +1,7 @@
 package org.nova.backend.board.util;
 
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
+import org.springframework.http.HttpStatus;
 
 public class ValidationUtil {
 
@@ -13,7 +14,7 @@ public class ValidationUtil {
             String fieldName
     ) {
         if (value == null || value.trim().isEmpty()) {
-            throw new BoardDomainException(fieldName + "은 비어 있을 수 없습니다.");
+            throw new BoardDomainException(fieldName + "은 비어 있을 수 없습니다.", HttpStatus.BAD_REQUEST);
         }
     }
 }

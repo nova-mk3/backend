@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -82,7 +83,7 @@ public class BasePostService implements BasePostUseCase {
         ValidationUtil.requireNonBlank(request.getContent(), "내용");
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         if (request.getPostType() == PostType.NOTICE && !boardSecurityChecker.isAdminOrPresident(member)) {
             throw new UnauthorizedException(MSG_UNAUTHORIZED_NOTICE);
@@ -94,7 +95,8 @@ public class BasePostService implements BasePostUseCase {
             throw new BoardDomainException(
                     String.format("게시판 [%s]에는 [%s] 타입의 게시글을 저장할 수 없습니다.",
                             board.getCategory().getDisplayName(),
-                            request.getPostType().getDisplayName())
+                            request.getPostType().getDisplayName()),
+                    HttpStatus.BAD_REQUEST
             );
         }
 
@@ -221,7 +223,7 @@ public class BasePostService implements BasePostUseCase {
     ) {
         basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         UUID memberId = securityUtil.getOptionalCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
@@ -239,13 +241,13 @@ public class BasePostService implements BasePostUseCase {
             UUID memberId
     ) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         Post post = basePostPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent()) {
-            throw new BoardDomainException(MSG_POST_LIKE_DUPLICATE);
+            throw new BoardDomainException(MSG_POST_LIKE_DUPLICATE, HttpStatus.CONFLICT);
         }
 
         postLikePersistencePort.save(new PostLike(post, member));
@@ -274,7 +276,7 @@ public class BasePostService implements BasePostUseCase {
             UUID memberId
     ) {
         if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isEmpty()) {
-            throw new BoardDomainException(MSG_POST_LIKE_NOT_FOUND);
+            throw new BoardDomainException(MSG_POST_LIKE_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
         postLikePersistencePort.deleteByPostIdAndMemberId(postId, memberId);
@@ -302,14 +304,14 @@ public class BasePostService implements BasePostUseCase {
         ValidationUtil.requireNonBlank(request.getContent(), "내용");
 
         Post post = basePostPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         if (!post.getBoard().getId().equals(boardId)) {
-            throw new BoardDomainException(BoardErrorMessages.INVALID_BOARD_ID);
+            throw new BoardDomainException(BoardErrorMessages.INVALID_BOARD_ID, HttpStatus.NOT_FOUND);
         }
 
         if (!post.getMember().getId().equals(memberId)) {
-            throw new BoardDomainException(BoardErrorMessages.NO_AUTHORITY);
+            throw new BoardDomainException(BoardErrorMessages.NO_AUTHORITY, HttpStatus.FORBIDDEN);
         }
 
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
@@ -348,19 +350,19 @@ public class BasePostService implements BasePostUseCase {
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> {
                     logger.error("삭제 요청한 게시글이 존재하지 않습니다. ID: {}", postId);
-                    return new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND);
+                    return new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND, HttpStatus.NOT_FOUND);
                 });
 
         if (!post.getBoard().getId().equals(boardId)) {
-            throw new BoardDomainException(BoardErrorMessages.INVALID_BOARD_ID);
+            throw new BoardDomainException(BoardErrorMessages.INVALID_BOARD_ID, HttpStatus.NOT_FOUND);
         }
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_USER_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         if (!post.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
             logger.warn("사용자 {}가 게시글 {}를 삭제하려 했으나 권한이 없습니다.", memberId, postId);
-            throw new BoardDomainException(BoardErrorMessages.NO_AUTHORITY);
+            throw new BoardDomainException(BoardErrorMessages.NO_AUTHORITY, HttpStatus.FORBIDDEN);
         }
 
         List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();

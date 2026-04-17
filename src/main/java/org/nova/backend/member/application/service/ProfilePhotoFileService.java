@@ -46,7 +46,7 @@ public class ProfilePhotoFileService {
             MultipartFile profilePhoto
     ) {
         if (profilePhoto == null || profilePhoto.isEmpty()) {
-            throw new FileDomainException("업로드할 파일이 없습니다.");
+            throw new FileDomainException("업로드할 파일이 없습니다.", HttpStatus.BAD_REQUEST);
         }
 
         FileUtil.validateImageFile(profilePhoto);

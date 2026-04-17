@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,10 +24,10 @@ public class FileUtil {
      */
     public static void validateFileList(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
-            throw new FileDomainException("업로드할 파일이 없습니다.");
+            throw new FileDomainException("업로드할 파일이 없습니다.", HttpStatus.BAD_REQUEST);
         }
         if (files.size() > MAX_FILE_COUNT) {
-            throw new FileDomainException("첨부파일은 최대 " + MAX_FILE_COUNT + "개까지 가능합니다.");
+            throw new FileDomainException("첨부파일은 최대 " + MAX_FILE_COUNT + "개까지 가능합니다.", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -36,7 +37,7 @@ public class FileUtil {
      */
     public static void validateFileSize(MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new FileDomainException("파일 크기가 너무 큽니다. 최대 허용 크기: " + (MAX_FILE_SIZE / (1024L * 1024L)) + "MB");
+            throw new FileDomainException("파일 크기가 너무 큽니다. 최대 허용 크기: " + (MAX_FILE_SIZE / (1024L * 1024L)) + "MB", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -46,12 +47,12 @@ public class FileUtil {
     public static void validateFileExtension(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         if (fileName == null || fileName.isBlank()) {
-            throw new FileDomainException("파일 이름이 없습니다.");
+            throw new FileDomainException("파일 이름이 없습니다.", HttpStatus.BAD_REQUEST);
         }
 
         String extension = getFileExtension(fileName);
         if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
-            throw new FileDomainException("허용되지 않은 파일 확장자입니다: " + extension);
+            throw new FileDomainException("허용되지 않은 파일 확장자입니다: " + extension, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -71,7 +72,7 @@ public class FileUtil {
      */
     public static String encodeFileName(String fileName) {
         if (fileName == null || fileName.isBlank()) {
-            throw new FileDomainException("파일 이름이 없습니다.");
+            throw new FileDomainException("파일 이름이 없습니다.", HttpStatus.BAD_REQUEST);
         }
         return URLEncoder.encode(fileName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
@@ -112,7 +113,7 @@ public class FileUtil {
      */
     public static void validateImageFile(MultipartFile file) {
         if (!isImageFile(file)) {
-            throw new FileDomainException("미리보기가 가능한 이미지 파일만 업로드할 수 있습니다. (지원 형식: JPG, JPEG, PNG, GIF, BMP, WEBP)");
+            throw new FileDomainException("미리보기가 가능한 이미지 파일만 업로드할 수 있습니다. (지원 형식: JPG, JPEG, PNG, GIF, BMP, WEBP)", HttpStatus.BAD_REQUEST);
         }
     }
 }

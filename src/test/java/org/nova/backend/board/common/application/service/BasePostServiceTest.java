@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
@@ -204,7 +205,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
         BasePostRequest request = new BasePostRequest("제목", "내용", PostType.FREE, fileIds);
 
         when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
-        when(fileUseCase.findFilesByIds(fileIds)).thenThrow(new BoardDomainException("파일을 찾을 수 없습니다"));
+        when(fileUseCase.findFilesByIds(fileIds)).thenThrow(new BoardDomainException("파일을 찾을 수 없습니다", HttpStatus.NOT_FOUND));
 
         Throwable thrown = catchThrowable(() -> basePostService.createPost(integratedBoard.getId(), request, normalUser.getId()));
         assertThat(thrown).isInstanceOf(BoardDomainException.class)

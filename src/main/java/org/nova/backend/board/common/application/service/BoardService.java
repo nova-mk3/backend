@@ -10,6 +10,7 @@ import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,7 +40,7 @@ public class BoardService implements BoardUseCase {
         return boardPersistencePort.findById(boardId)
                 .orElseThrow(() -> {
                     logger.warn("게시판을 찾을 수 없습니다. ID: {}", boardId);
-                    return new BoardDomainException("게시판을 찾을 수 없습니다. ID: " + boardId);
+                    return new BoardDomainException("게시판을 찾을 수 없습니다. ID: " + boardId, HttpStatus.NOT_FOUND);
                 });
     }
 }

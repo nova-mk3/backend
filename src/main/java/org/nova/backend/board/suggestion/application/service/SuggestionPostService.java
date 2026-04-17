@@ -58,7 +58,7 @@ public class SuggestionPostService implements SuggestionPostUseCase {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> {
                     logger.error("건의 게시글 생성 실패 - 사용자 없음 ID: {}", memberId);
-                    return new BoardDomainException("사용자를 찾을 수 없습니다.");
+                    return new BoardDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
                 });
 
         SuggestionPost post = postMapper.toEntity(request, member);
@@ -114,7 +114,7 @@ public class SuggestionPostService implements SuggestionPostUseCase {
             }
         } else {
             Member member = memberRepository.findById(memberId)
-                    .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
             if (member.getRole() == Role.ADMINISTRATOR && !post.isAdminRead()) {
                 logger.info("관리자가 게시글을 읽음 - 게시글 ID: {}", postId);
@@ -151,11 +151,11 @@ public class SuggestionPostService implements SuggestionPostUseCase {
                 });
 
         Member admin = memberRepository.findById(adminId)
-                .orElseThrow(() -> new BoardDomainException("관리자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException("관리자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (admin.getRole() != Role.ADMINISTRATOR) {
             logger.warn("사용자 {}가 건의 게시글 {}에 답변을 작성하려 했으나 권한이 없습니다.", adminId, postId);
-            throw new BoardDomainException("건의 게시글에 답변을 작성할 권한이 없습니다.");
+            throw new BoardDomainException("건의 게시글에 답변을 작성할 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
 
         post.addAdminReply(request.getReply());
