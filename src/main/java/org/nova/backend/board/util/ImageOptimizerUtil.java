@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.nova.backend.board.common.domain.exception.FileDomainException;
 import java.awt.image.AffineTransformOp;
+import org.springframework.http.HttpStatus;
 
 public class ImageOptimizerUtil {
     private static final Logger logger = LoggerFactory.getLogger(ImageOptimizerUtil.class);
@@ -44,7 +45,7 @@ public class ImageOptimizerUtil {
         try {
             BufferedImage originalImage = ImageIO.read(inputPath.toFile());
             if (originalImage == null) {
-                throw new FileDomainException("이미지 로딩 실패: " + inputPath);
+                throw new FileDomainException("이미지 로딩 실패: " + inputPath, HttpStatus.BAD_REQUEST);
             }
 
             originalImage = applyExifOrientationFix(inputPath, originalImage);
@@ -65,7 +66,7 @@ public class ImageOptimizerUtil {
             try (var os = Files.newOutputStream(tempOutputPath)) {
                 boolean written = ImageIO.write(compressedImage, originalExtension, os);
                 if (!written) {
-                    throw new FileDomainException("압축 이미지 저장 실패 (확장자=" + originalExtension + "): " + outputPath);
+                    throw new FileDomainException("압축 이미지 저장 실패 (확장자=" + originalExtension + "): " + outputPath, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
 
@@ -74,7 +75,7 @@ public class ImageOptimizerUtil {
             logger.info("이미지 압축 저장 완료: {}", outputPath);
             return new ImageCompressResult(outputPath, originalImage.getWidth(), originalImage.getHeight());
         } catch (IOException e) {
-            throw new FileDomainException("이미지 압축 실패", e);
+            throw new FileDomainException("이미지 압축 실패", HttpStatus.INTERNAL_SERVER_ERROR, e);
         } finally {
             try {
                 Files.deleteIfExists(tempOutputPath);

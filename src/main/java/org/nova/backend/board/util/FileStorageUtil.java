@@ -5,6 +5,7 @@ import org.nova.backend.board.common.domain.exception.FileDomainException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +40,7 @@ public class FileStorageUtil {
 
             Path targetPath = fileDir.resolve(uuid + "." + extension);
             if (!targetPath.toAbsolutePath().startsWith(fileDir.toAbsolutePath())) {
-                throw new FileDomainException("잘못된 파일 경로가 탐지되었습니다.");
+                throw new FileDomainException("잘못된 파일 경로가 탐지되었습니다.", HttpStatus.BAD_REQUEST);
             }
 
             file.transferTo(targetPath.toFile());
@@ -47,7 +48,7 @@ public class FileStorageUtil {
 
         } catch (IOException e) {
             logger.error("파일 저장 중 오류 발생: {}", file.getOriginalFilename(), e);
-            throw new FileDomainException("파일 저장 중 오류 발생", e);
+            throw new FileDomainException("파일 저장 중 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -61,7 +62,7 @@ public class FileStorageUtil {
             logger.info("파일 삭제 성공: {}", filePath);
         } catch (IOException e) {
             logger.error("파일 삭제 실패: {}", filePath, e);
-            throw new FileDomainException("파일 삭제 중 오류 발생", e);
+            throw new FileDomainException("파일 삭제 중 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -75,7 +76,7 @@ public class FileStorageUtil {
     ) {
         Path path = Paths.get(filePath);
         if (!Files.exists(path)) {
-            throw new FileDomainException("파일이 존재하지 않습니다.");
+            throw new FileDomainException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
         }
 
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
@@ -85,7 +86,7 @@ public class FileStorageUtil {
             StreamUtils.copy(inputStream, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException e) {
-            throw new FileDomainException("파일 다운로드 중 오류 발생");
+            throw new FileDomainException("파일 다운로드 중 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR, e);
         }
     }
 }

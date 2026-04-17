@@ -118,7 +118,7 @@ public class SuggestionFileService implements SuggestionFileUseCase {
             UUID memberId
     ) {
         memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         SuggestionFile file = filePersistencePort.findFileById(fileId)
                 .orElseThrow(() -> new SuggestionFileDomainException("파일을 찾을 수 없습니다.",HttpStatus.NOT_FOUND));

@@ -1,11 +1,15 @@
 package org.nova.backend.board.common.domain.exception;
 
-public class CommentDomainException extends RuntimeException {
-    public CommentDomainException(String message) {
-        super(message);
+import org.nova.backend.shared.exception.CustomException;
+import org.springframework.http.HttpStatus;
+
+public class CommentDomainException extends CustomException {
+    public CommentDomainException(String message, HttpStatus status) {
+        super(message, status);
     }
 
-    public CommentDomainException(String message, Throwable cause) {
-        super(message, cause);
+    public CommentDomainException(String message, HttpStatus status, Throwable cause) {
+        super(message, status);
+        initCause(cause);
     }
 }

@@ -63,7 +63,7 @@ public class PicturePostService implements PicturePostUseCase {
         Board board = boardUseCase.getBoardById(boardId);
 
         if (board.getCategory() != BoardCategory.CLUB_ARCHIVE) {
-            throw new BoardDomainException("사진 게시글은 'CLUB_ARCHIVE' 게시판에서만 작성할 수 있습니다.");
+            throw new BoardDomainException("사진 게시글은 'CLUB_ARCHIVE' 게시판에서만 작성할 수 있습니다.", HttpStatus.BAD_REQUEST);
         }
 
         Post post = new Post(
@@ -118,7 +118,7 @@ public class PicturePostService implements PicturePostUseCase {
                 .orElseThrow(() -> new PictureDomainException("게시글을 찾을 수 없습니다. ID: " + postId, HttpStatus.NOT_FOUND));
 
         if (!post.getBoard().getId().equals(boardId)) {
-            throw new BoardDomainException("잘못된 게시판 ID입니다.");
+            throw new BoardDomainException("잘못된 게시판 ID입니다.", HttpStatus.NOT_FOUND);
         }
 
         if (!post.getMember().getId().equals(memberId)) {
@@ -154,10 +154,10 @@ public class PicturePostService implements PicturePostUseCase {
             UUID memberId
     ) {
         Post post = basePostPersistencePort.findById(postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다. ID: " + postId, HttpStatus.NOT_FOUND));
 
         if (!post.getBoard().getId().equals(boardId)) {
-            throw new BoardDomainException("잘못된 게시판 ID입니다.");
+            throw new BoardDomainException("잘못된 게시판 ID입니다.", HttpStatus.NOT_FOUND);
         }
 
         Member member = memberRepository.findById(memberId)
@@ -184,7 +184,7 @@ public class PicturePostService implements PicturePostUseCase {
     ) {
         basePostPersistencePort.increaseViewCount(postId);
         Post post = basePostPersistencePort.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BoardDomainException("게시글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         UUID memberId = securityUtil.getOptionalCurrentMemberId().orElse(null);
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();

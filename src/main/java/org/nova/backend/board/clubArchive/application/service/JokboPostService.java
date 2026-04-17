@@ -81,7 +81,7 @@ public class JokboPostService implements JokboPostUseCase {
         Board board = boardUseCase.getBoardById(boardId);
 
         if (board.getCategory() != BoardCategory.CLUB_ARCHIVE) {
-            throw new BoardDomainException( MSG_INVALID_CATEGORY);
+            throw new BoardDomainException(MSG_INVALID_CATEGORY, HttpStatus.BAD_REQUEST);
         }
 
         Post post =  new Post(
@@ -131,13 +131,13 @@ public class JokboPostService implements JokboPostUseCase {
         ValidationUtil.requireNonBlank(request.getContent(), "내용");
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         JokboPost jokboPost = jokboPostPersistencePort.findByPost(post)
-                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         if (!post.getMember().getId().equals(memberId)) {
-            throw new BoardDomainException(MSG_NO_UPDATE_PERMISSION);
+            throw new BoardDomainException(MSG_NO_UPDATE_PERMISSION, HttpStatus.FORBIDDEN);
         }
 
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
@@ -172,17 +172,17 @@ public class JokboPostService implements JokboPostUseCase {
             UUID memberId
     ) {
         Post post = postRepository.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException(MSG_POST_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_POST_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         JokboPost jokboPost = jokboPostPersistencePort.findByPost(post)
-                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BoardDomainException(MSG_NOT_FOUND_USER));
+                .orElseThrow(() -> new BoardDomainException(MSG_NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
         if (!post.getMember().getId().equals(memberId) && member.getRole() != Role.ADMINISTRATOR) {
             logger.warn("사용자 {}가 게시글 {}를 삭제하려 했으나 권한이 없습니다.", memberId, postId);
-            throw new BoardDomainException(MSG_NO_DELETE_PERMISSION);
+            throw new BoardDomainException(MSG_NO_DELETE_PERMISSION, HttpStatus.FORBIDDEN);
         }
 
         List<UUID> fileIds = jokboPost.getPost().getFiles().stream().map(File::getId).toList();
@@ -204,10 +204,10 @@ public class JokboPostService implements JokboPostUseCase {
     ) {
         basePostPersistencePort.increaseViewCount(postId);
         Post post = postRepository.findByBoardIdAndPostId(boardId, postId)
-                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         JokboPost jokboPost = jokboPostPersistencePort.findByPostId(postId)
-                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_INFO_NOT_FOUND));
+                .orElseThrow(() -> new BoardDomainException(MSG_JOKBO_INFO_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         UUID memberId = securityUtil.getCurrentMemberIdOrNull();
         boolean isLiked = (memberId != null) && postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent();
