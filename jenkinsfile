@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        ENV_FILE = '.env'
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -29,53 +25,14 @@ pipeline {
                         fi
                     '''
 
-                    def envVars = ""
                     if (env.BRANCH_NAME == 'main') {
                         echo "Setting environment for main (production) branch..."
-                        withCredentials([
-                            string(credentialsId: 'MYSQL_DATABASE_PROD', variable: 'MYSQL_DATABASE_PROD'),
-                            string(credentialsId: 'MYSQL_USER_PROD', variable: 'MYSQL_USER_PROD'),
-                            string(credentialsId: 'MYSQL_PASSWORD_PROD', variable: 'MYSQL_PASSWORD_PROD'),
-                            string(credentialsId: 'MYSQL_ROOT_PASSWORD_PROD', variable: 'MYSQL_ROOT_PASSWORD_PROD'),
-                            string(credentialsId: 'MYSQL_HOST_PROD', variable: 'MYSQL_HOST_PROD'),
-                            string(credentialsId: 'MYSQL_IN_PORT_PROD', variable: 'MYSQL_IN_PORT_PROD'),
-                            string(credentialsId: 'MYSQL_EX_PORT_PROD', variable: 'MYSQL_EX_PORT_PROD'),
-                            string(credentialsId: 'REDIS_HOST_PROD', variable: 'REDIS_HOST_PROD'),
-                            string(credentialsId: 'REDIS_PORT_PROD', variable: 'REDIS_PORT_PROD'),
-                            string(credentialsId: 'SPRING_PROFILE_ACTIVE_PROD', variable: 'SPRING_PROFILE_ACTIVE_PROD'),
-                            string(credentialsId: 'SPRING_APP_PORT_PROD', variable: 'SPRING_APP_PORT_PROD'),
-                            string(credentialsId: 'FILE_STORAGE_PATH_PROD', variable: 'FILE_STORAGE_PATH'),
-                            string(credentialsId: 'JWT_SECRET_KEY_PROD', variable: 'JWT_SECRET_KEY'),
-                            string(credentialsId: 'EMAIL_ADDRESS_PROD', variable: 'EMAIL_ADDRESS'),
-                            string(credentialsId: 'EMAIL_PASSWORD_PROD', variable: 'EMAIL_PASSWORD'),
-                            string(credentialsId: 'BASE_PROFILE_IMAGE_NAME_PROD', variable: 'BASE_PROFILE_IMAGE_NAME'),
-                            string(credentialsId: 'ADMIN_STUDENT_NUMBER_PROD', variable: 'ADMIN_STUDENT_NUMBER'),
-                            string(credentialsId: 'ADMIN_PASSWORD_PROD', variable: 'ADMIN_PASSWORD')
-                        ]) {
-                            envVars = """
-                            MYSQL_DATABASE=${MYSQL_DATABASE_PROD}
-                            MYSQL_USER=${MYSQL_USER_PROD}
-                            MYSQL_PASSWORD=${MYSQL_PASSWORD_PROD}
-                            MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_PROD}
-                            MYSQL_HOST=${MYSQL_HOST_PROD}
-                            MYSQL_IN_PORT=${MYSQL_IN_PORT_PROD}
-                            MYSQL_EX_PORT=${MYSQL_EX_PORT_PROD}
-                            REDIS_HOST=${REDIS_HOST_PROD}
-                            REDIS_PORT=${REDIS_PORT_PROD}
-                            SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE_PROD}
-                            SPRING_APP_PORT=${SPRING_APP_PORT_PROD}
-                            FILE_STORAGE_PATH=${FILE_STORAGE_PATH}
-                            JWT_SECRET_KEY=${JWT_SECRET_KEY}
-                            EMAIL_ADDRESS=${EMAIL_ADDRESS}
-                            EMAIL_PASSWORD=${EMAIL_PASSWORD}
-                            BASE_PROFILE_IMAGE_NAME=${BASE_PROFILE_IMAGE_NAME}
-                            ADMIN_STUDENT_NUMBER=${ADMIN_STUDENT_NUMBER}
-                            ADMIN_PASSWORD=${ADMIN_PASSWORD}
-                            """
+                        withCredentials([file(credentialsId: 'backend_env_file_prod', variable: 'ENV_FILE_PATH')]) {
+                            sh 'cp $ENV_FILE_PATH .env'
                         }
                     } else {
                         echo "Setting environment for non-main branch (dev/test)..."
-                        envVars = """
+                        writeFile file: '.env', text: """\
                         MYSQL_DATABASE=test_db
                         MYSQL_USER=test_user
                         MYSQL_PASSWORD=test_pw
@@ -96,8 +53,6 @@ pipeline {
                         ADMIN_PASSWORD=1234
                         """
                     }
-
-                    writeFile file: '.env', text: envVars
                 }
             }
         }
