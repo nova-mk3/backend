@@ -1,6 +1,7 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -8,8 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.nova.backend.board.common.adapter.persistence.repository.BoardRepository;
+import org.nova.backend.board.common.adapter.persistence.repository.CommentRepository;
 import org.nova.backend.board.common.adapter.persistence.repository.FileRepository;
 import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
+import org.nova.backend.board.common.domain.model.entity.Comment;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
@@ -46,6 +49,7 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     @Autowired BasePostService basePostService;
     @Autowired MemberRepository memberRepository;
     @Autowired BoardRepository boardRepository;
+    @Autowired CommentRepository commentRepository;
     @Autowired FileRepository fileRepository;
     @Autowired PostRepository postRepository;
     @Autowired BoardUseCase boardUseCase;
@@ -332,6 +336,29 @@ class BasePostServiceTest extends AbstractIntegrationTest {
     void 게시판_타입별_최신글_조회() {
         Map<PostType, List<BasePostSummaryResponse>> result = basePostService.getLatestPostsByType(integratedBoard.getId());
         assertThat(result).containsKeys(PostType.QNA, PostType.FREE, PostType.NOTICE, PostType.INTRODUCTION);
+    }
+
+    @Test
+    @DisplayName("댓글이 있는 게시글 삭제 시 FK 제약 위반 없이 댓글과 게시글이 모두 삭제되어야 한다")
+    @Transactional
+    void 댓글이_있는_게시글_삭제_FK_위반_없음() {
+        BasePostRequest request = new BasePostRequest("댓글포함 게시글", "내용", PostType.FREE, null);
+        when(boardUseCase.getBoardById(integratedBoard.getId())).thenReturn(integratedBoard);
+        var postResponse = basePostService.createPost(integratedBoard.getId(), request, normalUser.getId());
+
+        Post savedPost = postRepository.findById(postResponse.getId()).orElseThrow();
+        Member managedUser = memberRepository.findById(normalUser.getId()).orElseThrow();
+        Comment comment = new Comment(null, savedPost, managedUser, null, "테스트 댓글", LocalDateTime.now(), null);
+        Comment saved = commentRepository.save(comment);
+
+        assertThatCode(() -> basePostService.deletePost(integratedBoard.getId(), postResponse.getId(), normalUser.getId()))
+                .doesNotThrowAnyException();
+
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(postRepository.findById(postResponse.getId())).isNotPresent();
+        assertThat(commentRepository.findById(saved.getId())).isNotPresent();
     }
 
     @TestConfiguration

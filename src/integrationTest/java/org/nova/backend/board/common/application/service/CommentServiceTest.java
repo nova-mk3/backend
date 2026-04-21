@@ -211,6 +211,26 @@ class CommentServiceTest extends AbstractIntegrationTest {
                 .containsExactlyInAnyOrder("c1", "c2");
     }
 
+    @Test
+    @DisplayName("댓글 내용이 빈 문자열이면 예외가 발생해야 한다")
+    @Transactional
+    void 댓글_내용이_빈_문자열이면_예외() {
+        CommentRequest request = new CommentRequest(null, "");
+        Throwable thrown = catchThrowable(() -> commentService.addComment(post.getId(), request, writer.getId()));
+        assertThat(thrown).isInstanceOf(CommentDomainException.class)
+                .hasMessageContaining("비어 있을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("댓글 내용이 null이면 예외가 발생해야 한다")
+    @Transactional
+    void 댓글_내용이_null이면_예외() {
+        CommentRequest request = new CommentRequest(null, null);
+        Throwable thrown = catchThrowable(() -> commentService.addComment(post.getId(), request, writer.getId()));
+        assertThat(thrown).isInstanceOf(CommentDomainException.class)
+                .hasMessageContaining("비어 있을 수 없습니다");
+    }
+
     @TestConfiguration
     static class MockConfig {
         @Bean NotificationUseCase notificationUseCase() { return mock(NotificationUseCase.class); }
