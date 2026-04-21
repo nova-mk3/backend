@@ -63,16 +63,27 @@ pipeline {
             }
         }
 
-//         stage('Run Tests') {
-//             steps {
-//                 echo "Running tests on all branches"
-//                 sh "./gradlew test"
-//             }
-//         }
+        stage('Run Unit Tests') {
+            steps {
+                sh './gradlew clean test --no-daemon'
+            }
+        }
+
+        stage('Run Integration Tests') {
+            when {
+                anyOf {
+                    expression { return env.CHANGE_ID != null }
+                    branch 'main'
+                }
+            }
+            steps {
+                sh './gradlew integrationTest --no-daemon'
+            }
+        }
 
         stage('Build JAR') {
             steps {
-                sh "./gradlew build -x test --no-daemon"
+               sh "./gradlew bootJar --no-daemon"
             }
         }
 
