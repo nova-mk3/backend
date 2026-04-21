@@ -20,4 +20,6 @@ public interface CommentPersistencePort {
     void deleteAllByParentId(UUID parentId);
 
     void deleteComment(UUID commentId);
+
+    void deleteAllByPostId(UUID postId);
 }

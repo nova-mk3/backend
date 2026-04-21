@@ -14,6 +14,7 @@ import org.nova.backend.board.common.adapter.persistence.repository.PostReposito
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
@@ -48,6 +49,7 @@ public class JokboPostService implements JokboPostUseCase {
     private final JokboPostPersistencePort jokboPostPersistencePort;
     private final BasePostPersistencePort basePostPersistencePort;
     private final PostLikePersistencePort postLikePersistencePort;
+    private final CommentPersistencePort commentPersistencePort;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final BoardUseCase boardUseCase;
@@ -188,6 +190,7 @@ public class JokboPostService implements JokboPostUseCase {
         List<UUID> fileIds = jokboPost.getPost().getFiles().stream().map(File::getId).toList();
         fileUseCase.deleteFiles(fileIds);
 
+        commentPersistencePort.deleteAllByPostId(post.getId());
         jokboPostPersistencePort.deleteByPost(post);
         basePostPersistencePort.deleteById(post.getId());
         logger.info("게시글이 성공적으로 삭제되었습니다. Board ID: {}, Post ID: {}", boardId, postId);

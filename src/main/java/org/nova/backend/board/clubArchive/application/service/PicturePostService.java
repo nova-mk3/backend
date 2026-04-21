@@ -11,6 +11,7 @@ import org.nova.backend.board.clubArchive.domain.exception.PictureDomainExceptio
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
@@ -39,6 +40,7 @@ import java.util.UUID;
 public class PicturePostService implements PicturePostUseCase {
     private final BasePostPersistencePort basePostPersistencePort;
     private final PostLikePersistencePort postLikePersistencePort;
+    private final CommentPersistencePort commentPersistencePort;
     private final FileUseCase fileUseCase;
     private final BoardUseCase boardUseCase;
     private final MemberRepository memberRepository;
@@ -170,6 +172,7 @@ public class PicturePostService implements PicturePostUseCase {
         List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();
         fileUseCase.deleteFiles(fileIds);
 
+        commentPersistencePort.deleteAllByPostId(postId);
         basePostPersistencePort.deleteById(postId);
     }
 
