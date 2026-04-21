@@ -67,8 +67,6 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/files/public/**").permitAll();
-                    auth.requestMatchers("/actuator/prometheus").permitAll();
-
                     auth.requestMatchers("/actuator/prometheus")
                             .access(new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"));
 
