@@ -24,6 +24,7 @@ import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
 import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
@@ -49,6 +50,7 @@ public class BasePostService implements BasePostUseCase {
     private static final Logger logger = LoggerFactory.getLogger(BasePostService.class);
 
     private final BasePostPersistencePort basePostPersistencePort;
+    private final CommentPersistencePort commentPersistencePort;
     private final PostLikePersistencePort postLikePersistencePort;
     private final MemberRepository memberRepository;
     private final BoardSecurityChecker boardSecurityChecker;
@@ -368,6 +370,7 @@ public class BasePostService implements BasePostUseCase {
         List<UUID> fileIds = post.getFiles().stream().map(File::getId).toList();
         fileUseCase.deleteFiles(fileIds);
 
+        commentPersistencePort.deleteAllByPostId(postId);
         basePostPersistencePort.deleteById(postId);
         logger.info("게시글이 성공적으로 삭제되었습니다. Board ID: {}, Post ID: {}", boardId, postId);
     }

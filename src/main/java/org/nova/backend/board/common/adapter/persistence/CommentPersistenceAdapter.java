@@ -50,4 +50,9 @@ public class CommentPersistenceAdapter implements CommentPersistencePort {
     public void deleteComment(UUID commentId) {
         commentRepository.deleteByCommentId(commentId);
     }
+
+    @Override
+    public void deleteAllByPostId(UUID postId) {
+        commentRepository.deleteAllByPostId(postId);
+    }
 }

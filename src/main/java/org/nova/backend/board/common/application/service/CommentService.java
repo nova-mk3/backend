@@ -100,6 +100,10 @@ public class CommentService implements CommentUseCase {
             CommentRequest request,
             UUID memberId
     ) {
+        if (request.getContent() == null || request.getContent().isBlank()) {
+            throw new CommentDomainException("댓글 내용은 비어 있을 수 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BoardDomainException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
