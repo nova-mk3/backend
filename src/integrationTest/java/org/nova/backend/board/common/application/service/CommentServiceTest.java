@@ -1,17 +1,6 @@
 package org.nova.backend.board.common.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +28,16 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @Import(CommentServiceTest.MockConfig.class)
 class CommentServiceTest extends AbstractIntegrationTest {
@@ -78,7 +77,6 @@ class CommentServiceTest extends AbstractIntegrationTest {
                 0,
                 0,
                 0,
-                new ArrayList<>(),
                 new ArrayList<>(),
                 new ArrayList<>(),
                 LocalDateTime.now(),
@@ -152,27 +150,27 @@ class CommentServiceTest extends AbstractIntegrationTest {
                 .hasMessageContaining("자신의 댓글만 수정");
     }
 
-//    @Test
-//    @DisplayName("댓글 삭제 시 자식 댓글까지 함께 삭제되어야 한다")
-//    @Transactional
-//    void 댓글_삭제_자식까지() {
-//        UUID parentId = commentService.addComment(post.getId(), new CommentRequest(null, "부모"), writer.getId())
-//                .getId();
-//        commentService.addComment(post.getId(), new CommentRequest(parentId, "자식"), other.getId());
-//        assertThat(post.getCommentCount()).isEqualTo(2);
-//
-//        commentService.deleteComment(parentId, writer.getId());
-//
-//        entityManager.flush();
-//        entityManager.clear();
-//
-//        assertThat(commentRepository.existsById(parentId)).isFalse();
-//        assertThat(commentRepository.findAllByParentCommentId(parentId)).isEmpty();
-//
-//        assertThat(postRepository.findById(post.getId()).orElseThrow()
-//                .getCommentCount())
-//                .isZero();
-//    }
+    @Test
+    @DisplayName("댓글 삭제 시 자식 댓글까지 함께 삭제되어야 한다")
+    @Transactional
+    void 댓글_삭제_자식까지() {
+        UUID parentId = commentService.addComment(post.getId(), new CommentRequest(null, "부모"), writer.getId())
+                .getId();
+        commentService.addComment(post.getId(), new CommentRequest(parentId, "자식"), other.getId());
+        assertThat(post.getCommentCount()).isEqualTo(2);
+
+        commentService.deleteComment(parentId, writer.getId());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(commentRepository.existsById(parentId)).isFalse();
+        assertThat(commentRepository.findAllByParentCommentId(parentId)).isEmpty();
+
+        assertThat(postRepository.findById(post.getId()).orElseThrow()
+                .getCommentCount())
+                .isZero();
+    }
 
     @Test
     @DisplayName("작성자가 아니고 관리자도 아닌 사용자가 댓글 삭제 시 예외 발생")
@@ -191,8 +189,13 @@ class CommentServiceTest extends AbstractIntegrationTest {
     void 관리자_댓글_삭제() {
         UUID commentId = commentService.addComment(post.getId(), new CommentRequest(null, "부모"), writer.getId())
                 .getId();
+
         commentService.deleteComment(commentId, admin.getId());
-        assertThat(commentRepository.findById(commentId)).isNotPresent();
+
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(postRepository.findById(post.getId()).orElseThrow().getCommentCount()).isZero();
     }
 
     @Test

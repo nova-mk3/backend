@@ -1,10 +1,5 @@
 package org.nova.backend.board.clubArchive.application.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
 import org.nova.backend.board.clubArchive.application.dto.request.PicturePostRequest;
@@ -32,6 +27,12 @@ import org.nova.backend.member.domain.model.valueobject.Role;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +78,6 @@ public class PicturePostService implements PicturePostUseCase {
                 0,
                 0,
                 0,
-                new ArrayList<>(),
                 new ArrayList<>(),
                 new ArrayList<>(),
                 LocalDateTime.now(),

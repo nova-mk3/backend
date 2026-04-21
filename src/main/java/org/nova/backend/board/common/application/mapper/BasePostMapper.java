@@ -1,9 +1,5 @@
 package org.nova.backend.board.common.application.mapper;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
@@ -13,6 +9,11 @@ import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -34,7 +35,6 @@ public class BasePostMapper {
                 0,
                 0,
                 0,
-                new ArrayList<>(),
                 new ArrayList<>(),
                 new ArrayList<>(),
                 LocalDateTime.now(),

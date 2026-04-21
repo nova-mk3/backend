@@ -1,18 +1,13 @@
 package org.nova.backend.board.common.application.service;
 
-import org.nova.backend.notification.application.port.in.NotificationUseCase;
-import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.dto.request.CommentRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateCommentRequest;
 import org.nova.backend.board.common.application.dto.response.CommentResponse;
 import org.nova.backend.board.common.application.mapper.CommentMapper;
 import org.nova.backend.board.common.application.port.in.CommentUseCase;
-import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.domain.exception.BoardDomainException;
 import org.nova.backend.board.common.domain.exception.CommentDomainException;
 import org.nova.backend.board.common.domain.model.entity.Comment;
@@ -20,10 +15,16 @@ import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
+import org.nova.backend.notification.application.port.in.NotificationUseCase;
+import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -81,14 +82,11 @@ public class CommentService implements CommentUseCase {
 
         Post post = comment.getPost();
 
-        List<Comment> children = commentPersistencePort.findAllByParentId(commentId);
-        children.forEach(c -> commentPersistencePort.deleteById(c.getId()));
-        commentPersistencePort.deleteById(commentId);
+        long childCount = commentPersistencePort.countByParentId(commentId);
+        post.decrementCommentCount((int) childCount + 1);
 
-        post.getComments().removeAll(children);
-        post.getComments().remove(comment);
-
-        post.decrementCommentCount(children.size() + 1);
+        commentPersistencePort.deleteAllByParentId(commentId);
+        commentPersistencePort.deleteComment(commentId);
     }
 
 
@@ -116,7 +114,6 @@ public class CommentService implements CommentUseCase {
 
         Comment comment = commentMapper.toEntity(request, post, member, parentComment);
         comment = commentPersistencePort.save(comment);
-        post.getComments().add(comment);
 
         if (parentComment == null) {
             // 일반 댓글 → 게시글 작성자에게 알림

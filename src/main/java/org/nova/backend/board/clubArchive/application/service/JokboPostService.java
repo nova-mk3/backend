@@ -1,23 +1,6 @@
 package org.nova.backend.board.clubArchive.application.service;
 
-import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
-import org.nova.backend.board.util.SecurityUtil;
-import org.nova.backend.board.util.ValidationUtil;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.nova.backend.board.common.application.port.in.BoardUseCase;
-import org.nova.backend.board.common.application.port.in.FileUseCase;
-import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
-import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
-import org.nova.backend.board.common.domain.exception.BoardDomainException;
-import org.nova.backend.board.common.domain.model.entity.Board;
-import org.nova.backend.board.common.domain.model.entity.File;
-import org.nova.backend.board.common.domain.model.entity.Post;
-import org.nova.backend.board.common.domain.model.valueobject.PostType;
 import org.nova.backend.board.clubArchive.application.dto.request.JokboPostRequest;
 import org.nova.backend.board.clubArchive.application.dto.request.UpdateJokboPostRequest;
 import org.nova.backend.board.clubArchive.application.dto.response.JokboPostDetailResponse;
@@ -28,6 +11,18 @@ import org.nova.backend.board.clubArchive.application.port.out.JokboPostPersiste
 import org.nova.backend.board.clubArchive.domain.model.entity.JokboPost;
 import org.nova.backend.board.clubArchive.domain.model.valueobject.Semester;
 import org.nova.backend.board.common.adapter.persistence.repository.PostRepository;
+import org.nova.backend.board.common.application.port.in.BoardUseCase;
+import org.nova.backend.board.common.application.port.in.FileUseCase;
+import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
+import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
+import org.nova.backend.board.common.domain.exception.BoardDomainException;
+import org.nova.backend.board.common.domain.model.entity.Board;
+import org.nova.backend.board.common.domain.model.entity.File;
+import org.nova.backend.board.common.domain.model.entity.Post;
+import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
+import org.nova.backend.board.common.domain.model.valueobject.PostType;
+import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.board.util.ValidationUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.exception.MemberDomainException;
 import org.nova.backend.member.domain.model.entity.Member;
@@ -38,6 +33,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -95,7 +96,6 @@ public class JokboPostService implements JokboPostUseCase {
                 0,
                 0,
                 0,
-                new ArrayList<>(),
                 new ArrayList<>(),
                 new ArrayList<>(),
                 LocalDateTime.now(),

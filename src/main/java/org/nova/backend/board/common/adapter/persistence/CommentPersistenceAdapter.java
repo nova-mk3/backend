@@ -1,17 +1,19 @@
 package org.nova.backend.board.common.adapter.persistence;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.adapter.persistence.repository.CommentRepository;
 import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.domain.model.entity.Comment;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class CommentPersistenceAdapter implements CommentPersistencePort {
+
     private final CommentRepository commentRepository;
 
     @Override
@@ -30,12 +32,22 @@ public class CommentPersistenceAdapter implements CommentPersistencePort {
     }
 
     @Override
-    public void deleteById(UUID commentId) {
-        commentRepository.deleteById(commentId);
+    public List<Comment> findAllByParentId(UUID parentId) {
+        return commentRepository.findAllByParentCommentId(parentId);
     }
 
     @Override
-    public List<Comment> findAllByParentId(UUID parentId) {
-        return commentRepository.findAllByParentCommentId(parentId);
+    public long countByParentId(UUID parentId) {
+        return commentRepository.countByParentCommentId(parentId);
+    }
+
+    @Override
+    public void deleteAllByParentId(UUID parentId) {
+        commentRepository.deleteAllByParentCommentId(parentId);
+    }
+
+    @Override
+    public void deleteComment(UUID commentId) {
+        commentRepository.deleteByCommentId(commentId);
     }
 }
