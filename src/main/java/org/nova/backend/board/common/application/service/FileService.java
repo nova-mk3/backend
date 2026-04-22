@@ -1,5 +1,6 @@
 package org.nova.backend.board.common.application.service;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
@@ -71,6 +73,11 @@ public class FileService implements FileUseCase {
             String fileName = file.getId() + "." + extension;
             Path publicFilePath = Paths.get(baseFileStoragePath, FilePathConstants.PUBLIC_FOLDER, fileName);
             FileStorageUtil.deleteFile(publicFilePath.toString());
+
+            redisTemplate.delete(List.of(
+                    FileCacheKeyConstants.uploadStatusKey(file.getId()),
+                    FileCacheKeyConstants.imageMetaKey(file.getId())
+            ));
         }
         filePersistencePort.deleteFilesByIds(fileIds);
     }
@@ -168,7 +175,7 @@ public class FileService implements FileUseCase {
 
         if (postType == PostType.PICTURES) {
             copyFileToPublic(savedFilePath, storagePath, fileId, extension);
-            redisTemplate.opsForValue().set("upload:" + fileId, "uploading");
+            redisTemplate.opsForValue().set(FileCacheKeyConstants.uploadStatusKey(fileId), "uploading", 7, TimeUnit.DAYS);
             CompletableFuture.runAsync(() ->
                     compressImageAsync(fileId, savedFilePath, storagePath, extension), executor);
         }
@@ -208,7 +215,7 @@ public class FileService implements FileUseCase {
         logger.info("[압축 시작] fileId={} thread={}", fileId, threadName);
 
         try {
-            redisTemplate.opsForValue().set("upload:" + fileId, "compressing");
+            redisTemplate.opsForValue().set(FileCacheKeyConstants.uploadStatusKey(fileId), "compressing", 7, TimeUnit.DAYS);
 
             Path protectedPath = Paths.get(originalFilePath);
             Path publicDir = Paths.get(storagePath, FilePathConstants.PUBLIC_FOLDER);
@@ -217,14 +224,15 @@ public class FileService implements FileUseCase {
 
             redisTemplate.opsForValue().set(
                     FileCacheKeyConstants.imageMetaKey(fileId),
-                    compressResult.originalWidth() + "x" + compressResult.originalHeight()
+                    compressResult.originalWidth() + "x" + compressResult.originalHeight(),
+                    30, TimeUnit.DAYS
             );
 
-            redisTemplate.opsForValue().set("upload:" + fileId, "done");
+            redisTemplate.opsForValue().set(FileCacheKeyConstants.uploadStatusKey(fileId), "done", 7, TimeUnit.DAYS);
             logger.info("[압축 완료] fileId={}", fileId);
         } catch (Exception e) {
             logger.error("이미지 압축 중 오류", e);
-            redisTemplate.opsForValue().set("upload:" + fileId, "error");
+            redisTemplate.opsForValue().set(FileCacheKeyConstants.uploadStatusKey(fileId), "error", 7, TimeUnit.DAYS);
         }
     }
 
@@ -261,6 +269,11 @@ public class FileService implements FileUseCase {
         String extension = FileUtil.getFileExtension(file.getOriginalFilename());
         Path publicPath = Paths.get(baseFileStoragePath, FilePathConstants.PUBLIC_FOLDER, file.getId() + "." + extension);
         FileStorageUtil.deleteFile(publicPath.toString());
+
+        redisTemplate.delete(List.of(
+                FileCacheKeyConstants.uploadStatusKey(fileId),
+                FileCacheKeyConstants.imageMetaKey(fileId)
+        ));
 
         filePersistencePort.deleteFileById(fileId);
     }
@@ -323,5 +336,18 @@ public class FileService implements FileUseCase {
             basePostPersistencePort.save(file.getPost());
         }
         filePersistencePort.save(file);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }
