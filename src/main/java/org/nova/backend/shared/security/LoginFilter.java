@@ -121,7 +121,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String name = customUserDetails.getUsername();
         String role = SecurityUtils.getRole(authentication);
 
-        return jwtUtil.createJwt(studentNumber, name, role, 60 * 60 * 60 * 10L);
+        return jwtUtil.createJwt(studentNumber, name, role, 60 * 60 * 5 * 1000L);
     }
 
     @Override
