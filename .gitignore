@@ -41,4 +41,9 @@ out/
 
 ### queryDSL files ###
 src/main/generated/
+
+### ETC ###
 /spec/*
+/infra/*
+/.omc/*
+application-loadtest.yml

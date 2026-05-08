@@ -12,10 +12,14 @@ public class GradeSemesterYearMapper {
      * @return ex)2024, 2025,..
      */
     public int toIntYear(String stringYear) {
-        if (stringYear == null || stringYear.length() <= 1) {
+        if (stringYear == null || stringYear.trim().isEmpty() || stringYear.length() <= 1) {
             return 0;
         }
-        return Integer.parseInt(stringYear.substring(0, stringYear.length() - 1));
+        try {
+            return Integer.parseInt(stringYear.substring(0, stringYear.length() - 1));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     /**
@@ -25,12 +29,19 @@ public class GradeSemesterYearMapper {
      * @return ex) 1,2,..
      */
     public int toIntGrade(String stringGrade) {
-        if (stringGrade == null) return 0;
+        if (stringGrade == null || stringGrade.trim().isEmpty()) {
+            return 0;
+        }
 
         if (stringGrade.equals("초과학기") || stringGrade.equals("초과 학기")) {
             return 5;
         }
-        return Integer.parseInt(String.valueOf(stringGrade.charAt(0)));
+        
+        try {
+            return Integer.parseInt(String.valueOf(stringGrade.charAt(0)));
+        } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+            return 0;
+        }
     }
 
 
@@ -39,12 +50,16 @@ public class GradeSemesterYearMapper {
      * @return 재학중인 학기
      */
     public int toIntCompletionSemester(String stringSemester) {
-        if (stringSemester == null || stringSemester.length() <= 2) {
+        if (stringSemester == null || stringSemester.trim().isEmpty() || stringSemester.length() <= 2) {
             return 0;
         }
 
-        int semester = Integer.parseInt(stringSemester.substring(0, stringSemester.length() - 2));
-        return Math.min(semester, 2); //학기는 1학기, 2학기 중 선택
+        try {
+            int semester = Integer.parseInt(stringSemester.substring(0, stringSemester.length() - 2));
+            return Math.min(semester, 2); //학기는 1학기, 2학기 중 선택
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
 }

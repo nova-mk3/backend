@@ -1,28 +1,19 @@
 package org.nova.backend.board.common.application.service;
 
-import java.util.EnumMap;
-import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
-import org.nova.backend.board.common.application.dto.response.AllPostSummaryResponse;
-import org.nova.backend.board.common.application.mapper.AllPostMapper;
-import org.nova.backend.board.util.SecurityUtil;
-import org.nova.backend.board.util.ValidationUtil;
-import org.nova.backend.notification.application.port.in.NotificationUseCase;
-import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
-import org.nova.backend.shared.constants.BoardErrorMessages;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.auth.UnauthorizedException;
+import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
+import org.nova.backend.board.clubArchive.application.mapper.PicturePostMapper;
 import org.nova.backend.board.common.application.dto.request.BasePostRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateBasePostRequest;
+import org.nova.backend.board.common.application.dto.response.AllPostSummaryResponse;
 import org.nova.backend.board.common.application.dto.response.BasePostDetailResponse;
 import org.nova.backend.board.common.application.dto.response.BasePostSummaryResponse;
+import org.nova.backend.board.common.application.mapper.AllPostMapper;
 import org.nova.backend.board.common.application.mapper.BasePostMapper;
+import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.application.port.in.BoardUseCase;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
-import org.nova.backend.board.common.application.port.in.BasePostUseCase;
 import org.nova.backend.board.common.application.port.out.BasePostPersistencePort;
 import org.nova.backend.board.common.application.port.out.CommentPersistencePort;
 import org.nova.backend.board.common.application.port.out.PostLikePersistencePort;
@@ -32,17 +23,28 @@ import org.nova.backend.board.common.domain.model.entity.File;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.entity.PostLike;
 import org.nova.backend.board.common.domain.model.valueobject.PostType;
-import org.nova.backend.board.clubArchive.application.dto.response.JokboPostSummaryResponse;
+import org.nova.backend.board.util.SecurityUtil;
+import org.nova.backend.board.util.ValidationUtil;
 import org.nova.backend.member.adapter.repository.MemberRepository;
 import org.nova.backend.member.domain.model.entity.Member;
 import org.nova.backend.member.domain.model.valueobject.Role;
+import org.nova.backend.notification.application.port.in.NotificationUseCase;
+import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
+import org.nova.backend.shared.constants.BoardErrorMessages;
 import org.nova.backend.shared.security.BoardSecurityChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -138,23 +140,7 @@ public class BasePostService implements BasePostUseCase {
             Pageable pageable
     ) {
         Page<Post> posts = basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable);
-
-        return switch (postType) {
-            case EXAM_ARCHIVE -> posts.map(post -> new JokboPostSummaryResponse(
-                    post.getId(),
-                    post.getTitle(),
-                    post.getContent(),
-                    post.getViewCount(),
-                    post.getLikeCount(),
-                    post.getCreatedTime(),
-                    post.getModifiedTime(),
-                    post.getMember().getName(),
-                    post.getTotalDownloadCount(),
-                    post.getFiles().size()
-            ));
-            case PICTURES -> posts.map(picturePostMapper::toSummaryResponse);
-            default -> posts.map(postMapper::toSummaryResponse);
-        };
+        return convertToSummaryResponse(posts, postType);
     }
 
     /**
@@ -172,15 +158,22 @@ public class BasePostService implements BasePostUseCase {
         Page<Post> posts;
 
         if (keyword == null || keyword.trim().isEmpty()) {
-            return getPostsByCategory(boardId, postType, pageable);
+            posts = basePostPersistencePort.findAllByBoardAndCategory(boardId, postType, pageable);
+        } else {
+            posts = switch (searchType.toUpperCase()) {
+                case "TITLE" -> basePostPersistencePort.searchByTitle(boardId, postType, keyword, pageable);
+                case "CONTENT" -> basePostPersistencePort.searchByContent(boardId, postType, keyword, pageable);
+                default -> basePostPersistencePort.searchByTitleOrContent(boardId, postType, keyword, pageable);
+            };
         }
 
-        posts = switch (searchType.toUpperCase()) {
-            case "TITLE" -> basePostPersistencePort.searchByTitle(boardId, postType, keyword, pageable);
-            case "CONTENT" -> basePostPersistencePort.searchByContent(boardId, postType, keyword, pageable);
-            default -> basePostPersistencePort.searchByTitleOrContent(boardId, postType, keyword, pageable);
-        };
+        return convertToSummaryResponse(posts, postType);
+    }
 
+    /**
+     * Page<Post>를 PostType에 맞는 SummaryResponse로 변환
+     */
+    private Page<?> convertToSummaryResponse(Page<Post> posts, PostType postType) {
         return switch (postType) {
             case EXAM_ARCHIVE -> posts.map(post -> new JokboPostSummaryResponse(
                     post.getId(),
@@ -248,12 +241,16 @@ public class BasePostService implements BasePostUseCase {
         Post post = basePostPersistencePort.findById(postId)
                 .orElseThrow(() -> new BoardDomainException(BoardErrorMessages.POST_NOT_FOUND, HttpStatus.NOT_FOUND));
 
-        if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent()) {
+        try {
+            if (postLikePersistencePort.findByPostIdAndMemberId(postId, memberId).isPresent()) {
+                throw new BoardDomainException(MSG_POST_LIKE_DUPLICATE, HttpStatus.CONFLICT);
+            }
+
+            postLikePersistencePort.save(new PostLike(post, member));
+            basePostPersistencePort.increaseLikeCount(postId);
+        } catch (DataIntegrityViolationException e) {
             throw new BoardDomainException(MSG_POST_LIKE_DUPLICATE, HttpStatus.CONFLICT);
         }
-
-        postLikePersistencePort.save(new PostLike(post, member));
-        basePostPersistencePort.increaseLikeCount(postId);
 
         if (!post.getMember().getId().equals(memberId)) {
             notificationUseCase.create(

@@ -2,21 +2,6 @@ package org.nova.backend.board.common.application.service;
 
 import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.nova.backend.board.common.application.dto.response.FileResponse;
 import org.nova.backend.board.common.application.port.in.FileUseCase;
@@ -43,6 +28,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -105,7 +106,7 @@ public class FileService implements FileUseCase {
     @Override
     @Transactional(readOnly = true)
     public Optional<File> findFileById(UUID fileId) {
-        return Optional.ofNullable(filePersistencePort.findFileById(fileId)
+        return Optional.of(filePersistencePort.findFileById(fileId)
                 .orElseThrow(() -> new FileDomainException("파일을 찾을 수 없습니다. ID: " + fileId, HttpStatus.NOT_FOUND)));
     }
 
@@ -231,8 +232,19 @@ public class FileService implements FileUseCase {
             redisTemplate.opsForValue().set(FileCacheKeyConstants.uploadStatusKey(fileId), "done", 7, TimeUnit.DAYS);
             logger.info("[압축 완료] fileId={}", fileId);
         } catch (Exception e) {
-            logger.error("이미지 압축 중 오류", e);
-            redisTemplate.opsForValue().set(FileCacheKeyConstants.uploadStatusKey(fileId), "error", 7, TimeUnit.DAYS);
+            logger.error("[압축 실패 - Cleanup 시작] fileId={}", fileId, e);
+
+            try {
+                redisTemplate.opsForValue().set(FileCacheKeyConstants.uploadStatusKey(fileId), "error", 1, TimeUnit.HOURS);
+                
+                FileStorageUtil.deleteFile(originalFilePath);
+                
+                filePersistencePort.deleteFileById(fileId);
+                
+                logger.info("[Cleanup 완료] 실패한 파일 정보가 정상적으로 정리되었습니다. fileId={}", fileId);
+            } catch (Exception cleanupEx) {
+                logger.error("[Cleanup 실패] 파일 정리 중 추가 오류 발생 fileId={}", fileId, cleanupEx);
+            }
         }
     }
 

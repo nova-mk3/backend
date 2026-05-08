@@ -1,17 +1,24 @@
-# Liberica JDK 21 이미지 사용
-FROM bellsoft/liberica-openjdk-alpine:21
-
-# 작업 디렉토리 설정
+FROM bellsoft/liberica-openjdk-alpine:21 AS builder
 WORKDIR /app
 
-# 빌드된 파일 복사
-COPY build/libs/backend-0.0.1-SNAPSHOT.jar backend.jar
+ARG JAR_FILE=build/libs/backend-0.0.1-SNAPSHOT.jar
+COPY ${JAR_FILE} backend.jar
+
+RUN java -Djarmode=layertools -jar backend.jar extract
+
+FROM bellsoft/liberica-openjdk-alpine:21
+WORKDIR /app
+
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring
+
+COPY --from=builder /app/dependencies/ ./
+COPY --from=builder /app/spring-boot-loader/ ./
+COPY --from=builder /app/snapshot-dependencies/ ./
+COPY --from=builder /app/application/ ./
+
 COPY build/libs/.env .env
 
-# 애플리케이션 실행 포트
 EXPOSE 4001
 
-
-
-# 실행 명령
-ENTRYPOINT ["java", "-jar", "backend.jar"]
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
