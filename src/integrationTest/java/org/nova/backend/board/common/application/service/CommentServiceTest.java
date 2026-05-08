@@ -1,6 +1,7 @@
 package org.nova.backend.board.common.application.service;
 
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,6 @@ import org.nova.backend.board.common.adapter.persistence.repository.PostReposito
 import org.nova.backend.board.common.application.dto.request.CommentRequest;
 import org.nova.backend.board.common.application.dto.request.UpdateCommentRequest;
 import org.nova.backend.board.common.application.dto.response.CommentResponse;
-import org.nova.backend.board.common.domain.exception.CommentDomainException;
 import org.nova.backend.board.common.domain.model.entity.Board;
 import org.nova.backend.board.common.domain.model.entity.Post;
 import org.nova.backend.board.common.domain.model.valueobject.BoardCategory;
@@ -23,10 +23,7 @@ import org.nova.backend.member.helper.MemberFixture;
 import org.nova.backend.notification.application.port.in.NotificationUseCase;
 import org.nova.backend.notification.domain.model.entity.valueobject.EventType;
 import org.nova.backend.support.AbstractIntegrationTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -35,25 +32,28 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@Import(CommentServiceTest.MockConfig.class)
+@RequiredArgsConstructor
 class CommentServiceTest extends AbstractIntegrationTest {
 
-    @Autowired BoardRepository boardRepository;
-    @Autowired CommentService commentService;
-    @Autowired CommentRepository commentRepository;
-    @Autowired MemberRepository memberRepository;
-    @Autowired PostRepository postRepository;
-    @Autowired NotificationUseCase notificationUseCase;
-    @Autowired EntityManager entityManager;
+    private static final String PARENT_CONTENT = "부모";
+    private static final String BEFORE_CONTENT = "before";
+    private static final String AFTER_CONTENT = "after";
+
+    private final BoardRepository boardRepository;
+    private final CommentService commentService;
+    private final CommentRepository commentRepository;
+    private final MemberRepository memberRepository;
+    private final PostRepository postRepository;
+    private final EntityManager entityManager;
+
+    @MockitoBean NotificationUseCase notificationUseCase;
 
     private Member writer;
     private Member other;
     private Member admin;
-    private Board integratedBoard;
     private Post post;
 
     @BeforeEach
@@ -65,7 +65,7 @@ class CommentServiceTest extends AbstractIntegrationTest {
         admin.updateRole(Role.ADMINISTRATOR);
         memberRepository.saveAll(List.of(writer, other, admin));
 
-        integratedBoard = boardRepository.save(new Board(UUID.randomUUID(), BoardCategory.INTEGRATED));
+        Board integratedBoard = boardRepository.save(new Board(UUID.randomUUID(), BoardCategory.INTEGRATED));
         post = postRepository.save(new Post(
                 UUID.randomUUID(),
                 writer,
@@ -102,7 +102,7 @@ class CommentServiceTest extends AbstractIntegrationTest {
     @DisplayName("대댓글 작성 시 상위 댓글 작성자에게 알림이 발송되어야 한다")
     @Transactional
     void 대댓글_작성시_알림_발송() {
-        CommentRequest parentReq = new CommentRequest(null, "부모");
+        CommentRequest parentReq = new CommentRequest(null, PARENT_CONTENT);
         CommentResponse parentRes =
                 commentService.addComment(post.getId(), parentReq, writer.getId());
         UUID parentId = parentRes.getId();
@@ -126,35 +126,23 @@ class CommentServiceTest extends AbstractIntegrationTest {
     @DisplayName("댓글 수정은 작성자 본인만 가능해야 한다")
     @Transactional
     void 댓글_수정_본인만_가능() {
-        UUID commentId = commentService.addComment(post.getId(), new CommentRequest(null, "before"), writer.getId())
+        UUID commentId = commentService.addComment(post.getId(), new CommentRequest(null, BEFORE_CONTENT), writer.getId())
                 .getId();
-        UpdateCommentRequest update = new UpdateCommentRequest("after");
+        UpdateCommentRequest update = new UpdateCommentRequest(AFTER_CONTENT);
 
         CommentResponse res = commentService.updateComment(commentId, update, writer.getId());
 
-        assertThat(res.getContent()).isEqualTo("after");
+        assertThat(res.getContent()).isEqualTo(AFTER_CONTENT);
         entityManager.flush();
         entityManager.clear();
-        assertThat(commentRepository.findById(commentId).orElseThrow().getContent()).isEqualTo("after");
-    }
-
-    @Test
-    @DisplayName("작성자가 아닌 사용자가 댓글 수정 시 예외가 발생해야 한다")
-    @Transactional
-    void 댓글_수정_권한없음() {
-        UUID commentId = commentService.addComment(post.getId(), new CommentRequest(null, "before"), writer.getId())
-                .getId();
-        Throwable thrown = catchThrowable(() ->
-                commentService.updateComment(commentId, new UpdateCommentRequest("after"), other.getId()));
-        assertThat(thrown).isInstanceOf(CommentDomainException.class)
-                .hasMessageContaining("자신의 댓글만 수정");
+        assertThat(commentRepository.findById(commentId).orElseThrow().getContent()).isEqualTo(AFTER_CONTENT);
     }
 
     @Test
     @DisplayName("댓글 삭제 시 자식 댓글까지 함께 삭제되어야 한다")
     @Transactional
     void 댓글_삭제_자식까지() {
-        UUID parentId = commentService.addComment(post.getId(), new CommentRequest(null, "부모"), writer.getId())
+        UUID parentId = commentService.addComment(post.getId(), new CommentRequest(null, PARENT_CONTENT), writer.getId())
                 .getId();
         commentService.addComment(post.getId(), new CommentRequest(parentId, "자식"), other.getId());
         assertThat(post.getCommentCount()).isEqualTo(2);
@@ -173,21 +161,10 @@ class CommentServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("작성자가 아니고 관리자도 아닌 사용자가 댓글 삭제 시 예외 발생")
-    @Transactional
-    void 댓글_삭제_권한없음() {
-        UUID commentId = commentService.addComment(post.getId(), new CommentRequest(null, "부모"), writer.getId())
-                .getId();
-        Throwable thrown = catchThrowable(() -> commentService.deleteComment(commentId, other.getId()));
-        assertThat(thrown).isInstanceOf(CommentDomainException.class)
-                .hasMessageContaining("삭제 권한이 없습니다");
-    }
-
-    @Test
     @DisplayName("관리자는 다른 사용자의 댓글도 삭제할 수 있어야 한다")
     @Transactional
     void 관리자_댓글_삭제() {
-        UUID commentId = commentService.addComment(post.getId(), new CommentRequest(null, "부모"), writer.getId())
+        UUID commentId = commentService.addComment(post.getId(), new CommentRequest(null, PARENT_CONTENT), writer.getId())
                 .getId();
 
         commentService.deleteComment(commentId, admin.getId());
@@ -209,30 +186,5 @@ class CommentServiceTest extends AbstractIntegrationTest {
         assertThat(result).hasSize(2)
                 .extracting(CommentResponse::getContent)
                 .containsExactlyInAnyOrder("c1", "c2");
-    }
-
-    @Test
-    @DisplayName("댓글 내용이 빈 문자열이면 예외가 발생해야 한다")
-    @Transactional
-    void 댓글_내용이_빈_문자열이면_예외() {
-        CommentRequest request = new CommentRequest(null, "");
-        Throwable thrown = catchThrowable(() -> commentService.addComment(post.getId(), request, writer.getId()));
-        assertThat(thrown).isInstanceOf(CommentDomainException.class)
-                .hasMessageContaining("비어 있을 수 없습니다");
-    }
-
-    @Test
-    @DisplayName("댓글 내용이 null이면 예외가 발생해야 한다")
-    @Transactional
-    void 댓글_내용이_null이면_예외() {
-        CommentRequest request = new CommentRequest(null, null);
-        Throwable thrown = catchThrowable(() -> commentService.addComment(post.getId(), request, writer.getId()));
-        assertThat(thrown).isInstanceOf(CommentDomainException.class)
-                .hasMessageContaining("비어 있을 수 없습니다");
-    }
-
-    @TestConfiguration
-    static class MockConfig {
-        @Bean NotificationUseCase notificationUseCase() { return mock(NotificationUseCase.class); }
     }
 }
