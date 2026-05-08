@@ -123,6 +123,19 @@ pipeline {
                     sh '''
                     docker compose -p backend --env-file .env build spring-app
                     docker compose -p backend --env-file .env up -d --no-deps spring-app
+
+                    # 런타임 검증 (30초 대기 후 헬스체크)
+                    echo "Waiting for application startup..."
+                    sleep 30
+
+                    # 헬스체크
+                    if ! curl -f http://localhost:4001/actuator/health 2>/dev/null; then
+                        echo "❌ Health check FAILED! Rolling back..."
+                        docker compose -p backend down
+                        exit 1
+                    fi
+
+                    echo "✅ Health check PASSED!"
                     '''
                 }
             }
