@@ -9,15 +9,17 @@ RUN java -Djarmode=layertools -jar backend.jar extract
 FROM bellsoft/liberica-openjdk-alpine:21
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring
-
 COPY --from=builder /app/dependencies/ ./
 COPY --from=builder /app/spring-boot-loader/ ./
 COPY --from=builder /app/snapshot-dependencies/ ./
 COPY --from=builder /app/application/ ./
 
 COPY build/libs/.env .env
+RUN addgroup -S spring && adduser -S spring -G spring \
+    && chown spring:spring /app/.env \
+    && chmod 640 /app/.env
+
+USER spring
 
 EXPOSE 4001
 
