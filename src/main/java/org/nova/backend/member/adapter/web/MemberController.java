@@ -3,6 +3,7 @@ package org.nova.backend.member.adapter.web;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -140,7 +141,7 @@ public class MemberController {
     @PutMapping("/{profileMemberId}")
     @MemberProfileApiDocument.UpdateMemberProfileApiDoc
     public ResponseEntity<ApiResponse<MyPageMemberResponse>> updateMemberProfile(@PathVariable UUID profileMemberId,
-                                                                                 @RequestBody
+                                                                                 @RequestBody @Valid
                                                                                  UpdateMemberRequest updateMemberRequest) {
         UUID loginMemberId = securityUtil.getCurrentMemberId();
         MyPageMemberResponse response = memberService.updateMember(profileMemberId, loginMemberId, updateMemberRequest);

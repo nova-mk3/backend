@@ -267,10 +267,21 @@ public class MemberService {
         }
 
         int grade = gradeSemesterYearMapper.toIntGrade(updateMemberProfileRequest.getGrade());
-        if (grade == 0) {  // 초과 학기인 사람은 grade 변경 x
-            grade = member.getGrade();
-        }
         int semester = gradeSemesterYearMapper.toIntCompletionSemester(updateMemberProfileRequest.getSemester());
+
+        // 졸업생인 경우 학년/학기를 0으로 세팅
+        if (updateMemberProfileRequest.isGraduation()) {
+            grade = 0;
+            semester = 0;
+        } else {
+            // 재학생인데 빈 값(0)이 들어온 경우 기존 정보 유지
+            if (grade == 0) {
+                grade = member.getGrade();
+            }
+            if (semester == 0) {
+                semester = member.getSemester();
+            }
+        }
 
         member.updateProfileInfo(updateMemberProfileRequest, grade, semester);
     }
