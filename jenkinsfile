@@ -114,28 +114,43 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Stopping old container if running..."
+                    echo "Stopping old spring-app container if running..."
                     sh '''
                     docker ps -q --filter "name=backend-spring-app-1" | grep -q . && docker stop backend-spring-app-1 && docker rm backend-spring-app-1 || true
                     '''
 
-                    echo "Running new container on correct network with consistent project name..."
+                    echo "Building and starting spring-app..."
                     sh '''
                     docker compose -p backend --env-file .env build spring-app
                     docker compose -p backend --env-file .env up -d --no-deps spring-app
 
-                    # 런타임 검증 (30초 대기 후 헬스체크)
-                    echo "Waiting for application startup..."
-                    sleep 30
+                    echo "Waiting for spring-app to become healthy..."
 
-                    # 헬스체크
-                    if ! curl -f http://localhost:4001/actuator/health 2>/dev/null; then
-                        echo "❌ Health check FAILED! Rolling back..."
-                        docker compose -p backend down
+                    for i in $(seq 1 18); do
+                      STATUS=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}starting{{end}}' backend-spring-app-1 2>/dev/null || echo "starting")
+                      echo "Attempt $i: $STATUS"
+
+                      if [ "$STATUS" = "healthy" ]; then
+                        echo "✅ Health check PASSED!"
+                        exit 0
+                      fi
+
+                      if [ "$STATUS" = "unhealthy" ]; then
+                        echo "❌ Container became unhealthy!"
+                        docker logs backend-spring-app-1 --tail 100 || true
+                        docker compose -p backend stop spring-app || true
+                        docker compose -p backend rm -f spring-app || true
                         exit 1
-                    fi
+                      fi
 
-                    echo "✅ Health check PASSED!"
+                      sleep 10
+                    done
+
+                    echo "❌ Health check timeout! Rolling back..."
+                    docker logs backend-spring-app-1 --tail 100 || true
+                    docker compose -p backend stop spring-app || true
+                    docker compose -p backend rm -f spring-app || true
+                    exit 1
                     '''
                 }
             }
