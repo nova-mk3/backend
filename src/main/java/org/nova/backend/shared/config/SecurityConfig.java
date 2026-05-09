@@ -67,8 +67,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/files/public/**").permitAll();
-                    auth.requestMatchers("/actuator/prometheus")
-                            .access(new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"));
+                    auth.requestMatchers("/actuator/prometheus").permitAll();
+
 
                     //건의 게시판 관련 권한
                     configureSuggestionBoardPermissions(auth);
